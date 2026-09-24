@@ -1,0 +1,26 @@
+name: Backend PoCs
+on:
+  pull_request:
+    paths:
+      - 'poc/backend/**'
+      - '.github/workflows/backend-poc.yml'
+jobs:
+  nestjs:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: poc/backend/nestjs } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: poc/backend/nestjs/package.json }
+      - run: npm install
+      - run: npm run build
+      - run: npm test
+  aspnet:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: poc/backend/aspnet-core } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: '8.0.x' }
+      - run: dotnet build -c Release
+      - run: dotnet test SetaExpreso.Poc.Tests/SetaExpreso.Poc.Tests.csproj -c Release
