@@ -6,6 +6,8 @@ Este directorio contiene el protocolo y herramientas para ejecutar el benchmark 
 
 La ejecución de referencia debe hacerse en el equipo de desarrollo Windows 11 Pro documentado para el proyecto. No se deben comparar resultados obtenidos en máquinas diferentes.
 
+> Nota: GitHub Actions puede ejecutar la validación CI en Linux; esos resultados sirven para verificar reproducibilidad y corrección, pero **no deben mezclarse** con las mediciones de rendimiento del equipo Windows de referencia.
+
 ## Requisitos
 
 - Docker Desktop funcionando.
