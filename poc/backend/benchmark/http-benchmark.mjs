@@ -1,15 +1,44 @@
 import { performance } from 'node:perf_hooks';
 
-const [requestsArg, concurrencyArg, ...pairs] = process.argv.slice(2);
+const [requestsArg, concurrencyArg, warmupArg, nameArg, baseArg] = process.argv.slice(2);
 const requests = Number(requestsArg);
 const concurrency = Number(concurrencyArg);
-if (!Number.isInteger(requests) || requests < 1 || !Number.isInteger(concurrency) || concurrency < 1 || pairs.length % 2 !== 0) {
-  throw new Error('Usage: node http-benchmark.mjs <requests> <concurrency> <name> <baseUrl> [<name> <baseUrl>...]');
+const warmupRequests = Number(warmupArg);
+if (!Number.isInteger(requests) || requests < 1 ||
+    !Number.isInteger(concurrency) || concurrency < 1 ||
+    !Number.isInteger(warmupRequests) || warmupRequests < 0 ||
+    !nameArg || !baseArg) {
+  throw new Error('Usage: node http-benchmark.mjs <requests> <concurrency> <warmupRequests> <name> <baseUrl>');
 }
-const targets = [];
-for (let i = 0; i < pairs.length; i += 2) targets.push({ name: pairs[i], base: pairs[i + 1] });
+const target = { name: nameArg, base: baseArg };
 
-async function run(target) {
+async function requestOnce() {
+  try {
+    const response = await fetch(target.base + '/packages');
+    if (!response.ok) return false;
+    await response.text();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function warmup() {
+  if (warmupRequests === 0) return;
+  let next = 0;
+  const worker = async () => {
+    while (true) {
+      const index = next++;
+      if (index >= warmupRequests) return;
+      await requestOnce();
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(concurrency, warmupRequests) }, worker));
+}
+
+async function run() {
+  await warmup();
+
   const latencies = [];
   let errors = 0;
   let next = 0;
@@ -43,6 +72,7 @@ async function run(target) {
     implementation: target.name,
     requests,
     concurrency,
+    warmup_requests: warmupRequests,
     elapsed_ms: Number(elapsed.toFixed(2)),
     throughput_rps: Number(rps.toFixed(2)),
     p50_ms: Number(percentile(0.50).toFixed(2)),
@@ -51,6 +81,4 @@ async function run(target) {
   };
 }
 
-for (const target of targets) {
-  console.log(JSON.stringify(await run(target)));
-}
+console.log(JSON.stringify(await run()));
