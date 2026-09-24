@@ -1,0 +1,3 @@
+import { IsInt,IsNotEmpty,IsNumber,IsOptional,IsString,Min } from 'class-validator';
+export class CreatePackageDto {@IsString() @IsNotEmpty() house!:string; @IsNumber() @Min(0) weightKg!:number; @IsString() @IsNotEmpty() recipientAddress!:string;}
+export class UpdatePackageDto {@IsOptional() @IsString() @IsNotEmpty() house?:string; @IsOptional() @IsNumber() @Min(0) weightKg?:number; @IsOptional() @IsString() @IsNotEmpty() recipientAddress?:string;}
