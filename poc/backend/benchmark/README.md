@@ -28,7 +28,7 @@ cd poc/backend/benchmark
 Parámetros:
 
 ```powershell
-.\run-benchmark.ps1 -Requests 1000 -Concurrency 20 -Runs 5
+.\run-benchmark.ps1 -Requests 1000 -Concurrency 20 -Runs 5 -WarmupRequests 20
 ```
 
 Valores por defecto:
@@ -36,9 +36,21 @@ Valores por defecto:
 - 200 solicitudes por implementación y corrida.
 - Concurrencia 10.
 - 5 corridas.
+- 20 solicitudes de calentamiento por implementación y corrida.
 - El build se realiza una vez por implementación.
 - Los servicios permanecen activos durante todas las corridas.
 - Los datos HTTP de cada corrida se guardan en `results.jsonl`.
+
+## Diseño de las corridas
+
+Para reducir sesgos por orden de ejecución:
+
+- En corridas impares se ejecuta primero NestJS y después ASP.NET Core.
+- En corridas pares se ejecuta primero ASP.NET Core y después NestJS.
+- Cada implementación se mide por separado; no se ejecutan ambas cargas HTTP simultáneamente.
+- El calentamiento no se incluye en las métricas de latencia ni throughput.
+- Ambas implementaciones permanecen levantadas durante todo el conjunto de corridas.
+- Cada implementación utiliza su propia instancia PostgreSQL definida por su Compose.
 
 ## Mediciones
 
@@ -52,7 +64,12 @@ El runner registra:
 - throughput_rps;
 - p50_ms;
 - p95_ms;
-- error_rate.
+- error_rate;
+- requests;
+- concurrency;
+- warmup_requests.
+
+`memory_mb` y `cpu_pct` son **instantáneas del contenedor tomadas después de cada corrida**, no promedios de CPU durante toda la carga. No deben interpretarse como consumo medio sostenido.
 
 Los resultados se conservan como JSONL para permitir análisis posterior sin perder los datos brutos.
 
