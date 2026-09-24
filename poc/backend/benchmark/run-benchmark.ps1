@@ -79,8 +79,9 @@ try {
       $stats = docker stats --no-stream --format "{{.Name}}|{{.MemUsage}}|{{.CPUPerc}}"
       $memoryMb = $null
       $cpuPct = $null
+      $targetPattern = if ($record.implementation -eq "nestjs") { "*nestjs*api*" } else { "*aspnet-core*api*" }
       foreach ($stat in ($stats -split "\r?\n")) {
-        if ($stat -like "*api*") {
+        if ($stat -like $targetPattern) {
           $parts = $stat -split "\|"
           if ($parts.Count -ge 3) {
             if ($parts[1] -match "([0-9.]+)MiB") { $memoryMb = [math]::Round([double]$Matches[1], 2) }
