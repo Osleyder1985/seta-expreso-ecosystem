@@ -1,7 +1,8 @@
 param(
   [int]$Requests = 200,
   [int]$Concurrency = 10,
-  [int]$Runs = 5
+  [int]$Runs = 5,
+  [int]$WarmupRequests = 20
 )
 
 $ErrorActionPreference = "Stop"
@@ -12,6 +13,7 @@ $results = Join-Path $PSScriptRoot "results.jsonl"
 if ($Runs -lt 1) { throw "Runs must be >= 1." }
 if ($Requests -lt 1) { throw "Requests must be >= 1." }
 if ($Concurrency -lt 1) { throw "Concurrency must be >= 1." }
+if ($WarmupRequests -lt 0) { throw "WarmupRequests must be >= 0." }
 
 Remove-Item $results -ErrorAction SilentlyContinue
 
@@ -36,6 +38,44 @@ function Get-ImageSizeMb([string]$ComposeDir) {
   } finally {
     Pop-Location
   }
+}
+
+function Get-MemoryMb([string]$usage) {
+  if ($usage -match "([0-9.]+)GiB") { return [math]::Round([double]$Matches[1] * 1024, 2) }
+  if ($usage -match "([0-9.]+)MiB") { return [math]::Round([double]$Matches[1], 2) }
+  if ($usage -match "([0-9.]+)KiB") { return [math]::Round([double]$Matches[1] / 1024, 2) }
+  if ($usage -match "([0-9.]+)B") { return [math]::Round([double]$Matches[1] / 1MB, 2) }
+  return $null
+}
+
+function Get-ContainerStats([string]$Implementation) {
+  $stats = docker stats --no-stream --format "{{.Name}}|{{.MemUsage}}|{{.CPUPerc}}"
+  $targetPattern = if ($Implementation -eq "nestjs") { "*nestjs*api*" } else { "*aspnet-core*api*" }
+
+  foreach ($stat in ($stats -split "?
+")) {
+    if ($stat -like $targetPattern) {
+      $parts = $stat -split "|"
+      if ($parts.Count -ge 3) {
+        return @{
+          memory_mb = Get-MemoryMb $parts[1]
+          cpu_pct = if ($parts[2] -match "([0-9.]+)%") { [math]::Round([double]$Matches[1], 2) } else { $null }
+        }
+      }
+    }
+  }
+
+  return @{ memory_mb = $null; cpu_pct = $null }
+}
+
+function Invoke-TargetBenchmark([string]$Implementation, [string]$Url) {
+  $raw = node (Join-Path $PSScriptRoot "http-benchmark.mjs") $Requests $Concurrency $WarmupRequests $Implementation $Url
+  if ($LASTEXITCODE -ne 0) { throw "HTTP benchmark failed for $Implementation." }
+  $record = $raw | ConvertFrom-Json
+  $stats = Get-ContainerStats $Implementation
+  $record | Add-Member -NotePropertyName memory_mb -NotePropertyValue $stats.memory_mb
+  $record | Add-Member -NotePropertyName cpu_pct -NotePropertyValue $stats.cpu_pct
+  return $record
 }
 
 $nestDir = Join-Path $root "nestjs"
@@ -72,30 +112,25 @@ try {
 
   for ($run = 1; $run -le $Runs; $run++) {
     Write-Host "Benchmark run $run/$Runs..."
-    $raw = node (Join-Path $PSScriptRoot "http-benchmark.mjs") $Requests $Concurrency "nestjs" "http://localhost:3000" "aspnet-core" "http://localhost:8081"
-    foreach ($line in ($raw -split "\r?\n")) {
-      if ([string]::IsNullOrWhiteSpace($line)) { continue }
-      $record = $line | ConvertFrom-Json
-      $stats = docker stats --no-stream --format "{{.Name}}|{{.MemUsage}}|{{.CPUPerc}}"
-      $memoryMb = $null
-      $cpuPct = $null
-      $targetPattern = if ($record.implementation -eq "nestjs") { "*nestjs*api*" } else { "*aspnet-core*api*" }
-      foreach ($stat in ($stats -split "\r?\n")) {
-        if ($stat -like $targetPattern) {
-          $parts = $stat -split "\|"
-          if ($parts.Count -ge 3) {
-            if ($parts[1] -match "([0-9.]+)MiB") { $memoryMb = [math]::Round([double]$Matches[1], 2) }
-            if ($parts[2] -match "([0-9.]+)%") { $cpuPct = [math]::Round([double]$Matches[1], 2) }
-          }
-        }
-      }
 
+    $order = if ($run % 2 -eq 1) {
+      @(
+        @{ implementation = "nestjs"; url = "http://localhost:3000" }
+        @{ implementation = "aspnet-core"; url = "http://localhost:8081" }
+      )
+    } else {
+      @(
+        @{ implementation = "aspnet-core"; url = "http://localhost:8081" }
+        @{ implementation = "nestjs"; url = "http://localhost:3000" }
+      )
+    }
+
+    foreach ($target in $order) {
+      $record = Invoke-TargetBenchmark $target.implementation $target.url
       $record | Add-Member -NotePropertyName run -NotePropertyValue $run
-      $record | Add-Member -NotePropertyName build_ms -NotePropertyValue $(if ($record.implementation -eq "nestjs") { $nestBuildMs } else { $aspBuildMs })
-      $record | Add-Member -NotePropertyName startup_ms -NotePropertyValue $(if ($record.implementation -eq "nestjs") { $nestStartupMs } else { $aspStartupMs })
-      $record | Add-Member -NotePropertyName memory_mb -NotePropertyValue $memoryMb
-      $record | Add-Member -NotePropertyName cpu_pct -NotePropertyValue $cpuPct
-      $record | Add-Member -NotePropertyName image_size_mb -NotePropertyValue $(if ($record.implementation -eq "nestjs") { $nestImageMb } else { $aspImageMb })
+      $record | Add-Member -NotePropertyName build_ms -NotePropertyValue $(if ($target.implementation -eq "nestjs") { $nestBuildMs } else { $aspBuildMs })
+      $record | Add-Member -NotePropertyName startup_ms -NotePropertyValue $(if ($target.implementation -eq "nestjs") { $nestStartupMs } else { $aspStartupMs })
+      $record | Add-Member -NotePropertyName image_size_mb -NotePropertyValue $(if ($target.implementation -eq "nestjs") { $nestImageMb } else { $aspImageMb })
       ($record | ConvertTo-Json -Compress) | Add-Content -Path $results
     }
   }
