@@ -40,6 +40,7 @@ Valores por defecto:
 - El build se realiza una vez por implementación.
 - Los servicios permanecen activos durante todas las corridas.
 - Los datos HTTP de cada corrida se guardan en `results.jsonl`.
+- El entorno y commit evaluado se guardan en `run-metadata.json`.
 
 ## Diseño de las corridas
 

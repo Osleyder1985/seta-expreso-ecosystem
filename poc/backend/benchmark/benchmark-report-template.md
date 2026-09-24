@@ -19,6 +19,7 @@ No se deben completar resultados con estimaciones o datos inventados.
 - ASP.NET Core:
 - Fecha/hora:
 - Commit evaluado:
+- Metadatos de ejecución: `run-metadata.json`
 
 ## 3. Configuración
 
@@ -33,9 +34,9 @@ No se deben completar resultados con estimaciones o datos inventados.
 
 ## 4. Resultados brutos
 
-Registrar cada corrida sin promediar previamente.
+Registrar cada corrida sin promediar previamente. El artefacto `run-metadata.json` debe conservar el entorno, commit y configuración de la ejecución.
 
-| Implementación | Corrida | Build ms | Startup ms | Memoria MB | CPU idle % | Throughput RPS | p50 ms | p95 ms | Error % | Tests ms | Notas |
+| Implementación | Corrida | Build ms | Startup ms | Memoria MB | CPU % | Throughput RPS | p50 ms | p95 ms | Error % | Tests ms | Notas |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
 | NestJS | | | | | | | | | | | |
 | ASP.NET Core | | | | | | | | | | | |

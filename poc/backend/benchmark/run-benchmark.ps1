@@ -9,6 +9,9 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 $root = Split-Path -Parent $PSScriptRoot
 $results = Join-Path $PSScriptRoot "results.jsonl"
+$commitSha = (git rev-parse HEAD 2>$null).Trim()
+if (-not $commitSha) { $commitSha = $null }
+
 
 if ($Runs -lt 1) { throw "Runs must be >= 1." }
 if ($Requests -lt 1) { throw "Requests must be >= 1." }
@@ -142,3 +145,43 @@ finally {
   Push-Location $nestDir; docker compose down -v; Pop-Location
   Push-Location $aspDir; docker compose down -v; Pop-Location
 }
+
+
+function Get-CommandVersion([string]$Command, [string[]]$Arguments) {
+  try {
+    $output = & $Command @Arguments 2>&1
+    if ($LASTEXITCODE -eq 0) { return (($output | Out-String).Trim()) }
+  } catch {}
+  return $null
+}
+
+function Write-RunMetadata([string]$CommitSha) {
+  $os = Get-CimInstance Win32_OperatingSystem
+  $computer = Get-CimInstance Win32_ComputerSystem
+  $processor = Get-CimInstance Win32_Processor | Select-Object -First 1
+  $dockerVersion = Get-CommandVersion "docker" @("--version")
+  $composeVersion = Get-CommandVersion "docker" @("compose", "version")
+  $nodeVersion = Get-CommandVersion "node" @("--version")
+  $metadata = [ordered]@{
+    timestamp_utc = (Get-Date).ToUniversalTime().ToString("o")
+    commit_sha = $CommitSha
+    operating_system = $os.Caption
+    os_version = $os.Version
+    os_build = $os.BuildNumber
+    cpu = $processor.Name
+    logical_processors = $processor.NumberOfLogicalProcessors
+    physical_memory_gb = [math]::Round($computer.TotalPhysicalMemory / 1GB, 2)
+    docker_version = $dockerVersion
+    docker_compose_version = $composeVersion
+    node_version = $nodeVersion
+    requests = $Requests
+    concurrency = $Concurrency
+    runs = $Runs
+    warmup_requests = $WarmupRequests
+    endpoint = "/packages"
+    memory_cpu_note = "memory_mb and cpu_pct are post-run container snapshots, not workload averages."
+  }
+  $metadata | ConvertTo-Json | Set-Content -Path (Join-Path $PSScriptRoot "run-metadata.json") -Encoding utf8
+}
+
+Write-RunMetadata $commitSha
