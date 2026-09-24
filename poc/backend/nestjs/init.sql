@@ -1,1 +1,8 @@
-CREATE TABLE IF NOT EXISTS packages(id BIGSERIAL PRIMARY KEY,house TEXT NOT NULL,weight_kg NUMERIC(12,3) NOT NULL CHECK(weight_kg>=0),recipient_address TEXT NOT NULL,created_at TIMESTAMPTZ NOT NULL DEFAULT now(),updated_at TIMESTAMPTZ NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS packages(
+  id BIGSERIAL PRIMARY KEY,
+  house TEXT NOT NULL,
+  weight_kg DOUBLE PRECISION NOT NULL CHECK(weight_kg>=0),
+  recipient_address TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
