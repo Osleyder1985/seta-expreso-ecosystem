@@ -10,40 +10,37 @@ jobs:
     services:
       postgres:
         image: postgres:16
-        env:
-          POSTGRES_USER: poc
-          POSTGRES_PASSWORD: poc
-          POSTGRES_DB: poc
+        env: {POSTGRES_USER: poc, POSTGRES_PASSWORD: poc, POSTGRES_DB: poc}
         ports: ['5432:5432']
         options: >-
           --health-cmd "pg_isready -U poc -d poc"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
-    defaults:
-      run:
-        working-directory: poc/backend/nestjs
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    defaults: {run: {working-directory: poc/backend/nestjs}}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: poc/backend/nestjs/package.json
+        with: {node-version: 22, cache: npm, cache-dependency-path: poc/backend/nestjs/package.json}
       - run: npm install
+      - run: psql postgresql://poc:poc@localhost:5432/poc -f init.sql
       - run: npm run build
       - run: npm test
-        env:
-          DATABASE_URL: postgresql://poc:poc@localhost:5432/poc
+        env: {DATABASE_URL: postgresql://poc:poc@localhost:5432/poc}
   aspnet:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: poc/backend/aspnet-core
+    services:
+      postgres:
+        image: postgres:16
+        env: {POSTGRES_USER: poc, POSTGRES_PASSWORD: poc, POSTGRES_DB: poc}
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U poc -d poc"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    defaults: {run: {working-directory: poc/backend/aspnet-core}}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
+        with: {dotnet-version: '8.0.x'}
+      - run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - run: psql postgresql://poc:poc@localhost:5432/poc -f init.sql
       - run: dotnet build -c Release
       - run: dotnet test SetaExpreso.Poc.Tests/SetaExpreso.Poc.Tests.csproj -c Release
