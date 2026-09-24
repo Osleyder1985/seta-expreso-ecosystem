@@ -5,7 +5,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
-$results = Join-Path $PSScriptRoot "results.csv"
+$results = Join-Path $PSScriptRoot "results.jsonl"
 
 function Wait-Health([string]$Url) {
   for ($i=0; $i -lt 60; $i++) {
