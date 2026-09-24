@@ -1,1 +1,1 @@
-import { Controller,Get } from '@nestjs/common'; @Controller('health') export class HealthController { @Get() health(){return {status:'ok'};} }
+import {Controller,Get} from '@nestjs/common';import {Pool} from 'pg';@Controller('health')export class HealthController{private readonly pool=new Pool({connectionString:process.env.DATABASE_URL});@Get()async health(){await this.pool.query('SELECT 1');return {status:'ok',database:'ok'};}}
