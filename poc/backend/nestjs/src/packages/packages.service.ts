@@ -1,10 +1,12 @@
-import {BadRequestException,Injectable,NotFoundException} from '@nestjs/common';
-type P={id:number;house:string;weightKg:number;recipientAddress:string;createdAt:string;updatedAt:string};
-@Injectable() export class PackagesService {
- private data=new Map<number,P>(); private nextId=1;
- create(x:any){if(x.weightKg<0)throw new BadRequestException('weightKg must be >= 0');const now=new Date().toISOString();const p={id:this.nextId++, ...x,createdAt:now,updatedAt:now};this.data.set(p.id,p);return p;}
- findAll(){return [...this.data.values()];} findOne(id:number){const p=this.data.get(id);if(!p)throw new NotFoundException('Package not found');return p;}
- update(id:number,x:any){const p=this.findOne(id);const n={...p,...x,updatedAt:new Date().toISOString()};this.data.set(id,n);return n;}
- remove(id:number){this.findOne(id);this.data.delete(id);return {deleted:true};}
- transactionProbe(){return {transaction:true,provider:'postgresql-contract-placeholder'};}
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Pool } from 'pg';
+type PackageRow={id:number;house:string;weightKg:number;recipientAddress:string;createdAt:string;updatedAt:string};
+@Injectable()
+export class PackagesService {
+ private readonly pool=new Pool({connectionString:process.env.DATABASE_URL});
+ async create(x:any):Promise<PackageRow>{if(x.weightKg<0)throw new BadRequestException('weightKg must be >= 0');const c=await this.pool.connect();try{await c.query('BEGIN');const r=await c.query('INSERT INTO packages(house,weight_kg,recipient_address) VALUES($1,$2,$3) RETURNING id,house,weight_kg AS "weightKg",recipient_address AS "recipientAddress",created_at AS "createdAt",updated_at AS "updatedAt"',[x.house,x.weightKg,x.recipientAddress]);await c.query('COMMIT');return r.rows[0];}catch(e){await c.query('ROLLBACK');throw e;}finally{c.release();}}
+ async findAll(){return (await this.pool.query('SELECT id,house,weight_kg AS "weightKg",recipient_address AS "recipientAddress",created_at AS "createdAt",updated_at AS "updatedAt" FROM packages ORDER BY id')).rows;}
+ async findOne(id:number){const r=await this.pool.query('SELECT id,house,weight_kg AS "weightKg",recipient_address AS "recipientAddress",created_at AS "createdAt",updated_at AS "updatedAt" FROM packages WHERE id=$1',[id]);if(!r.rows[0])throw new NotFoundException('Package not found');return r.rows[0];}
+ async update(id:number,x:any){await this.findOne(id);const r=await this.pool.query('UPDATE packages SET house=COALESCE($2,house),weight_kg=COALESCE($3,weight_kg),recipient_address=COALESCE($4,recipient_address),updated_at=now() WHERE id=$1 RETURNING id,house,weight_kg AS "weightKg",recipient_address AS "recipientAddress",created_at AS "createdAt",updated_at AS "updatedAt"',[id,x.house,x.weightKg,x.recipientAddress]);return r.rows[0];}
+ async remove(id:number){await this.findOne(id);await this.pool.query('DELETE FROM packages WHERE id=$1',[id]);return {deleted:true};}
 }
