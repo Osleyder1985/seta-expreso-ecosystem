@@ -4,6 +4,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+Set-StrictMode -Version Latest
 $root = Split-Path -Parent $PSScriptRoot
 $results = Join-Path $PSScriptRoot "results.jsonl"
 
@@ -21,7 +22,7 @@ function Wait-Health([string]$Url) {
 Write-Host "Building and starting NestJS..."
 Push-Location (Join-Path $root "nestjs")
 $nestBuild = Measure-Command { docker compose build api | Out-Host }
-docker compose up -d
+docker compose up -d --wait
 Pop-Location
 
 Write-Host "Building and starting ASP.NET Core..."
