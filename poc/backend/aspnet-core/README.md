@@ -1,0 +1,2 @@
+# ASP.NET Core Backend PoC
+PoC mínimo para comparación. Implementa el mismo contrato CRUD/validación/health. Persistencia en memoria se usa únicamente para mantener la reconstrucción ejecutable sin imponer todavía una decisión de ORM; PostgreSQL, transacción y pruebas de integración quedan como pasos obligatorios del benchmark.
