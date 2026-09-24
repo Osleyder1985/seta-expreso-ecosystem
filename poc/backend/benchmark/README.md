@@ -6,12 +6,13 @@ Este directorio contiene el protocolo y herramientas para ejecutar el benchmark 
 
 La ejecución de referencia debe hacerse en el equipo de desarrollo Windows 11 Pro documentado para el proyecto. No se deben comparar resultados obtenidos en máquinas diferentes.
 
-> Nota: GitHub Actions puede ejecutar la validación CI en Linux; esos resultados sirven para verificar reproducibilidad y corrección, pero **no deben mezclarse** con las mediciones de rendimiento del equipo Windows de referencia.
+> GitHub Actions puede validar la compilación y las pruebas en Linux, pero sus mediciones de rendimiento no deben mezclarse con las mediciones del equipo Windows de referencia.
 
 ## Requisitos
 
 - Docker Desktop funcionando.
 - Node.js LTS.
+- PowerShell.
 - PostgreSQL se ejecuta dentro de los Compose de cada PoC.
 - Puertos libres 3000 y 8081.
 
@@ -27,19 +28,33 @@ cd poc/backend/benchmark
 Parámetros:
 
 ```powershell
-.\run-benchmark.ps1 -Requests 1000 -Concurrency 20
+.\run-benchmark.ps1 -Requests 1000 -Concurrency 20 -Runs 5
 ```
 
-El script:
-1. construye ambas imágenes;
-2. inicia ambos servicios;
-3. espera los health checks;
-4. ejecuta solicitudes equivalentes contra `GET /packages`;
-5. calcula throughput, p50, p95 y tasa de error;
-6. registra una instantánea de memoria/CPU de los contenedores;
-7. detiene y elimina los servicios.
+Valores por defecto:
 
-Los tiempos de build se muestran por separado. Los resultados HTTP se guardan en `results.jsonl`.
+- 200 solicitudes por implementación y corrida.
+- Concurrencia 10.
+- 5 corridas.
+- El build se realiza una vez por implementación.
+- Los servicios permanecen activos durante todas las corridas.
+- Los datos HTTP de cada corrida se guardan en `results.jsonl`.
+
+## Mediciones
+
+El runner registra:
+
+- build_ms;
+- startup_ms;
+- memory_mb;
+- cpu_pct;
+- image_size_mb;
+- throughput_rps;
+- p50_ms;
+- p95_ms;
+- error_rate.
+
+Los resultados se conservan como JSONL para permitir análisis posterior sin perder los datos brutos.
 
 ## Reglas
 
@@ -48,3 +63,4 @@ Los tiempos de build se muestran por separado. Los resultados HTTP se guardan en
 - Registrar cualquier desviación.
 - No convertir estos resultados en una decisión automática.
 - La evaluación final debe integrar evidencia experimental, documental, operativa y de mantenibilidad.
+- Si una medición es atípica, no eliminarla silenciosamente: documentar el motivo y conservar el dato.
