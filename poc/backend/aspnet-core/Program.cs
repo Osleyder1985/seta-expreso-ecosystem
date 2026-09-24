@@ -1,7 +1,8 @@
 using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 builder.Services.AddHealthChecks();
 builder.Services.AddSingleton<PackageStore>();
 
@@ -17,12 +18,12 @@ app.UseExceptionHandler(errorApp =>
     });
 });
 
-app.MapOpenApi();
+app.UseSwagger(c => c.RouteTemplate = "openapi/{documentName}.json");
 app.MapHealthChecks("/health");
 
 app.MapPost("/packages", async (CreatePackageDto dto, PackageStore s) =>
 {
-    var validation = Validate(dto);
+    var validation = ValidateCreate(dto);
     if (validation is not null) return validation;
     var p = await s.Create(dto);
     return Results.Created("/packages/" + p.Id, p);
@@ -36,7 +37,7 @@ app.MapGet("/packages/{id:long}", async (long id, PackageStore s) =>
 
 app.MapPatch("/packages/{id:long}", async (long id, UpdatePackageDto dto, PackageStore s) =>
 {
-    var validation = Validate(dto);
+    var validation = ValidateUpdate(dto);
     if (validation is not null) return validation;
     return await s.Update(id, dto) is { } p
         ? Results.Ok(p)
@@ -50,14 +51,14 @@ app.MapDelete("/packages/{id:long}", async (long id, PackageStore s) =>
 
 app.Run();
 
-static IResult? Validate(CreatePackageDto dto)
+static IResult? ValidateCreate(CreatePackageDto dto)
 {
     if (string.IsNullOrWhiteSpace(dto.House) || dto.WeightKg < 0 || string.IsNullOrWhiteSpace(dto.RecipientAddress))
         return Results.BadRequest(new { error = new { code = "VALIDATION_ERROR", message = "Invalid package" } });
     return null;
 }
 
-static IResult? Validate(UpdatePackageDto dto)
+static IResult? ValidateUpdate(UpdatePackageDto dto)
 {
     if ((dto.House is not null && string.IsNullOrWhiteSpace(dto.House)) ||
         dto.WeightKg is < 0 ||
