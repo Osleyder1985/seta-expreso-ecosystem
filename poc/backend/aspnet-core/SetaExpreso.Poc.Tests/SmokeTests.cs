@@ -1,0 +1,1 @@
+using Xunit;public class SmokeTests{[Fact]public void Poc_contract_is_defined(){var dto=new CreatePackageDto("POC-1",2.5,"Camagüey");Assert.Equal("POC-1",dto.House);Assert.True(dto.WeightKg>=0);}}record CreatePackageDto(string House,double WeightKg,string RecipientAddress);
