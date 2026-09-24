@@ -37,7 +37,7 @@ El script:
 6. registra una instantánea de memoria/CPU de los contenedores;
 7. detiene y elimina los servicios.
 
-Los tiempos de build se muestran por separado. Los resultados HTTP se guardan en `results.csv`.
+Los tiempos de build se muestran por separado. Los resultados HTTP se guardan en `results.jsonl`.
 
 ## Reglas
 
