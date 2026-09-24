@@ -69,7 +69,7 @@ static IResult? Validate(UpdatePackageDto dto)
 static IResult NotFound(string code, string message) =>
     Results.NotFound(new { error = new { code, message } });
 
-public partial class Program;
+public partial class Program { }
 
 record CreatePackageDto(string House, double WeightKg, string RecipientAddress);
 record UpdatePackageDto(string? House, double? WeightKg, string? RecipientAddress);
