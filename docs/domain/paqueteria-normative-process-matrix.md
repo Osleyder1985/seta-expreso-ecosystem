@@ -1,7 +1,7 @@
 # Matriz normativa y de proceso del Servicio de Paquetería
 
 **Versión:** 0.1.0  
-**Estado:** Base de trazabilidad; evidencia pendiente de profundización artículo por artículo  
+**Estado:** En validación
 **Issue:** #38
 
 ## 1. Objetivo
@@ -131,3 +131,6 @@ Una fila normativa podrá pasar de 🟡 a 🟢 solamente cuando exista:
 La siguiente iteración debe convertir N-001…N-007 en fichas artículo por artículo y, paralelamente, localizar en las fuentes oficiales la documentación específica de envíos y operación de carga que permita resolver D01–D06.
 
 No se debe crear todavía el modelo físico de PostgreSQL.
+
+
+**Fase/nota:** El estado anterior, si existía, se conserva como descripción histórica de fase; el campo `Estado` usa exclusivamente la taxonomía formal de gobernanza.
