@@ -15,16 +15,14 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      security-events: write
-      pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: 0
 
       - name: Gitleaks
-        uses: gitleaks/gitleaks-action@v3
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -36,7 +34,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Detect dependency manifests
         id: detect
@@ -51,7 +49,7 @@ jobs:
 
       - name: Dependency Review
         if: ${{ steps.detect.outputs.has_dependencies == 'true' }}
-        uses: actions/dependency-review-action@v4
+        uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4.9.0
         with:
           fail-on-severity: critical
 
@@ -65,29 +63,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Check workflow permissions
         shell: bash
         run: |
           set -euo pipefail
-          if [ ! -d .github/workflows ]; then
-            echo "No workflow directory present."
-            exit 0
-          fi
-          if grep -RInE 'permissions:[[:space:]]*$' .github/workflows >/dev/null 2>&1; then
-            echo "Workflow permission declarations found."
-          else
-            echo "No explicit workflow permissions found; review required."
-            exit 1
-          fi
+          found=0
+          for f in .github/workflows/*.yml .github/workflows/*.yaml; do
+            [ -f "$f" ] || continue
+            found=1
+            if ! grep -qE '^permissions:' "$f"; then
+              echo "Missing top-level permissions declaration: $f"
+              exit 1
+            fi
+          done
+          [ "$found" -eq 1 ]
+          echo "All workflow files declare top-level permissions."
 
   policy-file:
     name: SEC-04 Policy consistency
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Verify assurance policy
         shell: bash
