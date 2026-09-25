@@ -3,7 +3,8 @@
 **Ecosistema:** SETA EXPRESO SURL  
 **Issue:** #5  
 **Relacionada con:** Technology Stack Baseline v0.1.0  
-**Estado:** Marco de evaluación
+**Estado:** Vigente
+**Tipo:** Marco de evaluación
 
 ---
 
