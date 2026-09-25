@@ -1,0 +1,71 @@
+name: XLSX reader comparison
+
+on:
+  push:
+    paths:
+      - 'poc/benchmark/xlsx-reader/**'
+      - '.github/workflows/xlsx-reader-comparison.yml'
+  pull_request:
+    paths:
+      - 'poc/benchmark/xlsx-reader/**'
+      - '.github/workflows/xlsx-reader-comparison.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: poc/benchmark/xlsx-reader
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24.21.0
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.21.0
+
+      - name: Generate dependency lockfile
+        run: npm install --package-lock-only --ignore-scripts
+
+      - name: Install benchmark dependencies reproducibly
+        run: npm ci --ignore-scripts
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --json > npm-audit.json || true
+
+      - name: Generate F01-F20 fixtures
+        run: npm run generate-fixtures
+
+      - name: Generate stress fixtures
+        run: npm run generate-stress-fixtures
+
+      - name: Generate malformed fixtures
+        run: npm run generate-malformed-fixtures
+
+      - name: Execute F01-F20 acceptance contract
+        run: node --expose-gc compare-readers.mjs
+
+      - name: Enforce acceptance and malformed-input gates
+        run: |
+          node -e "const r=require('./comparison-report.json'); if((r.acceptanceSummary.ERROR||0)>0 || (r.acceptanceSummary.FAIL||0)>0 || (r.acceptanceSummary.UNEXPECTED_ACCEPTANCE||0)>0) process.exit(1)"
+
+      - name: Publish supply-chain evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xlsx-reader-supply-chain-evidence
+          path: |
+            poc/benchmark/xlsx-reader/package-lock.json
+            poc/benchmark/xlsx-reader/npm-audit.json
+
+      - name: Publish comparison report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xlsx-reader-comparison-report
+          path: poc/benchmark/xlsx-reader/comparison-report.json
