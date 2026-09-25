@@ -54,7 +54,22 @@ Esto permite sustituir la biblioteca sin modificar:
 
 ## 4. Alternativas
 
-Se deben evaluar al menos:
+La evaluación preliminar actual identifica tres familias relevantes:
+
+| Alternativa | Estado actual | Observación preliminar |
+|---|---|---|
+| **ExcelJS 4.4.0** | Candidato | Amplia API de workbook/celdas, TypeScript, MIT; ya integrado provisionalmente detrás del port. |
+| **SheetJS Community Edition 0.20.3** | Candidato de comparación | Versión actual publicada por su CDN oficial; Apache-2.0. Requiere evaluar cuidadosamente su modelo de acceso a metadatos, fórmulas y streaming frente a nuestro modelo intermedio. |
+| **read-excel-file 9.3.10** | Candidato de comparación | MIT, Node >=18, orientado a lectura y parsing; parece atractivo para ingesta pura, pero hay que comprobar si conserva suficiente metadato estructural para nuestros requisitos de provenance. |
+| **xlsx-populate / forks** | Baja prioridad | Existen versiones recientes de forks, pero el proyecto original `xlsx-populate` lleva años sin publicación; no se debe confundir actividad de un fork con mantenimiento del upstream. |
+
+Fuentes externas consultadas el 2026-09-25:
+- ExcelJS upstream: https://github.com/exceljs/exceljs/releases
+- SheetJS CE: https://docs.sheetjs.com/docs/getting-started/installation/nodejs/ y https://docs.sheetjs.com/docs/miscellany/license/
+- read-excel-file: https://www.npmjs.com/package/read-excel-file
+- xlsx-populate: https://www.npmjs.com/package/xlsx-populate
+
+La comparación debe usar fixtures comunes y medir:
 
 1. ExcelJS oficial 4.4.0.
 2. Forks mantenidos de ExcelJS, únicamente como alternativas técnicas y no como equivalentes oficiales.
@@ -75,6 +90,18 @@ La comparación debe usar fixtures comunes y medir:
 - licencia;
 - mantenimiento;
 - capacidad de streaming.
+
+### 4.1 Observación sobre SheetJS
+
+SheetJS CE tiene una versión 0.20.3 distribuida por su CDN oficial, mientras que el registro npm público muestra una versión histórica 0.18.5; el propio proyecto explica que su CDN es la fuente autoritativa para las versiones actuales. Esto introduce una consideración adicional de reproducibilidad y supply chain que debemos resolver si se elige esta alternativa.
+
+### 4.2 Observación sobre read-excel-file
+
+`read-excel-file` declara soporte Node.js y actualmente publica 9.3.10; su API devuelve valores de celdas y puede leer múltiples hojas. Sin embargo, nuestro requisito no es únicamente convertir XLSX a valores: necesitamos preservar provenance, fórmulas, resultados cacheados, formatos y estructura suficiente para validación/reconciliación. Por eso no se puede seleccionar por simplicidad de API sin un fixture comparativo.
+
+### 4.3 Resultado preliminar de alternativas
+
+No existe todavía evidencia suficiente para reemplazar ExcelJS. La estrategia correcta es **comparar mediante un adapter experimental**, no cambiar la dependencia por intuición.
 
 ## 5. Gate antes de adopción
 
