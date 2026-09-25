@@ -1,5 +1,5 @@
 import { readFile, writeFile } from 'node:fs/promises';
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash, createHmac, randomBytes } from 'node:crypto';
 import ExcelJS from 'exceljs';
 import readXlsxFile from 'read-excel-file/node';
 import * as XLSX from 'xlsx';
@@ -39,8 +39,7 @@ const expectedHeaderSet = new Set(EXPECTED_HEADERS.map(normalizeHeader));
 
 function privacyToken(value) {
   const type = value === null || value === undefined ? 'blank' : typeof value;
-  return createHash('sha256')
-    .update(hmacKey)
+  return createHmac('sha256', hmacKey)
     .update(type)
     .update('\0')
     .update(String(value ?? ''))
