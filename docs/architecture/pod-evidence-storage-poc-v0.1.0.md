@@ -288,4 +288,6 @@ El PoC debe producir:
 
 El PoC termina cuando cada alternativa seleccionada haya ejecutado T01–T08 o se documente explícitamente por qué una prueba no aplica.
 
-**Estado:** DRAFT / pendiente de ejecución.
+**Estado:** Propuesto
+
+**Fase/nota:** El estado anterior, si existía, se conserva como descripción histórica de fase; el campo `Estado` usa exclusivamente la taxonomía formal de gobernanza.
