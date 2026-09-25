@@ -106,7 +106,25 @@ def t04(client, eid, content):
     upload_id = upload["UploadId"]
     parts = []
     try:
-        for number, offset in enumerate(range(0, len(content), CHUNK), 1):
+        offsets = list(enumerate(range(0, len(content), CHUNK), 1))
+        number, offset = offsets[0]
+        first_part = content[offset:offset + CHUNK]
+        response = client.upload_part(
+            Bucket=BUCKET, Key=key, UploadId=upload_id,
+            PartNumber=number, Body=first_part
+        )
+        parts.append({"PartNumber": number, "ETag": response["ETag"]})
+
+        endpoint = client.meta.endpoint_url
+        client = boto3.client(
+            "s3",
+            endpoint_url=endpoint,
+            aws_access_key_id=os.environ["S3_ACCESS_KEY"],
+            aws_secret_access_key=os.environ["S3_SECRET_KEY"],
+            region_name="us-east-1",
+            config=Config(signature_version="s3v4"),
+        )
+        for number, offset in offsets[1:]:
             part = content[offset:offset + CHUNK]
             response = client.upload_part(
                 Bucket=BUCKET, Key=key, UploadId=upload_id,
@@ -150,6 +168,13 @@ def t07(s, client, eid, content):
     try:
         s.get(eid, h, "admin")
     except ValueError:
+        client.put_object(
+            Bucket=BUCKET,
+            Key=f"evidence/{eid}",
+            Body=content,
+            Metadata={"sha256": h},
+        )
+        assert s.get(eid, h, "admin") == content
         return {"corruption_detected": True}
     raise AssertionError("corruption was not detected")
 
