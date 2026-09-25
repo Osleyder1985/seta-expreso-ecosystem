@@ -136,7 +136,7 @@ $metadataObject = [ordered]@{
   warmup_requests = $WarmupRequests
   endpoint = "/packages"
   operation = $Operation
-  command = ".\\run-benchmark-native.ps1 -Requests $Requests -Concurrency $Concurrency -Runs $Runs -WarmupRequests $WarmupRequests"
+  command = ".\\run-benchmark-native.ps1 -Operation $Operation -Requests $Requests -Concurrency $Concurrency -Runs $Runs -WarmupRequests $WarmupRequests"
   postgres_container = try { (docker inspect seta-expreso-benchmark-postgres --format "{{.Config.Image}}|{{.Image}}|{{.State.Status}}").Trim() } catch { "unavailable" }
   note = "Native Windows measurements. DATABASE_URL uses PostgreSQL URI syntax for the Node.js candidate; the runner derives an equivalent ADO.NET/Npgsql connection string for ASP.NET Core. CPU is process CPU seconds consumed during the measured HTTP load; memory values are process snapshots after the measured load. Do not compare these resource metrics directly with Docker container snapshots."
 }
