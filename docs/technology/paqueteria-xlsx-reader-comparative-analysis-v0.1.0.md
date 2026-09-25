@@ -60,7 +60,19 @@ ExcelJS Hardened 5.0.0 is a non-upstream fork that specifically introduces parse
 
 The private real-manifest evidence already recorded in the project remains separate from the public synthetic fixtures. In addition, eight representative local manifest workbooks were structurally inspected without committing raw data: they span 1–8 sheets, 84–419 maximum rows, 12–23 columns, 0–3 merged ranges and 0–1,829 formula cells. One multi-sheet workbook contains 8 sheets and 1,829 formulas; another contains 2 sheets and 290 formulas. This confirms that the production-like input can require substantially richer workbook metadata than a simple one-sheet table.
 
-Actual parser execution against this private workbook is still a separate privacy-controlled gate; the raw workbook is not copied into GitHub.
+Actual parser execution against this private workbook is a separate privacy-controlled gate; the raw workbook is not copied into GitHub.
+
+The real-manifest probe was strengthened to protocol **v0.2.0**. It now:
+- detects the operational header row from normalized expected header vocabulary rather than assuming a fixed row number;
+- verifies the complete 12-column operational header contract and its order;
+- verifies data-row counts, non-empty House identity, numeric/decimal weight behavior and integer quantity behavior;
+- verifies destination-code type/counts without emitting literal codes;
+- measures repeated-address groups and maximum multiplicity without emitting addresses;
+- records privacy-preserving per-cell type/fingerprint data so row fidelity can be compared across readers without publishing PII;
+- captures formula metadata only for readers that expose it;
+- compares the structural contract across successful reader executions.
+
+The report uses a per-run random HMAC key for sensitive-value fingerprints and never writes the raw cell values, addresses, names, phones, passport/ID values or the hashing key. Therefore the fingerprints are suitable for within-run fidelity comparison, not as public identifiers.
 
 ## 7. Interpretation
 
@@ -76,7 +88,7 @@ Current evidence establishes:
 
 ## 8. Remaining decision gates
 
-1. Execute the redacted/production-like real-manifest probe for all candidates.
+1. Execute the privacy-controlled real-manifest probe for all current candidates.
 2. Review the exact lockfile and audit artifacts.
 3. Decide whether parser isolation/resource limits are acceptable.
 4. Evaluate provenance/cell-address requirements in the actual `WorkbookReaderPort`.
