@@ -1,4 +1,4 @@
-# Matriz objetiva de evaluación tecnológica v0.1.0
+# Matriz objetiva de evaluación tecnológica v0.1.1
 
 **Ecosistema:** SETA EXPRESO SURL  
 **Issue:** #5  
