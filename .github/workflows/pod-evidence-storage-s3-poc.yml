@@ -11,21 +11,25 @@ jobs:
   s3-compatible:
     runs-on: ubuntu-latest
     services:
-      minio:
-        image: zenko/cloudserver:latest-0.0.0
+      cloudserver:
+        image: ghcr.io/scality/cloudserver:c1ba296859690c1cbbec609aaae430f6b04b4745
         ports:
           - 8000:8000
         env:
+          SCALITY_ACCESS_KEY_ID: accessKey1
+          SCALITY_SECRET_ACCESS_KEY: verySecretKey1
           S3BACKEND: file
           S3DATAPATH: /usr/src/app/localData
           S3METADATAPATH: /usr/src/app/localMetadata
+          REMOTE_MANAGEMENT_DISABLE: 1
         options: >-
-          --health-cmd "curl -f http://localhost:8000/_/healthcheck"
+          --health-cmd "node -e \"const c=require(\\\"net\\\").connect(8000,\\\"127.0.0.1\\\",()=>process.exit(0)); c.on(\\\"error\\\",()=>process.exit(1)); c.setTimeout(2000,()=>process.exit(1));\""
           --health-interval 5s
           --health-timeout 3s
           --health-retries 20
         volumes:
-          - /tmp/minio-data:/data
+          - /tmp/cloudserver-data:/usr/src/app/localData
+          - /tmp/cloudserver-metadata:/usr/src/app/localMetadata
 
 
     steps:
