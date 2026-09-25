@@ -1,0 +1,83 @@
+name: Security Assurance
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  secret-scan:
+    name: SEC-01 Secret scanning
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Gitleaks
+        uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  dependency-review:
+    name: SEC-02 Dependency review
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: critical
+
+  workflow-permissions:
+    name: SEC-03 Workflow permission baseline
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check workflow permissions
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -d .github/workflows ]; then
+            echo "No workflow directory present."
+            exit 0
+          fi
+          if grep -RInE 'permissions:[[:space:]]*$' .github/workflows >/dev/null 2>&1; then
+            echo "Workflow permission declarations found."
+          else
+            echo "No explicit workflow permissions found; review required."
+            exit 1
+          fi
+
+  policy-file:
+    name: SEC-04 Policy consistency
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Verify assurance policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f docs/security/security-assurance-v0.1.0.md
+          grep -q "SEC-01" docs/security/security-assurance-v0.1.0.md
+          grep -q "SEC-02" docs/security/security-assurance-v0.1.0.md
+          grep -q "SEC-03" docs/security/security-assurance-v0.1.0.md
+          grep -q "SEC-04" docs/security/security-assurance-v0.1.0.md
