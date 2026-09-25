@@ -153,14 +153,23 @@ const acceptanceSummary = results.reduce((acc, item) => {
   return acc;
 }, { PASS: 0, FAIL: 0, ERROR: 0 });
 
+const robustnessSummary = results
+  .filter(x => x.fixture.startsWith('ST'))
+  .reduce((acc, x) => {
+    const key = x.errors.length ? 'ERROR' : 'EXECUTED';
+    acc[key] = (acc[key] ?? 0) + 1;
+    return acc;
+  }, { EXECUTED: 0, ERROR: 0 });
+
 const report = {
-  protocol: 'xlsx-reader-comparison-v0.4.0',
+  protocol: 'xlsx-reader-comparison-v0.5.0',
   node: process.version,
   platform: process.platform,
   arch: process.arch,
   fixtureCount: fixtureFiles.length,
   fixtures: fixtureFiles,
   acceptanceSummary,
+  robustnessSummary,
   results
 };
 
