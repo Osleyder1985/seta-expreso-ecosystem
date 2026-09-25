@@ -1,5 +1,6 @@
 import { readFile, writeFile, readdir } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import ExcelJS from 'exceljs';
 import readXlsxFile from 'read-excel-file/node';
@@ -109,7 +110,7 @@ const EXECUTION_TIMEOUT_MS = 15000;
 function runIsolated(reader, filePath) {
   return new Promise((resolve) => {
     const child = spawn(process.execPath, ['reader-worker.mjs', reader, filePath], {
-      cwd: new URL('.', import.meta.url),
+      cwd: fileURLToPath(new URL('.', import.meta.url)),
       stdio: ['ignore', 'pipe', 'pipe']
     });
     let stdout = '', stderr = '';
@@ -151,7 +152,7 @@ for (const fixture of fixtureFiles) {
     for (let i = 0; i < 6; i++) {
       global.gc?.();
       const before = rss();
-      const isolated = await runIsolated(reader, new URL(file, dir).pathname);
+      const isolated = await runIsolated(reader, fileURLToPath(new URL(file, dir)));
       const durationMs = isolated.elapsedMs;
       if (isolated.timeout) {
         errors.push({ iteration: i + 1, name: isolated.error.name, message: isolated.error.message });
