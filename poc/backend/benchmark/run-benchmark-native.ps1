@@ -117,6 +117,11 @@ function Invoke-HttpBenchmark([string]$Name, [string]$BaseUrl, [string]$Benchmar
 
 $aspDatabaseUrl = Convert-ToNpgsqlConnectionString $DatabaseUrl
 
+$postgresContainer = "unavailable"
+try {
+  $postgresContainer = (docker inspect seta-expreso-benchmark-postgres --format '{{.Config.Image}}|{{.Image}}|{{.State.Status}}' 2>$null).Trim()
+} catch {}
+
 $metadataObject = [ordered]@{
   timestamp_utc = (Get-Date).ToUniversalTime().ToString("o")
   commit_sha = (git -C $repoDir rev-parse HEAD).Trim()
@@ -137,7 +142,7 @@ $metadataObject = [ordered]@{
   endpoint = "/packages"
   operation = $Operation
   command = ".\\run-benchmark-native.ps1 -Operation $Operation -Requests $Requests -Concurrency $Concurrency -Runs $Runs -WarmupRequests $WarmupRequests"
-  postgres_container = try { (docker inspect seta-expreso-benchmark-postgres --format "{{.Config.Image}}|{{.Image}}|{{.State.Status}}").Trim() } catch { "unavailable" }
+  postgres_container = $postgresContainer
   note = "Native Windows measurements. DATABASE_URL uses PostgreSQL URI syntax for the Node.js candidate; the runner derives an equivalent ADO.NET/Npgsql connection string for ASP.NET Core. CPU is process CPU seconds consumed during the measured HTTP load; memory values are process snapshots after the measured load. Do not compare these resource metrics directly with Docker container snapshots."
 }
 $metadataObject | ConvertTo-Json | Set-Content -Encoding UTF8 $metadata
