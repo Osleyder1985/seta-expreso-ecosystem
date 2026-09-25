@@ -38,11 +38,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Detect dependency manifests
+        id: detect
+        shell: bash
+        run: |
+          set -euo pipefail
+          if find . -type f \( -name 'package.json' -o -name 'package-lock.json' -o -name 'pnpm-lock.yaml' -o -name 'yarn.lock' -o -name 'requirements.txt' -o -name 'poetry.lock' -o -name 'Pipfile.lock' -o -name '*.csproj' -o -name 'packages.lock.json' -o -name 'go.mod' -o -name 'go.sum' -o -name 'pom.xml' -o -name 'build.gradle' -o -name 'build.gradle.kts' -o -name 'Cargo.toml' -o -name 'Cargo.lock' \) -not -path './.git/*' | grep -q .; then
+            echo "has_dependencies=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_dependencies=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Dependency Review
+        if: ${{ steps.detect.outputs.has_dependencies == 'true' }}
         uses: actions/dependency-review-action@v4
         with:
           fail-on-severity: critical
 
+      - name: Record N/A
+        if: ${{ steps.detect.outputs.has_dependencies != 'true' }}
+        shell: bash
+        run: echo "Dependency review is N/A: no dependency manifest is present in the repository."
+        
   workflow-permissions:
     name: SEC-03 Workflow permission baseline
     runs-on: ubuntu-latest
