@@ -90,14 +90,14 @@ function Convert-ToNpgsqlConnectionString([string]$ConnectionUri) {
     return '"' + $Value.Replace('"', '""') + '"'
   }
 
-  $host = if ($uri.HostNameType -eq [System.UriHostNameType]::IPv6) {
+  $serverHost = if ($uri.HostNameType -eq [System.UriHostNameType]::IPv6) {
     "[" + $uri.Host + "]"
   } else {
     $uri.Host
   }
   $port = if ($uri.IsDefaultPort) { 5432 } else { $uri.Port }
 
-  return "Host=$host;Port=$port;Database=$(Quote-NpgsqlValue $database);Username=$(Quote-NpgsqlValue $user);Password=$(Quote-NpgsqlValue $password)"
+  return "Host=$serverHost;Port=$port;Database=$(Quote-NpgsqlValue $database);Username=$(Quote-NpgsqlValue $user);Password=$(Quote-NpgsqlValue $password)"
 }
 
 function Reset-Database {
