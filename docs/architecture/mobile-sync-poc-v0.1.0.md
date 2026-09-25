@@ -1,6 +1,6 @@
 # PoC de sincronización móvil offline-first — v0.1.0
 
-**Estado:** Propuesto  
+**Estado:** Propuesto
 **Issue:** #58  
 **Dependencias:** PR #55, PR #57
 
@@ -385,3 +385,6 @@ Una tecnología o estrategia sólo se incorpora al baseline cuando:
 
 No se seleccionará una tecnología simplemente por popularidad o familiaridad.
 
+
+
+**Fase/nota:** Las etiquetas históricas de fase o baseline no constituyen estados formales; el campo `Estado` se rige exclusivamente por la taxonomía de gobernanza.
