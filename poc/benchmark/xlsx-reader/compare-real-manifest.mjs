@@ -89,7 +89,7 @@ function detectHeaderRow(rows) {
 
 function summarizeRows(rows, headerIndex) {
   const header = rows[headerIndex] ?? [];
-  const data = rows.slice(headerIndex + 1).filter(row => row.some(v => scalar(v) !== null && scalar(v) !== ''));
+  const sourceRows = rows.slice(headerIndex + 1).filter(row => row.some(v => scalar(v) !== null && scalar(v) !== ''));
   const headerMatches = header.map(normalizeHeader);
   const columnIndexes = new Map(headerMatches.map((h, i) => [h, i]));
 
@@ -97,6 +97,14 @@ function summarizeRows(rows, headerIndex) {
   const weightIndex = columnIndexes.get(normalizeHeader('Peso (Kg)'));
   const destinationIndex = columnIndexes.get(normalizeHeader('Unidad de destino'));
   const addressIndex = columnIndexes.get(normalizeHeader('Dirección del DESTINATARIO:'));
+
+  // A real manifest may contain a trailing total/subtotal row after the operational records.
+  // Preserve every source row in rowFingerprints, but exclude non-string House totals from
+  // package/address operational metrics so totals are never imported as packages.
+  const data = houseIndex === undefined
+    ? sourceRows
+    : sourceRows.filter(row => typeof scalar(row[houseIndex]) === 'string' && scalar(row[houseIndex]).trim() !== '');
+  const nonOperationalRowsAfterHeader = sourceRows.length - data.length;
 
   const houses = houseIndex === undefined ? [] : data.map(r => scalar(r[houseIndex])).filter(v => v !== null && v !== '');
   const weights = weightIndex === undefined ? [] : data.map(r => scalar(r[weightIndex])).filter(v => v !== null && v !== '');
@@ -126,7 +134,9 @@ function summarizeRows(rows, headerIndex) {
     matchedExpectedHeaders: headerMatches.filter(h => expectedHeaderSet.has(h)).length,
     exactExpectedHeaderOrder: headerMatches.slice(0, EXPECTED_HEADERS.length)
       .every((h, i) => h === normalizeHeader(EXPECTED_HEADERS[i])),
-    dataRowCount: data.length,
+    sourceNonEmptyRowsAfterHeader: sourceRows.length,
+    operationalDataRowCount: data.length,
+    nonOperationalRowsAfterHeader,
     nonEmptyHouseCount: houses.length,
     uniqueHouseCount: new Set(houses.map(privacyToken)).size,
     repeatedAddressGroupCount: repeatedGroups.length,
@@ -142,7 +152,7 @@ function summarizeRows(rows, headerIndex) {
     ),
     blankCellCount: data.reduce((sum, row) =>
       sum + row.slice(0, EXPECTED_HEADERS.length).filter(v => scalar(v) === null || scalar(v) === '').length, 0),
-    rowFingerprints: data.map(rowFingerprint),
+    rowFingerprints: sourceRows.map(rowFingerprint),
     addressTokens: [...addressGroups.keys()].sort(),
   };
 }
