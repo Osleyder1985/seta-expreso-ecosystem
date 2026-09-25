@@ -5,8 +5,17 @@ import readXlsxFile from 'read-excel-file/node';
 import * as XLSX from 'xlsx';
 import { evaluateFixture } from './acceptance-contract.mjs';
 
-const dir = new URL('./fixtures/', import.meta.url);
-const fixtureFiles = (await readdir(dir)).filter(f => /^F\d\d\.xlsx$/.test(f)).sort();
+const fixtureSets = [
+  { dir: new URL('./fixtures/', import.meta.url), filter: /^F\d\d\.xlsx$/, kind: 'acceptance' },
+  { dir: new URL('./stress-fixtures/', import.meta.url), filter: /^ST\d\d-.*\.xlsx$/, kind: 'stress' }
+];
+
+const fixtureFiles = [];
+for (const set of fixtureSets) {
+  for (const file of (await readdir(set.dir)).filter(set.filter).sort()) {
+    fixtureFiles.push({ file, dir: set.dir, kind: set.kind });
+  }
+}
 const hash = v => createHash('sha256').update(JSON.stringify(v)).digest('hex');
 const rss = () => process.memoryUsage().rss;
 const percentile = (values, p) => {
@@ -93,9 +102,10 @@ const readers = {
 
 const results = [];
 
-for (const file of fixtureFiles) {
+for (const fixture of fixtureFiles) {
+  const { file, dir, kind } = fixture;
   const buffer = await readFile(new URL(file, dir));
-  const fixtureId = file.startsWith('F') ? file.slice(0, 3) : file.slice(0, 3);
+  const fixtureId = file.slice(0, 3);
 
   for (const [reader, fn] of Object.entries(readers)) {
     const samples = [];
@@ -125,13 +135,20 @@ for (const file of fixtureFiles) {
     const stableHashes = snapshotHashes.slice(1).filter(Boolean);
     const deterministic = stableHashes.length > 0 && stableHashes.every(x => x === stableHashes[0]);
     const acceptance = errors.length
-      ? { status: 'ERROR', message: 'Reader raised one or more execution errors.', details: { errors } }
-      : fixtureId.startsWith('F')
+      ? { status: kind === 'stress' && /^ST0[456]-/.test(file) ? 'EXPECTED_REJECTION' : 'ERROR',
+          message: kind === 'stress' && /^ST0[456]-/.test(file)
+            ? 'Malformed/non-XLSX fixture was rejected by the reader.'
+            : 'Reader raised one or more execution errors.',
+          details: { errors } }
+      : kind === 'acceptance'
         ? evaluateFixture(fixtureId, reader, lastResult)
-        : { status: 'NOT_APPLICABLE', message: 'Stress fixture: performance/memory/robustness evidence only.' };
+        : /^ST0[456]-/.test(file)
+          ? { status: 'UNEXPECTED_ACCEPTANCE', message: 'Malformed/non-XLSX fixture was accepted by the reader.' }
+          : { status: 'NOT_APPLICABLE', message: 'Stress fixture: performance/memory evidence only.' };
 
     results.push({
       fixture: file,
+      fixtureKind: kind,
       reader,
       bytes: buffer.length,
       acceptance,
@@ -151,18 +168,24 @@ const acceptanceSummary = results.reduce((acc, item) => {
   const status = item.acceptance.status;
   acc[status] = (acc[status] ?? 0) + 1;
   return acc;
-}, { PASS: 0, FAIL: 0, ERROR: 0 });
+}, { PASS: 0, FAIL: 0, ERROR: 0, EXPECTED_REJECTION: 0, UNEXPECTED_ACCEPTANCE: 0, NOT_APPLICABLE: 0 });
 
 const robustnessSummary = results
-  .filter(x => x.fixture.startsWith('ST'))
+  .filter(x => x.fixtureKind === 'stress')
   .reduce((acc, x) => {
-    const key = x.errors.length ? 'ERROR' : 'EXECUTED';
+    const key = x.acceptance.status === 'EXPECTED_REJECTION'
+      ? 'EXPECTED_REJECTION'
+      : x.acceptance.status === 'UNEXPECTED_ACCEPTANCE'
+        ? 'UNEXPECTED_ACCEPTANCE'
+        : x.errors.length
+          ? 'ERROR'
+          : 'EXECUTED';
     acc[key] = (acc[key] ?? 0) + 1;
     return acc;
-  }, { EXECUTED: 0, ERROR: 0 });
+  }, { EXECUTED: 0, EXPECTED_REJECTION: 0, UNEXPECTED_ACCEPTANCE: 0, ERROR: 0 });
 
 const report = {
-  protocol: 'xlsx-reader-comparison-v0.5.0',
+  protocol: 'xlsx-reader-comparison-v0.6.0',
   node: process.version,
   platform: process.platform,
   arch: process.arch,
