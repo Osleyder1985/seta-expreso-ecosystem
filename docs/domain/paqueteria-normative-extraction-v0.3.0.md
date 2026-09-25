@@ -3,7 +3,7 @@
 **Versión:** 0.3.0  
 **Issue:** #41  
 **PR relacionado:** #42  
-**Estado:** evidencia adicional verificada; no sustituye la revisión jurídica del PDF oficial.
+**Estado:** En validación
 
 ## 1. Fuente
 
@@ -276,3 +276,6 @@ No deben existir como un único `status` universal.
 **No crear todavía tablas `packages`, `manifests`, `deliveries` definitivas ni migraciones PostgreSQL derivadas únicamente de estos documentos.**
 
 La próxima decisión técnica debe producir primero un **modelo de dominio validado** y una **máquina de estados explícita**, antes del modelo relacional.
+
+
+**Fase/nota:** Las etiquetas históricas de fase o baseline no constituyen estados formales; el campo `Estado` se rige exclusivamente por la taxonomía de gobernanza.
