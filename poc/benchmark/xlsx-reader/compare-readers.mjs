@@ -95,7 +95,7 @@ const results = [];
 
 for (const file of fixtureFiles) {
   const buffer = await readFile(new URL(file, dir));
-  const fixtureId = file.slice(0, 3);
+  const fixtureId = file.startsWith('F') ? file.slice(0, 3) : file.slice(0, 3);
 
   for (const [reader, fn] of Object.entries(readers)) {
     const samples = [];
@@ -126,7 +126,9 @@ for (const file of fixtureFiles) {
     const deterministic = stableHashes.length > 0 && stableHashes.every(x => x === stableHashes[0]);
     const acceptance = errors.length
       ? { status: 'ERROR', message: 'Reader raised one or more execution errors.', details: { errors } }
-      : evaluateFixture(fixtureId, reader, lastResult);
+      : fixtureId.startsWith('F')
+        ? evaluateFixture(fixtureId, reader, lastResult)
+        : { status: 'NOT_APPLICABLE', message: 'Stress fixture: performance/memory/robustness evidence only.' };
 
     results.push({
       fixture: file,
