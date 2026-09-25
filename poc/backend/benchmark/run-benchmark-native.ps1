@@ -121,7 +121,7 @@ $targets = @(
   [ordered]@{
     name = "aspnet-core"
     command = "dotnet"
-    arguments = @((Join-Path $aspDir "bin/Release/net10.0/SetaExpreso.Poc.dll"), "--urls", "http://127.0.0.1:8081")
+    arguments = @("exec", (Join-Path $aspDir "bin/Release/net10.0/SetaExpreso.Poc.dll"), "--urls", "http://127.0.0.1:8081")
     working_directory = $aspDir
     url = "http://127.0.0.1:8081"
     health_url = "http://127.0.0.1:8081/health"
