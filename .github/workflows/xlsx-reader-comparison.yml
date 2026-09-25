@@ -1,6 +1,10 @@
 name: XLSX reader comparison
 
 on:
+  push:
+    paths:
+      - 'poc/benchmark/xlsx-reader/**'
+      - '.github/workflows/xlsx-reader-comparison.yml'
   pull_request:
     paths:
       - 'poc/benchmark/xlsx-reader/**'
