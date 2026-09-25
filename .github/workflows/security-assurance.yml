@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 jobs:
-  smoke:
+  workflow-smoke:
     name: SEC-00 Workflow execution smoke test
     runs-on: ubuntu-latest
     steps:
@@ -24,3 +24,43 @@ jobs:
           echo "Security Assurance workflow execution reached the runner."
           echo "event=${{ github.event_name }}"
           echo "sha=${{ github.sha }}"
+
+  workflow-permissions:
+    name: SEC-03 Workflow permission baseline
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30ee0af803 # v6.1.0
+        with:
+          fetch-depth: 1
+      - name: Check workflow permissions
+        shell: bash
+        run: |
+          set -euo pipefail
+          found=0
+          for f in .github/workflows/*.yml .github/workflows/*.yaml; do
+            [ -f "$f" ] || continue
+            found=1
+            if ! grep -qE '^permissions:' "$f"; then
+              echo "Missing top-level permissions declaration: $f"
+              exit 1
+            fi
+          done
+          [ "$found" -eq 1 ]
+          echo "All workflow files declare top-level permissions."
+
+  policy-file:
+    name: SEC-04 Policy consistency
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30ee0af803 # v6.1.0
+      - name: Verify assurance policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f docs/security/security-assurance-v0.1.0.md
+          grep -q "SEC-01" docs/security/security-assurance-v0.1.0.md
+          grep -q "SEC-02" docs/security/security-assurance-v0.1.0.md
+          grep -q "SEC-03" docs/security/security-assurance-v0.1.0.md
+          grep -q "SEC-04" docs/security/security-assurance-v0.1.0.md
