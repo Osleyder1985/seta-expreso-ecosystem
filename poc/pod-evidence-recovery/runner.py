@@ -12,8 +12,7 @@ def build(root):
     for i in range(1,N+1):
         b=payload(i); eid=f"evidence-{i:03d}"
         row={"evidenceId":eid,"physicalBultoId":f"bulto-{i:03d}","deliveryAttemptId":f"attempt-{i:03d}","evidenceType":TYPES[(i-1)%3],"contentHash":sha(b),"size":len(b),"storageReference":f"objects/{eid}"}
-        (root/"metadata"/f"{eid}.json").write_text(json.dumps(row,sort_keys=True)+"
-"); (root/"objects"/eid).write_bytes(b); rows.append(row)
+        (root/"metadata"/f"{eid}.json").write_text(json.dumps(row,sort_keys=True)+"\n"); (root/"objects"/eid).write_bytes(b); rows.append(row)
     return rows
 def meta(root): return [json.loads(p.read_text()) for p in sorted((root/"metadata").glob("*.json"))]
 def inventory(root):
