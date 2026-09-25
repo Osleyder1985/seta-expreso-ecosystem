@@ -1,7 +1,7 @@
 # Arquitectura Mobile Offline-First y Sincronización — v0.1.0
 
 **Issue:** #54  
-**Estado:** Propuesto para PoC y diseño incremental  
+**Estado:** Propuesto  
 **Ámbito:** Aplicaciones móviles operativas Android/iOS — Paquetería
 
 ## 1. Objetivo
