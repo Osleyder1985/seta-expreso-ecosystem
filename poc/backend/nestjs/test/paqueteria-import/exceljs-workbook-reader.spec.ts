@@ -31,4 +31,30 @@ describe('ExcelJsWorkbookReader', () => {
     expect(snapshot.sheets[0].rows[1].cells[1].numberFormat).toBe('0.00');
     expect(snapshot.contentHash).toMatch(/^[a-f0-9]{64}$/);
   });
+  it('detects a header row after title rows when required tokens support the candidate', async () => {
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Manifiesto');
+    sheet.addRow(['MANIFIESTO DE PAQUETERIA']);
+    sheet.addRow(['Fecha', '2026-09-25']);
+    sheet.addRow(['House', 'Peso', 'Dirección']);
+    sheet.addRow(['CACC-00000001', 12.5, 'DIRECCION_TEST_001']);
+
+    const buffer = Buffer.from(await workbook.xlsx.writeBuffer());
+    const snapshot = await new ExcelJsWorkbookReader({
+      headerScanRows: 10,
+      requiredHeaderTokens: ['HOUSE', 'PESO', 'DIRECCION'],
+    }).read(buffer, {
+      importSnapshotId: 'IMP-TEST-XLSX-002',
+      sourceDocumentId: 'DOC-TEST-XLSX-002',
+      contentHash: '',
+      sourceFileName: 'manifest-title-rows.xlsx',
+      mappingProfileId: 'profile-test',
+      mappingProfileVersion: '0.1.0',
+    });
+
+    expect(snapshot.sheets[0].rows[0].kind).toBe('DATA');
+    expect(snapshot.sheets[0].rows[1].kind).toBe('DATA');
+    expect(snapshot.sheets[0].rows[2].kind).toBe('HEADER');
+    expect(snapshot.sheets[0].rows[3].cells[0].columnHeaderRaw).toBe('House');
+  });
 });
