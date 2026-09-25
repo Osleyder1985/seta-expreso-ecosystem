@@ -1,11 +1,10 @@
 services:
   postgres:
-    image: postgres:16-alpine
+    image: ${POC_POSTGRES_IMAGE:-postgres:16-alpine}
     environment:
       POSTGRES_USER: poc
       POSTGRES_PASSWORD: poc
       POSTGRES_DB: poc
-    ports: ["5433:5432"]
     volumes: ["./init.sql:/docker-entrypoint-initdb.d/001-init.sql:ro"]
   api:
     build: .
