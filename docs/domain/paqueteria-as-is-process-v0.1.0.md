@@ -767,3 +767,85 @@ Este documento deberá utilizarse como fuente de entrada para:
 - pruebas de aceptación.
 
 **No se debe volver a solicitar al usuario la repetición de los hechos ya documentados aquí.** Si una fase posterior necesita una precisión que realmente no esté contenida en este documento, se debe señalar exactamente qué dato falta y por qué es necesario.
+
+
+## 15. Regla de asignación temporal de vehículo y tripulación
+
+### 15.1. Vehículo
+
+Un vehículo puede estar asignado a **una sola ruta activa/planificada dentro de un mismo intervalo temporal**.
+
+Por tanto:
+
+- un mismo vehículo no puede tener dos rutas superpuestas;
+- finalizar el día operativo no es requisito para asignar una segunda ruta;
+- una segunda ruta puede asignarse al mismo vehículo cuando la primera haya sido **completamente finalizada**, el vehículo esté nuevamente disponible y exista tiempo operativo suficiente;
+- la segunda ruta debe respetar todas las restricciones vigentes: ventana de entregas, tiempo de viaje, tiempos de servicio, descanso, límite máximo de 700 km y demás restricciones de planificación;
+- la secuencia de rutas del vehículo debe quedar registrada históricamente.
+
+Esto significa que la regla correcta es de **no solapamiento temporal de asignaciones**, no simplemente de “una ruta por vehículo por día”.
+
+### 15.2. Tripulación
+
+La misma regla se aplica a la tripulación.
+
+El **chofer** y el **segundo miembro de la tripulación** (denominación laboral definitiva pendiente de verificación) pueden:
+
+- estar asignados simultáneamente al mismo vehículo;
+- ejecutar conjuntamente una misma ruta;
+- formar una unidad operativa de tripulación para esa ejecución;
+- ser asignados posteriormente a otra ruta solamente cuando la ruta anterior haya terminado completamente y ambos estén disponibles, siempre dentro de las restricciones operativas.
+
+Una misma persona tampoco debe quedar asignada a dos rutas con intervalos temporales superpuestos.
+
+### 15.3. Regla de integridad TO-BE
+
+El sistema deberá impedir asignaciones incompatibles:
+
+**Vehicle + Time Interval → máximo una Route**
+
+**Crew Member + Time Interval → máximo una Route**
+
+**Crew + Vehicle + Route → asignación conjunta válida**
+
+La planificación podrá producir una secuencia:
+
+**Ruta 1 → finalización completa → disponibilidad → Ruta 2**
+
+pero nunca:
+
+**Ruta 1 ∥ Ruta 2**
+
+para el mismo vehículo o la misma persona cuando exista solapamiento temporal.
+
+### 15.4. Implicación para planificación
+
+La disponibilidad de vehículo y tripulación pasa a ser una **restricción de planificación**, no un simple dato administrativo.
+
+El planificador deberá comprobar, como mínimo:
+
+1. intervalo de la ruta;
+2. disponibilidad del vehículo;
+3. disponibilidad de cada integrante de la tripulación;
+4. tiempo de retorno/liberación cuando corresponda;
+5. ventana de entrega;
+6. descanso;
+7. distancia máxima;
+8. capacidad del vehículo;
+9. duración estimada y tiempo real cuando se replanifique.
+
+La planificación de una segunda ruta debe utilizar el tiempo de finalización real o una disponibilidad confirmada, no asumir que la primera ruta termina a una hora fija del día.
+
+### 15.5. Terminología de dominio
+
+Para evitar ambigüedad:
+
+- **Route** = recorrido operativo planificado/ejecutado.
+- **Vehicle Assignment** = asignación temporal de un vehículo a una ruta.
+- **Crew Assignment** = asignación temporal de personas a una ruta.
+- **Crew** = conjunto de miembros que ejecutan conjuntamente una ruta.
+- **Route Execution** = ejecución real de la ruta.
+- **Vehicle Availability** = intervalo durante el cual el vehículo puede ser asignado.
+- **Person Availability** = intervalo durante el cual una persona puede ser asignada.
+
+La denominación del segundo integrante seguirá abierta hasta verificar el nombre formal del puesto.
