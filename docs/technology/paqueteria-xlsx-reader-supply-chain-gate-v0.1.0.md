@@ -34,3 +34,5 @@ A production adoption decision requires review of the actual generated artifact 
 ## Decision rule
 
 No candidate is selected solely because it has fewer vulnerabilities or fewer dependencies. Any security or supply-chain exception requires explicit documentation and an ADR with compensating controls.
+
+Candidate set expanded to include exceljs-hardened 5.0.0 as a separately governed non-upstream security candidate.
