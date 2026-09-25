@@ -154,7 +154,16 @@ def t05(s, eid, content):
 def t06(s, eid, content, endpoint):
     h = digest(content)
     s.put(eid, content, h)
-    restarted = S3EvidenceStorage(boto3.client("s3", endpoint_url=endpoint, config=Config(signature_version="s3v4")))
+    restarted = S3EvidenceStorage(
+        boto3.client(
+            "s3",
+            endpoint_url=endpoint,
+            aws_access_key_id=os.environ["S3_ACCESS_KEY"],
+            aws_secret_access_key=os.environ["S3_SECRET_KEY"],
+            region_name="us-east-1",
+            config=Config(signature_version="s3v4"),
+        )
+    )
     assert restarted.get(eid, h, "admin") == content
     return {"recovered_after_restart": True}
 
