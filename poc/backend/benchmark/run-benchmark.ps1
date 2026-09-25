@@ -23,10 +23,14 @@ function Get-CommandVersion([string]$Command, [string[]]$Arguments) {
 }
 
 function Wait-Health([string]$Url) {
+  $started = [System.Diagnostics.Stopwatch]::StartNew()
   for ($i = 0; $i -lt 60; $i++) {
     try {
       $r = Invoke-WebRequest -Uri $Url -UseBasicParsing -TimeoutSec 2
-      if ($r.StatusCode -eq 200) { return }
+      if ($r.StatusCode -eq 200) {
+        $started.Stop()
+        return [math]::Round($started.Elapsed.TotalMilliseconds, 2)
+      }
     } catch {}
     Start-Sleep -Milliseconds 500
   }
@@ -44,10 +48,10 @@ function Get-ContainerSnapshot([string]$ComposeDir, [string]$Service) {
   } finally { Pop-Location }
 }
 
-$timestamp = (Get-Date).ToUniversalTime().ToString("o")
+$repoDir = Split-Path -Parent (Split-Path -Parent $root)
 $metadataObject = [ordered]@{
-  timestamp_utc = $timestamp
-  commit_sha = (git -C (Split-Path -Parent (Split-Path -Parent $root)) rev-parse HEAD).Trim()
+  timestamp_utc = (Get-Date).ToUniversalTime().ToString("o")
+  commit_sha = (git -C $repoDir rev-parse HEAD).Trim()
   operating_system = (Get-CimInstance Win32_OperatingSystem).Caption
   os_version = [Environment]::OSVersion.VersionString
   os_build = (Get-CimInstance Win32_OperatingSystem).BuildNumber
@@ -63,63 +67,52 @@ $metadataObject = [ordered]@{
   runs = $Runs
   warmup_requests = $WarmupRequests
   endpoint = "/packages"
-  note = "memory and CPU are post-run container snapshots, not workload averages."
+  note = "Each candidate is measured in isolation. memory and CPU are post-run container snapshots, not workload averages."
 }
 $metadataObject | ConvertTo-Json | Set-Content -Encoding UTF8 $metadata
 
-function Run-Target([string]$Name, [string]$Url, [string]$ComposeDir, [string]$Service) {
-  $output = node (Join-Path $PSScriptRoot "http-benchmark.mjs") $Requests $Concurrency $WarmupRequests $Name $Url
-  $result = $output | ConvertFrom-Json
-  $snapshot = Get-ContainerSnapshot $ComposeDir $Service
-  $result | Add-Member -NotePropertyName memory_snapshot -NotePropertyValue $snapshot.memory
-  $result | Add-Member -NotePropertyName cpu_pct_snapshot -NotePropertyValue $snapshot.cpu_pct
-  $result | ConvertTo-Json -Compress | Tee-Object -FilePath $results -Append
+function Build-Target([string]$ComposeDir) {
+  Push-Location $ComposeDir
+  try {
+    $timer = Measure-Command { docker compose build api | Out-Host }
+    return [math]::Round($timer.TotalMilliseconds)
+  } finally { Pop-Location }
+}
+
+function Run-Target([string]$Name, [string]$Url, [string]$HealthUrl, [string]$ComposeDir, [int]$BuildMs) {
+  Push-Location $ComposeDir
+  try {
+    docker compose up -d
+    $startupMs = Wait-Health $HealthUrl
+  } finally { Pop-Location }
+
+  try {
+    $output = node (Join-Path $PSScriptRoot "http-benchmark.mjs") $Requests $Concurrency $WarmupRequests $Name $Url
+    $result = $output | ConvertFrom-Json
+    $snapshot = Get-ContainerSnapshot $ComposeDir "api"
+    $result | Add-Member -NotePropertyName build_ms -NotePropertyValue $BuildMs
+    $result | Add-Member -NotePropertyName startup_ms -NotePropertyValue $startupMs
+    $result | Add-Member -NotePropertyName memory_snapshot -NotePropertyValue $snapshot.memory
+    $result | Add-Member -NotePropertyName cpu_pct_snapshot -NotePropertyValue $snapshot.cpu_pct
+    $result | ConvertTo-Json -Compress | Add-Content -Encoding UTF8 $results
+  } finally {
+    Push-Location $ComposeDir
+    try { docker compose down -v } finally { Pop-Location }
+  }
 }
 
 $nestDir = Join-Path $root "nestjs"
 $aspDir = Join-Path $root "aspnet-core"
+$nestBuildMs = Build-Target $nestDir
+$aspBuildMs = Build-Target $aspDir
 
-try {
-  Push-Location $nestDir
-  $nestBuildTimer = Measure-Command { docker compose build api | Out-Host }
-  $nestBuildMs = [math]::Round($nestBuildTimer.TotalMilliseconds)
-  Pop-Location
-
-  Push-Location $aspDir
-  $aspBuildTimer = Measure-Command { docker compose build api | Out-Host }
-  $aspBuildMs = [math]::Round($aspBuildTimer.TotalMilliseconds)
-  Pop-Location
-
-  for ($run = 1; $run -le $Runs; $run++) {
-    Write-Host "=== Run $run/$Runs ==="
-
-    Push-Location $nestDir; docker compose up -d --wait; Pop-Location
-    Push-Location $aspDir; docker compose up -d; Pop-Location
-
-    try {
-      Wait-Health "http://localhost:3000/health"
-      Wait-Health "http://localhost:8081/health"
-
-      if ($run % 2 -eq 1) {
-        Run-Target "nestjs" "http://localhost:3000" $nestDir "api"
-        Run-Target "aspnet-core" "http://localhost:8081" $aspDir "api"
-      } else {
-        Run-Target "aspnet-core" "http://localhost:8081" $aspDir "api"
-        Run-Target "nestjs" "http://localhost:3000" $nestDir "api"
-      }
-    } finally {
-      Push-Location $nestDir; docker compose down -v; Pop-Location
-      Push-Location $aspDir; docker compose down -v; Pop-Location
-    }
+for ($run = 1; $run -le $Runs; $run++) {
+  Write-Host "=== Run $run/$Runs ==="
+  if ($run % 2 -eq 1) {
+    Run-Target "nestjs" "http://localhost:3000" "http://localhost:3000/health" $nestDir $nestBuildMs
+    Run-Target "aspnet-core" "http://localhost:8081" "http://localhost:8081/health" $aspDir $aspBuildMs
+  } else {
+    Run-Target "aspnet-core" "http://localhost:8081" "http://localhost:8081/health" $aspDir $aspBuildMs
+    Run-Target "nestjs" "http://localhost:3000" "http://localhost:3000/health" $nestDir $nestBuildMs
   }
-
-  $buildRecord = [ordered]@{
-    type = "build"
-    nestjs_build_ms = $nestBuildMs
-    aspnet_core_build_ms = $aspBuildMs
-  }
-  $buildRecord | ConvertTo-Json -Compress | Add-Content -Encoding UTF8 $results
-} finally {
-  Push-Location $nestDir; docker compose down -v 2>$null; Pop-Location
-  Push-Location $aspDir; docker compose down -v 2>$null; Pop-Location
 }
