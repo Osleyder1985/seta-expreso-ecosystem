@@ -383,4 +383,7 @@ Esta arquitectura puede pasar a PoC cuando:
 - GPS tracking: `docs/architecture/gps-tracking-poc-v0.1.0.md`
 - Functional specification: `docs/domain/paqueteria-functional-specification-v0.1.0.md`
 
-**Estado:** DRAFT / decisión técnica pendiente de PoC.
+**Estado:** Propuesto
+
+
+**Fase/nota:** Las etiquetas históricas de fase o baseline no constituyen estados formales; el campo `Estado` se rige exclusivamente por la taxonomía de gobernanza.
