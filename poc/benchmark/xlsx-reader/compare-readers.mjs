@@ -34,7 +34,7 @@ async function exceljsRead(buffer) {
     state: s.state,
     rowCount: s.rowCount,
     columnCount: s.columnCount,
-    merged: [...s.mergedCells],
+    merged: Array.isArray(s.model?.merges) ? [...s.model.merges] : Object.keys(s._merges ?? {}),
     rows: s.actualRows.map(r => r.values.slice(1).map(v =>
       typeof v === 'object' && v?.formula
         ? v.result
