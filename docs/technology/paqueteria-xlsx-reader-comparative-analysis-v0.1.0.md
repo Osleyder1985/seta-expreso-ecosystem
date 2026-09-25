@@ -86,12 +86,20 @@ Current evidence establishes:
 - ExcelJS Hardened removes the specific parser hardening concern but remains non-upstream and still inherits the audited uuid finding.
 - SheetJS satisfies the functional contract but has a distinct supply-chain model because the official Node tarball is distributed from the SheetJS CDN rather than the stale public npm registry.
 
-## 8. Remaining decision gates
+## 8. Current technical direction
 
-1. Execute the privacy-controlled real-manifest probe for all current candidates.
-2. Review the exact lockfile and audit artifacts.
-3. Decide whether parser isolation/resource limits are acceptable.
-4. Evaluate provenance/cell-address requirements in the actual `WorkbookReaderPort`.
-5. Record the final choice and compensating controls in an ADR.
+The current evidence supports **SheetJS CE 0.20.3 as the proposed primary reader**, behind `WorkbookReaderPort`. This is a requirements-and-risk decision, not a benchmark score.
 
-Until those gates are closed, this document is **evidence baseline, not final technology adoption**.
+ExcelJS 4.4.0 remains a reference/compatibility candidate but is not proposed as the primary parser for untrusted uploads because of the published uncontrolled-resource-consumption advisory affecting versions <=4.4.0. ExcelJS Hardened 5.0.0 is not a current reproducible candidate in this branch. read-excel-file remains unsuitable for the current structural fidelity contract because F10 remains a reproducible failure.
+
+The proposed decision is recorded in **ADR-XLSX-001** with compensating controls and explicit certification gates.
+
+## 9. Remaining certification gates
+
+1. Execute the privacy-controlled real-manifest probe for the reproducible candidates.
+2. Confirm lockfile and exact SheetJS artifact provenance/hash in CI.
+3. Implement and test parser resource limits and isolation.
+4. Enable GitHub Dependency Graph and rerun SEC-02 Dependency Review.
+5. Change ADR-XLSX-001 from Proposed to Accepted only after the gates above are satisfied.
+
+Until then, this document and ADR represent the **current technical direction**, not final production certification.
