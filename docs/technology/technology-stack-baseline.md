@@ -1,7 +1,7 @@
 # Technology Stack Baseline v0.1.0
 
 **Ecosistema:** SETA EXPRESO SURL  
-**Estado:** Baseline inicial  
+**Estado:** En validación
 **Versión:** 0.1.0  
 **Issue:** #3  
 **Arquitectura de referencia:** Architecture Baseline v0.1.0 / ADR-0001  
@@ -310,3 +310,5 @@ Debe existir evidencia suficiente y una decisión documentada.
 Cuando la decisión tenga impacto arquitectónico significativo, se deberá crear un ADR.
 
 **Fin del Technology Stack Baseline v0.1.0.**
+
+**Fase/nota:** Las etiquetas históricas de fase o baseline no constituyen estados formales; el campo `Estado` se rige exclusivamente por la taxonomía de gobernanza.
