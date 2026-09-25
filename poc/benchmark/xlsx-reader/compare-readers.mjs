@@ -68,6 +68,7 @@ for (const fixture of fixtureFiles) {
     const samples = [];
     const snapshotHashes = [];
     const errors = [];
+    let timedOut = false;
     let lastResult = null;
 
     for (let i = 0; i < 6; i++) {
@@ -75,6 +76,7 @@ for (const fixture of fixtureFiles) {
       const isolated = await runIsolated(reader, fileURLToPath(new URL(file, dir)));
       const durationMs = isolated.elapsedMs;
       if (isolated.timeout) {
+        timedOut = true;
         errors.push({ iteration: i + 1, name: isolated.error.name, message: isolated.error.message });
         snapshotHashes.push(null);
       } else if (!isolated.ok) {
@@ -94,7 +96,7 @@ for (const fixture of fixtureFiles) {
     const preflightRejected = errors.length > 0 && errors.every(e => e.preflightRejected === true);
     const acceptance = malformedFixture
       ? {
-          status: preflightRejected || (errors.length > 0 && /^ST0[45]-/.test(file)) ? 'EXPECTED_REJECTION' : 'UNEXPECTED_ACCEPTANCE',
+          status: timedOut ? 'ERROR' : (preflightRejected || (errors.length > 0 && /^ST0[45]-/.test(file)) ? 'EXPECTED_REJECTION' : 'UNEXPECTED_ACCEPTANCE'),
           message: preflightRejected ? 'Input rejected by the strict XLSX container preflight before parser invocation.' : errors.length ? 'Malformed XLSX container was rejected by the reader.' : 'Malformed/non-XLSX fixture was accepted by the reader.',
           details: {
             strictContainerSignatureValid: isZipContainer,
