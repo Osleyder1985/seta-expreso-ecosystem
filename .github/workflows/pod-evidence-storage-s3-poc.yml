@@ -23,7 +23,7 @@ jobs:
           S3METADATAPATH: /usr/src/app/localMetadata
           REMOTE_MANAGEMENT_DISABLE: 1
         options: >-
-          --health-cmd "node -e \"const c=require(\\\"net\\\").connect(8000,\\\"127.0.0.1\\\",()=>process.exit(0)); c.on(\\\"error\\\",()=>process.exit(1)); c.setTimeout(2000,()=>process.exit(1));\""
+          --health-cmd "node -e \"require('net').connect(8000,'127.0.0.1').on('connect',()=>process.exit(0)).on('error',()=>process.exit(1))\""
           --health-interval 5s
           --health-timeout 3s
           --health-retries 20
