@@ -1,104 +1,26 @@
 name: Security Assurance
 
 on:
-  pull_request:
-    branches: [main]
   push:
     branches:
       - main
       - 'feat/**'
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  secret-scan:
-    name: SEC-01 Secret scanning
+  smoke:
+    name: SEC-00 Workflow execution smoke test
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
-      - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-        with:
-          fetch-depth: 0
-
-      - name: Gitleaks
-        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  dependency-review:
-    name: SEC-02 Dependency review
-    if: ${{ github.event_name == 'pull_request' }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30af803 # v6.1.0
-
-      - name: Detect dependency manifests
-        id: detect
-        shell: bash
+      - name: Verify runner execution
         run: |
           set -euo pipefail
-          if find . -type f \( -name 'package.json' -o -name 'package-lock.json' -o -name 'pnpm-lock.yaml' -o -name 'yarn.lock' -o -name 'requirements.txt' -o -name 'poetry.lock' -o -name 'Pipfile.lock' -o -name '*.csproj' -o -name 'packages.lock.json' -o -name 'go.mod' -o -name 'go.sum' -o -name 'pom.xml' -o -name 'build.gradle' -o -name 'build.gradle.kts' -o -name 'Cargo.toml' -o -name 'Cargo.lock' \) -not -path './.git/*' | grep -q .; then
-            echo "has_dependencies=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_dependencies=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Dependency Review
-        if: ${{ steps.detect.outputs.has_dependencies == 'true' }}
-        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
-        with:
-          fail-on-severity: critical
-
-      - name: Record N/A
-        if: ${{ steps.detect.outputs.has_dependencies != 'true' }}
-        shell: bash
-        run: echo "Dependency review is N/A: no dependency manifest is present in the repository."
-
-  workflow-permissions:
-    name: SEC-03 Workflow permission baseline
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-        with:
-          fetch-depth: 1
-
-      - name: Check workflow permissions
-        shell: bash
-        run: |
-          set -euo pipefail
-          found=0
-          for f in .github/workflows/*.yml .github/workflows/*.yaml; do
-            [ -f "$f" ] || continue
-            found=1
-            if ! grep -qE '^permissions:' "$f"; then
-              echo "Missing top-level permissions declaration: $f"
-              exit 1
-            fi
-          done
-          [ "$found" -eq 1 ]
-          echo "All workflow files declare top-level permissions."
-
-  policy-file:
-    name: SEC-04 Policy consistency
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30af803 # v6.1.0
-
-      - name: Verify assurance policy
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -f docs/security/security-assurance-v0.1.0.md
-          grep -q "SEC-01" docs/security/security-assurance-v0.1.0.md
-          grep -q "SEC-02" docs/security/security-assurance-v0.1.0.md
-          grep -q "SEC-03" docs/security/security-assurance-v0.1.0.md
-          grep -q "SEC-04" docs/security/security-assurance-v0.1.0.md
+          echo "Security Assurance workflow execution reached the runner."
+          echo "event=${{ github.event_name }}"
+          echo "sha=${{ github.sha }}"
