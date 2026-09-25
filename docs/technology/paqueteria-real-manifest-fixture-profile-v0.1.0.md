@@ -39,3 +39,19 @@ No real recipient names, identity numbers, telephone numbers or addresses are co
 ## Required next experiment
 
 The exact workbook should be processed locally by each candidate adapter after the dependency lock is established. The resulting reports must be anonymized before repository publication.
+
+
+## Raw-byte inspection completed locally
+
+The Library workbook was materialized and inspected without committing it to Git. Verified properties:
+
+- worksheet: `Manifiesto`;
+- dimensions: 134 rows × 12 columns;
+- operational header: row 6;
+- first operational record: row 7;
+- merged-cell ranges: 0;
+- hidden worksheets: none;
+- formulas: 0;
+- cell value types across the inspected sheet: 915 strings, 521 integers, 118 floating-point values and 54 blank cells.
+
+The workbook contains personal/operational data and therefore remains outside repository history. These measurements are structural evidence only.
