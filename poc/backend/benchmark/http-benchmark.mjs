@@ -1,15 +1,41 @@
 import { performance } from 'node:perf_hooks';
 
-const [requestsArg, concurrencyArg, warmupArg, name, baseUrl] = process.argv.slice(2);
+const [requestsArg, concurrencyArg, warmupArg, name, baseUrl, operation = 'list', idsArg = ''] = process.argv.slice(2);
 const requests = Number(requestsArg);
 const concurrency = Number(concurrencyArg);
 const warmupRequests = Number(warmupArg);
+const ids = idsArg ? idsArg.split(',').map(Number).filter(Number.isInteger) : [];
 
 if (!Number.isInteger(requests) || requests < 1 ||
     !Number.isInteger(concurrency) || concurrency < 1 ||
     !Number.isInteger(warmupRequests) || warmupRequests < 0 ||
-    !name || !baseUrl) {
-  throw new Error('Usage: node http-benchmark.mjs <requests> <concurrency> <warmupRequests> <name> <baseUrl>');
+    !name || !baseUrl ||
+    !['create', 'list', 'get', 'update', 'delete'].includes(operation)) {
+  throw new Error('Usage: node http-benchmark.mjs <requests> <concurrency> <warmupRequests> <name> <baseUrl> [operation] [idsCsv]');
+}
+
+if (['get', 'update', 'delete'].includes(operation) && ids.length < requests) {
+  throw new Error(`Operation ${operation} requires at least ${requests} seeded ids; received ${ids.length}.`);
+}
+
+const payload = JSON.stringify({
+  house: 'BENCH-HOUSE',
+  weightKg: 1.25,
+  recipientAddress: 'Benchmark address'
+});
+
+function target(index) {
+  if (operation === 'create') return { method: 'POST', url: baseUrl + '/packages', body: payload };
+  if (operation === 'list') return { method: 'GET', url: baseUrl + '/packages' };
+  const idIndex = operation === 'delete' ? warmupRequests + index : index;
+  const id = ids[idIndex % ids.length];
+  if (operation === 'get') return { method: 'GET', url: baseUrl + `/packages/${id}` };
+  if (operation === 'update') return {
+    method: 'PATCH',
+    url: baseUrl + `/packages/${id}`,
+    body: JSON.stringify({ weightKg: 2.5 })
+  };
+  return { method: 'DELETE', url: baseUrl + `/packages/${id}` };
 }
 
 async function load(count) {
@@ -23,7 +49,12 @@ async function load(count) {
       if (index >= count) return;
       const started = performance.now();
       try {
-        const response = await fetch(baseUrl + '/packages');
+        const request = target(index);
+        const response = await fetch(request.url, {
+          method: request.method,
+          headers: request.body ? { 'content-type': 'application/json' } : undefined,
+          body: request.body
+        });
         if (!response.ok) errors++;
         else await response.text();
       } catch {
@@ -36,11 +67,7 @@ async function load(count) {
 
   const started = performance.now();
   await Promise.all(Array.from({length: Math.min(concurrency, count)}, worker));
-  return {
-    elapsed_ms: performance.now() - started,
-    errors,
-    latencies
-  };
+  return { elapsed_ms: performance.now() - started, errors, latencies };
 }
 
 if (warmupRequests > 0) await load(warmupRequests);
@@ -52,6 +79,7 @@ const elapsedSeconds = result.elapsed_ms / 1000;
 
 console.log(JSON.stringify({
   implementation: name,
+  operation,
   requests,
   concurrency,
   warmup_requests: warmupRequests,

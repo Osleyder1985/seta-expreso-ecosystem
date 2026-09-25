@@ -3,7 +3,9 @@ param(
   [int]$Concurrency = 20,
   [int]$Runs = 5,
   [int]$WarmupRequests = 20,
-  [string]$DatabaseUrl = $env:DATABASE_URL
+  [string]$DatabaseUrl = $env:DATABASE_URL,
+  [ValidateSet("create","list","get","update","delete")]
+  [string]$Operation = "list"
 )
 
 $ErrorActionPreference = "Stop"
@@ -19,8 +21,8 @@ if (-not $DatabaseUrl) {
 $benchmarkDir = $PSScriptRoot
 $root = Split-Path -Parent $benchmarkDir
 $repoDir = Split-Path -Parent (Split-Path -Parent $root)
-$results = Join-Path $benchmarkDir "native-results.jsonl"
-$metadata = Join-Path $benchmarkDir "native-run-metadata.json"
+$results = Join-Path $benchmarkDir ("native-results-{0}.jsonl" -f $Operation)
+$metadata = Join-Path $benchmarkDir ("native-run-metadata-{0}.json" -f $Operation)
 if (Test-Path $results) { Remove-Item $results -Force }
 
 function Get-CommandVersion([string]$Command, [string[]]$Arguments) {
@@ -106,8 +108,9 @@ function Reset-Database {
   if ($LASTEXITCODE -ne 0) { throw "Database reset failed with exit code $LASTEXITCODE." }
 }
 
-function Invoke-HttpBenchmark([string]$Name, [string]$BaseUrl) {
-  $output = node (Join-Path $benchmarkDir "http-benchmark.mjs") $Requests $Concurrency $WarmupRequests $Name $BaseUrl
+function Invoke-HttpBenchmark([string]$Name, [string]$BaseUrl, [string]$BenchmarkOperation, [string[]]$Ids) {
+  $idsArg = if ($Ids.Count -gt 0) { $Ids -join "," } else { "" }
+  $output = node (Join-Path $benchmarkDir "http-benchmark.mjs") $Requests $Concurrency $WarmupRequests $Name $BaseUrl $BenchmarkOperation $idsArg
   if ($LASTEXITCODE -ne 0) { throw "HTTP benchmark failed for $Name." }
   return $output | ConvertFrom-Json
 }
@@ -132,7 +135,8 @@ $metadataObject = [ordered]@{
   runs = $Runs
   warmup_requests = $WarmupRequests
   endpoint = "/packages"
-  command = ".\\run-benchmark-native.ps1 -Requests $Requests -Concurrency $Concurrency -Runs $Runs -WarmupRequests $WarmupRequests"
+  operation = $Operation
+  command = ".\\run-benchmark-native.ps1 -Operation $Operation -Requests $Requests -Concurrency $Concurrency -Runs $Runs -WarmupRequests $WarmupRequests"
   postgres_container = try { (docker inspect seta-expreso-benchmark-postgres --format "{{.Config.Image}}|{{.Image}}|{{.State.Status}}").Trim() } catch { "unavailable" }
   note = "Native Windows measurements. DATABASE_URL uses PostgreSQL URI syntax for the Node.js candidate; the runner derives an equivalent ADO.NET/Npgsql connection string for ASP.NET Core. CPU is process CPU seconds consumed during the measured HTTP load; memory values are process snapshots after the measured load. Do not compare these resource metrics directly with Docker container snapshots."
 }
@@ -206,6 +210,15 @@ for ($run = 1; $run -le $Runs; $run++) {
     Write-Host "--- $($target.name) ---"
     Reset-Database
 
+    $seedCount = if ($Operation -eq "create") { 0 } elseif ($Operation -eq "delete") { $Requests + $WarmupRequests } else { $Requests }
+    $seedIds = @()
+    if ($seedCount -gt 0) {
+      $seedJson = node (Join-Path $benchmarkDir "seed-packages.mjs") $seedCount $DatabaseUrl
+      if ($LASTEXITCODE -ne 0) { throw "Database seed failed with exit code $LASTEXITCODE." }
+      $seedIds = @($seedJson | ConvertFrom-Json | ForEach-Object { [string]$_ })
+      if ($seedIds.Count -lt $seedCount) { throw "Database seed returned fewer IDs than requested." }
+    }
+
     $stdoutBase = if ($target.name -eq "nestjs") { $nestStdOut } else { $aspStdOut }
     $stderrBase = if ($target.name -eq "nestjs") { $nestStdErr } else { $aspStdErr }
     $stdout = "$stdoutBase.$run.log"
@@ -227,7 +240,7 @@ for ($run = 1; $run -le $Runs; $run++) {
       $startupMs = Wait-Health $target.health_url $process $stdout $stderr
       $process.Refresh()
       $cpuBefore = $process.TotalProcessorTime.TotalSeconds
-      $benchmark = Invoke-HttpBenchmark $target.name $target.url
+      $benchmark = Invoke-HttpBenchmark $target.name $target.url $Operation $seedIds
       $process.Refresh()
       $cpuAfter = $process.TotalProcessorTime.TotalSeconds
       $result = [ordered]@{

@@ -38,7 +38,9 @@ cd poc/backend/benchmark
 .\run-benchmark-native.ps1 -Requests 1000 -Concurrency 20 -Runs 5 -WarmupRequests 20
 ```
 
-El runner nativo construye ambos PoC fuera de contenedores, inicia un solo candidato a la vez, espera `/health`, restablece la tabla `packages` antes de cada medición y guarda resultados en `native-results.jsonl`. El entorno queda registrado en `native-run-metadata.json`.
+El runner nativo construye ambos PoC fuera de contenedores, inicia un solo candidato a la vez, espera `/health`, restablece la tabla `packages` antes de cada medición y guarda resultados por operación en `native-results-<operation>.jsonl`. El entorno queda registrado en `native-run-metadata-<operation>.json`.
+
+El parámetro `-Operation` admite `create`, `list`, `get`, `update` y `delete`. Para `get`, `update` y `delete`, el runner siembra registros deterministas fuera de la ventana medida. Para `delete`, se reservan registros adicionales para el warm-up para evitar que el warm-up consuma los IDs de la medición. Cada operación debe ejecutarse como un perfil independiente; no se deben mezclar sus resultados.
 
 Las métricas de proceso nativas no deben compararse directamente con las métricas de snapshots de contenedor del perfil Docker.
 
