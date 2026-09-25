@@ -56,7 +56,8 @@ const results={};
 for(const [name,probe] of Object.entries(probes)){
   const start=process.hrtime.bigint();
   try {
-    results[name]={status:'OK',elapsedMs:Number(process.hrtime.bigint()-start)/1e6,probe:await probe()};
+    const value=await probe();
+    results[name]={status:'OK',elapsedMs:Number(process.hrtime.bigint()-start)/1e6,probe:value};
   } catch(e) {
     results[name]={status:'ERROR',error:{name:e.name,message:e.message}};
   }
