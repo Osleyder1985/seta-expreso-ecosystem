@@ -22,8 +22,14 @@ jobs:
         with:
           node-version: 24.21.0
 
-      - name: Install benchmark dependencies
-        run: npm install --ignore-scripts
+      - name: Generate dependency lockfile
+        run: npm install --package-lock-only --ignore-scripts
+
+      - name: Install benchmark dependencies reproducibly
+        run: npm ci --ignore-scripts
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --json > npm-audit.json || true
 
       - name: Generate F01-F20 fixtures
         run: npm run generate-fixtures
@@ -40,6 +46,14 @@ jobs:
       - name: Fail if F01-F20 contains ERROR
         run: |
           node -e "const r=require('./fixtures/comparison-report.json'); if(r.acceptanceSummary.ERROR) process.exit(1)"
+
+      - name: Publish supply-chain evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: xlsx-reader-supply-chain-evidence
+          path: |
+            poc/benchmark/xlsx-reader/package-lock.json
+            poc/benchmark/xlsx-reader/npm-audit.json
 
       - name: Publish comparison report
         uses: actions/upload-artifact@v4
