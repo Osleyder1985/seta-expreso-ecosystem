@@ -1,7 +1,7 @@
 # Contratos transversales de sincronización, GPS y evidencias
 
 **Versión:** 0.1.0  
-**Estado:** Propuesto como regla transversal de arquitectura  
+**Estado:** Propuesto  
 **Fecha:** 2026-09-25  
 **Trazabilidad:** Issues #87, #88; PRs #53, #55, #57, #59, #60, #61, #63
 
