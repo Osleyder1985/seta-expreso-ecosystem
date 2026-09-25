@@ -1,4 +1,4 @@
-# Matriz objetiva de evaluación tecnológica v0.1.0
+# Matriz objetiva de evaluación tecnológica v0.1.1
 
 **Ecosistema:** SETA EXPRESO SURL  
 **Issue:** #5  
@@ -49,6 +49,14 @@ Puntuación ponderada = Σ (puntuación del criterio / 5 × peso). El resultado 
 - E5 — Inferencia técnica; debe marcarse explícitamente.
 
 Las puntuaciones críticas no deben basarse únicamente en E5.
+
+### 3.4 Regla de publicación de puntuaciones
+
+Una celda de puntuación solo puede contener un valor numérico de 0 a 5 cuando exista evidencia trazable asociada. El registro mínimo es: **puntuación, criterio, candidato, fecha de evaluación, fuente/evidencia, nivel de evidencia, versión evaluada y confianza**.
+
+Si la evidencia es insuficiente, el valor obligatorio es **No evaluado**, no una estimación. Una puntuación provisional sin evidencia no puede utilizarse para seleccionar una tecnología ni para cerrar una decisión crítica.
+
+La confianza deberá expresarse como **Alta / Media / Baja**, con una justificación breve. La fecha corresponde a la evaluación realizada, no a la fecha de publicación de la fuente.
 
 ## 4. Criterios eliminatorios
 
@@ -307,18 +315,20 @@ Estos umbrales son criterios de calidad, no una selección automática. Una alte
 
 ## 20. Registro de evaluación
 
-| Criterio | Peso | Candidato A | Evidencia A | Candidato B | Evidencia B |
-|---|---:|---:|---|---:|---|
-| Adecuación | 15% | 0–5 | E1/E2/... | 0–5 | E1/E2/... |
-| Seguridad | 10% | 0–5 | E1/E2/... | 0–5 | E1/E2/... |
-| Rendimiento | 10% | 0–5 | E2/E3 | 0–5 | E2/E3 |
+| Criterio | Peso | Candidato A | Fecha A | Evidencia A | Nivel A | Confianza A | Candidato B | Fecha B | Evidencia B | Nivel B | Confianza B |
+|---|---:|---|---|---|---|---|---|---|---|---|---|
+| Adecuación | 15% | No evaluado | YYYY-MM-DD | E1/E2/... | A/B/C/D/E | Alta/Media/Baja | No evaluado | YYYY-MM-DD | E1/E2/... | A/B/C/D/E | Alta/Media/Baja |
+| Seguridad | 10% | No evaluado | YYYY-MM-DD | E1/E2/... | A/B/C/D/E | Alta/Media/Baja | No evaluado | YYYY-MM-DD | E1/E2/... | A/B/C/D/E | Alta/Media/Baja |
+| Rendimiento | 10% | No evaluado | YYYY-MM-DD | E2/E3 | A/B/C/D/E | Alta/Media/Baja | No evaluado | YYYY-MM-DD | E2/E3 | A/B/C/D/E | Alta/Media/Baja |
 | ... | ... | ... | ... | ... | ... |
 
 ## 21. Trazabilidad
 
 Cada evaluación deberá relacionarse con:
 
-Issue → PoC/Benchmark → resultados → decisión → ADR → Stack Baseline → PR
+Issue → PoC/Benchmark → resultados → evaluación → decisión → ADR → Stack Baseline → PR
+
+Una decisión crítica no puede considerarse respaldada si alguno de sus valores numéricos carece de evidencia identificable. Los valores **No evaluado** son estados explícitos de ausencia de evidencia y deben permanecer así hasta que exista una evaluación reproducible.
 
 ## 22. Regla específica para SETA EXPRESO
 
@@ -332,4 +342,4 @@ Esta matriz establece el método oficial de evaluación, pero no sustituye las d
 
 Las decisiones concretas deberán ejecutarse como trabajos independientes y quedar documentadas mediante Issue/ADR/PR según su impacto.
 
-**Fin de la Matriz objetiva de evaluación tecnológica v0.1.0.**
+**Fin de la Matriz objetiva de evaluación tecnológica v0.1.1.**
