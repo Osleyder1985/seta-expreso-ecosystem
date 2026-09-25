@@ -218,10 +218,20 @@ for ($run = 1; $run -le $Runs; $run++) {
     $seedCount = if ($Operation -eq "create") { 0 } elseif ($Operation -eq "delete") { $Requests + $WarmupRequests } else { $Requests }
     $seedIds = @()
     if ($seedCount -gt 0) {
-      $seedJson = node (Join-Path $benchmarkDir "seed-packages.mjs") $seedCount $DatabaseUrl
-      if ($LASTEXITCODE -ne 0) { throw "Database seed failed with exit code $LASTEXITCODE." }
-      $seedIds = @($seedJson | ConvertFrom-Json | ForEach-Object { [string]$_ })
-      if ($seedIds.Count -lt $seedCount) { throw "Database seed returned fewer IDs than requested." }
+      $seedOutput = (& node (Join-Path $benchmarkDir "seed-packages.mjs") $seedCount $DatabaseUrl 2>&1) -join [Environment]::NewLine
+      if ($LASTEXITCODE -ne 0) {
+        throw "Database seed failed with exit code $LASTEXITCODE. Output: $seedOutput"
+      }
+      try {
+        $seedPayload = $seedOutput | ConvertFrom-Json
+      } catch {
+        throw "Database seed returned invalid JSON. Output: $seedOutput"
+      }
+      if ($null -eq $seedPayload.ids -or $seedPayload.count -ne $seedCount) {
+        $actualCount = if ($null -eq $seedPayload.ids) { 0 } else { @($seedPayload.ids).Count }
+        throw "Database seed returned an unexpected ID count. Expected: $seedCount; declared: $($seedPayload.count); actual: $actualCount."
+      }
+      $seedIds = @($seedPayload.ids | ForEach-Object { [string]$_ })
     }
 
     $stdoutBase = if ($target.name -eq "nestjs") { $nestStdOut } else { $aspStdOut }
