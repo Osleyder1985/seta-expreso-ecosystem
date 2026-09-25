@@ -32,9 +32,15 @@ function Start-NativeProcess([string]$FilePath, [string[]]$ArgumentList, [string
   return Start-Process -FilePath $FilePath -ArgumentList $ArgumentList -WorkingDirectory $WorkingDirectory -RedirectStandardOutput $StdOut -RedirectStandardError $StdErr -PassThru -WindowStyle Hidden
 }
 
-function Wait-Health([string]$Url) {
+function Wait-Health([string]$Url, [System.Diagnostics.Process]$Process, [string]$StdOut, [string]$StdErr) {
   $started = [System.Diagnostics.Stopwatch]::StartNew()
   for ($i = 0; $i -lt 60; $i++) {
+    $Process.Refresh()
+    if ($Process.HasExited) {
+      $stdoutText = if (Test-Path $StdOut) { Get-Content $StdOut -Raw -ErrorAction SilentlyContinue } else { "" }
+      $stderrText = if (Test-Path $StdErr) { Get-Content $StdErr -Raw -ErrorAction SilentlyContinue } else { "" }
+      throw ("Native process exited before readiness. URL: {0}; ExitCode: {1}; STDOUT: {2}; STDERR: {3}" -f $Url, $Process.ExitCode, $stdoutText.Trim(), $stderrText.Trim())
+    }
     try {
       $response = Invoke-WebRequest -Uri $Url -UseBasicParsing -TimeoutSec 2
       if ($response.StatusCode -eq 200) {
@@ -44,7 +50,10 @@ function Wait-Health([string]$Url) {
     } catch {}
     Start-Sleep -Milliseconds 500
   }
-  throw "Health endpoint did not become ready: $Url"
+  $Process.Refresh()
+  $stdoutText = if (Test-Path $StdOut) { Get-Content $StdOut -Raw -ErrorAction SilentlyContinue } else { "" }
+  $stderrText = if (Test-Path $StdErr) { Get-Content $StdErr -Raw -ErrorAction SilentlyContinue } else { "" }
+  throw ("Health endpoint did not become ready: {0}; process_exited={1}; exit_code={2}; STDOUT: {3}; STDERR: {4}" -f $Url, $Process.HasExited, ($(if ($Process.HasExited) { $Process.ExitCode } else { "running" })), $stdoutText.Trim(), $stderrText.Trim())
 }
 
 function Stop-NativeProcess([System.Diagnostics.Process]$Process) {
@@ -113,8 +122,13 @@ try { $nestBuild = Measure-Command { npm run build | Out-Host } } finally { Pop-
 if ($LASTEXITCODE -ne 0) { throw "NestJS build failed." }
 
 Push-Location $aspDir
-try { $aspBuild = Measure-Command { dotnet build --configuration Release | Out-Host } } finally { Pop-Location }
-if ($LASTEXITCODE -ne 0) { throw "ASP.NET Core build failed." }
+try { $aspBuild = Measure-Command { dotnet build (Join-Path $aspDir "SetaExpreso.Poc.csproj") --configuration Release | Out-Host } } finally { Pop-Location }
+if ($LASTEXITCODE -ne 0) { throw "ASP.NET Core project build failed." }
+
+$aspDll = Join-Path $aspDir "bin/Release/net10.0/SetaExpreso.Poc.dll"
+if (-not (Test-Path $aspDll)) {
+  throw "ASP.NET Core build completed without producing expected artifact: $aspDll"
+}
 
 $nestBuildMs = [math]::Round($nestBuild.TotalMilliseconds, 2)
 $aspBuildMs = [math]::Round($aspBuild.TotalMilliseconds, 2)
@@ -132,7 +146,7 @@ $targets = @(
   [ordered]@{
     name = "aspnet-core"
     command = "dotnet"
-    arguments = @("exec", (Join-Path $aspDir "bin/Release/net10.0/SetaExpreso.Poc.dll"), "--urls", "http://127.0.0.1:8081")
+    arguments = @("exec", $aspDll, "--urls", "http://127.0.0.1:8081")
     working_directory = $aspDir
     url = "http://127.0.0.1:8081"
     health_url = "http://127.0.0.1:8081/health"
@@ -162,7 +176,7 @@ for ($run = 1; $run -le $Runs; $run++) {
     $process = $null
     try {
       $process = Start-NativeProcess $target.command $target.arguments $target.working_directory $stdout $stderr
-      $startupMs = Wait-Health $target.health_url
+      $startupMs = Wait-Health $target.health_url $process $stdout $stderr
       $process.Refresh()
       $cpuBefore = $process.TotalProcessorTime.TotalSeconds
       $benchmark = Invoke-HttpBenchmark $target.name $target.url
