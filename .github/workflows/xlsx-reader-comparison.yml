@@ -43,9 +43,9 @@ jobs:
       - name: Execute F01-F20 acceptance contract
         run: node --expose-gc compare-readers.mjs
 
-      - name: Fail if F01-F20 contains ERROR
+      - name: Enforce acceptance and malformed-input gates
         run: |
-          node -e "const r=require('./fixtures/comparison-report.json'); if(r.acceptanceSummary.ERROR) process.exit(1)"
+          node -e "const r=require('./comparison-report.json'); if((r.acceptanceSummary.ERROR||0)>0 || (r.acceptanceSummary.FAIL||0)>0 || (r.acceptanceSummary.UNEXPECTED_ACCEPTANCE||0)>0) process.exit(1)"
 
       - name: Publish supply-chain evidence
         uses: actions/upload-artifact@v4
@@ -59,4 +59,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: xlsx-reader-comparison-report
-          path: poc/benchmark/xlsx-reader/fixtures/comparison-report.json
+          path: comparison-report.json
