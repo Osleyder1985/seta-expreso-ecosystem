@@ -580,3 +580,27 @@ Ese artefacto deberá transformar los patrones adoptados en:
 - roadmap.
 
 No debe comenzar directamente por tablas SQL.
+
+
+## 16. Restricción de recursos para Route Planning
+
+El benchmark se adapta al AS-IS de SETA con una regla explícita de **asignación temporal no solapada**.
+
+### Vehículo
+- Un vehículo no puede ejecutar dos rutas simultáneas.
+- Puede ejecutar una segunda ruta en el mismo día únicamente después de completar la primera y quedar disponible.
+- La segunda asignación debe respetar ventanas, descanso, distancia, capacidad y tiempo operativo.
+- La regla es temporal, no simplemente “una ruta por día”.
+
+### Tripulación
+- El chofer y el segundo miembro de tripulación pueden estar asignados juntos al mismo vehículo y a la misma ruta.
+- Cada integrante queda ocupado durante el intervalo de su asignación.
+- Ningún integrante puede estar asignado a dos rutas con intervalos superpuestos.
+- Una segunda ruta para la misma tripulación es válida después de completar la primera y confirmar disponibilidad.
+
+### Invariante
+**Vehicle + overlapping time interval → máximo 1 Route Assignment**
+
+**Crew Member + overlapping time interval → máximo 1 Route Assignment**
+
+Por tanto, el planificador debe tratar vehículo y personas como recursos temporales con disponibilidad, no como simples atributos de la ruta.
