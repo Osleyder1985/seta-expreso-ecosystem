@@ -1,5 +1,6 @@
 name: Dependency Review
 
+# SEC-02: retained on the stacked feature branch; execution is sourced from the PR base workflow.
 on:
   pull_request:
     branches:
