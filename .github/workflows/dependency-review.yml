@@ -2,7 +2,9 @@ name: Dependency Review
 
 on:
   pull_request:
-    branches: [main]
+    branches:
+      - main
+      - feat/paqueteria-xlsx-workbook-reader
   workflow_dispatch:
 
 permissions:
