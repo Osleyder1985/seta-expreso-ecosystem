@@ -1,5 +1,8 @@
 name: Backend PoCs
 
+permissions:
+  contents: read
+
 on:
   pull_request:
     paths:
@@ -25,8 +28,8 @@ jobs:
       run:
         working-directory: poc/backend/nestjs
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '24.21.0'
           cache: npm
@@ -57,8 +60,8 @@ jobs:
       run:
         working-directory: poc/backend/aspnet-core
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: '10.0.x'
       - run: sudo apt-get update && sudo apt-get install -y postgresql-client
