@@ -27,7 +27,8 @@ const payload = JSON.stringify({
 function target(index) {
   if (operation === 'create') return { method: 'POST', url: baseUrl + '/packages', body: payload };
   if (operation === 'list') return { method: 'GET', url: baseUrl + '/packages' };
-  const id = ids[index % ids.length];
+  const idIndex = operation === 'delete' ? warmupRequests + index : index;
+  const id = ids[idIndex % ids.length];
   if (operation === 'get') return { method: 'GET', url: baseUrl + `/packages/${id}` };
   if (operation === 'update') return {
     method: 'PATCH',
