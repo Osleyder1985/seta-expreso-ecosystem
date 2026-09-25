@@ -155,3 +155,124 @@ Las entidades y agregados concretos se decidirán después de confrontar esta es
 - https://www.aerovaradero.com.cu/
 
 **Nota:** el texto legal debe verificarse contra la publicación oficial/PDF oficial antes de convertirlo en una regla jurídica ejecutable por software.
+
+
+## 8. Extracción de las resoluciones complementarias — evidencia consolidada
+
+### 8.1 Resolución 529/2025 — Control aduanero a las mercancías
+
+La Resolución 529 establece normas para el control aduanero a las mercancías. Su objeto comprende los niveles de control y las acciones que se ejecutan antes, durante y después del desaduanamiento. También establece obligaciones de conservación documental para sujetos sometidos al control aduanero, incluyendo documentación relacionada con movimientos, almacenamiento y destino de las mercancías, así como información en medios electrónicos.
+
+**Impacto SETA:**
+- el control aduanero debe modelarse como una dimensión externa al ciclo logístico interno;
+- la trazabilidad documental debe ser persistente;
+- movimientos, almacenamiento y destino pueden requerir evidencia histórica;
+- SETA no debe sustituir la decisión de Aduana.
+
+### 8.2 Resolución 531/2025 — Depósito temporal
+
+La Resolución 531 regula la solicitud, otorgamiento, cancelación o revocación de la autorización para habilitar y operar un depósito temporal, así como la permanencia de mercancías y las operaciones que se realizan en él. También prevé documentación digital o impresa según corresponda.
+
+En los datos asociados al depósito aparecen mercancías retenidas, mercancías declaradas en abandono, número de resolución de abandono, documento de entrada/salida, datos del vehículo y transportista, y observaciones.
+
+**Impacto SETA:**
+- `TemporaryDeposit` es un contexto de custodia, no una dirección de entrega;
+- una mercancía puede estar retenida o declarada en abandono sin que eso sea equivalente a `DeliveryFailed`;
+- la entrada/salida del depósito debe conservar documento, fecha/hora y actor;
+- el sistema necesita distinguir `StorageMovement` de `DeliveryMovement`.
+
+### 8.3 Resolución 532/2025 — Regímenes aduaneros
+
+La Resolución 532 establece obligaciones, requisitos y formalidades para la autorización del régimen aduanero aplicable a mercancías bajo control de Aduana. También establece que la documentación de solicitudes y autorizaciones puede presentarse o emitirse en formato digital o impreso, y prevé la transmisión digital cuando las condiciones lo permitan.
+
+**Impacto SETA:**
+- el régimen aduanero es un dato contextual que no debe confundirse con el estado operativo de distribución;
+- una mercancía puede cambiar de régimen sin que eso implique automáticamente una transición de entrega;
+- deben conservarse referencias a autorizaciones/documentos externos cuando afecten la trazabilidad de SETA;
+- el modelo debe soportar información documental digital y sus referencias.
+
+### 8.4 Resolución 533/2025 — Desaduanamiento
+
+La Resolución 533 regula la forma, condiciones, términos y plazos de las formalidades aduaneras para el desaduanamiento y el disfrute de los regímenes aduaneros. Su alcance incluye mercancías procedentes de o con destino al extranjero y considera las distintas vías de transporte.
+
+Los modelos de declaración contemplan información de solicitud y actuación de Aduana, incluyendo fecha/hora de registro, fecha/hora de liquidación, cuño y datos asociados al pago cuando correspondan.
+
+**Impacto SETA:**
+- `CustomsClearance` debe ser independiente de `Delivery`;
+- SETA puede almacenar referencias y resultados del proceso aduanero;
+- una entrega no debe marcarse como jurídicamente liberada por una decisión interna de SETA;
+- los timestamps externos deben conservarse como evidencia.
+
+### 8.5 Resolución 534/2025 — Abandono
+
+La Resolución 534 regula específicamente el abandono legal y voluntario de mercancías, bienes y valores a favor del Estado. El jefe de la aduana de control es la autoridad facultada para declarar el abandono legal o aceptar el abandono voluntario, con posibilidad de delegación para la aceptación del abandono voluntario.
+
+La propia norma establece causales y plazos para el abandono legal.
+
+**Impacto SETA:**
+- `Abandonment` debe ser un proceso/resultado aduanero explícito;
+- no puede generarse automáticamente por una entrega fallida;
+- debe conservarse el número de resolución y la autoridad cuando la información esté disponible;
+- la máquina de estados debe impedir la transición directa `DeliveryFailed → Abandoned` sin el evento/decisión aduanera correspondiente.
+
+## 9. Nueva matriz de impacto
+
+| Fuente | Dominio afectado | Regla de diseño |
+|---|---|---|
+| DL 108 | Control aduanero | Aduana es actor/autoridad externa al dominio operativo de SETA |
+| Decreto 134 | Recepción y operaciones | Deben conservarse discrepancias y documentos relevantes |
+| Res. 529 | Control | Control aduanero independiente del ciclo de entrega |
+| Res. 531 | Almacenamiento | Depósito temporal y movimientos de custodia independientes de Address/Delivery |
+| Res. 532 | Régimen | Régimen aduanero independiente del estado logístico |
+| Res. 533 | Desaduanamiento | CustomsClearance independiente de Delivery |
+| Res. 534 | Abandono | Abandonment requiere actuación aduanera explícita |
+
+## 10. Decisiones DDD actualizadas
+
+### D01 — Manifest / TransportDocument
+
+**Estado: 🟢 suficientemente respaldado para diseño conceptual.**
+
+Manifest y TransportDocument son conceptos distintos. Para vía aérea, AirWayBill/Guía Aérea representa el documento de transporte aéreo.
+
+### D02 — House / Bulto / Package
+
+**Estado: 🟡 abierto.**
+
+La normativa revisada permite afirmar que “bulto” y documento de transporte no son equivalentes, pero todavía no permite definir que `House`, `Bulto` y `Package` sean exactamente el mismo concepto en la operación concreta de SETA.
+
+### D03–D04 — Cardinalidad y unidad física
+
+**Estado: 🟡 abierto.**
+
+La relación documental → carga/bulto y la posible existencia de unidades físicas internas deben confrontarse con el manifiesto real utilizado por SETA.
+
+### D10 — Intento fallido / devolución / abandono
+
+**Estado: 🟢 suficientemente respaldado para separar conceptos.**
+
+Debe existir una separación explícita entre:
+- intento de entrega;
+- entrega fallida;
+- devolución/reingreso;
+- abandono aduanero.
+
+### D11 — Estados
+
+**Estado: 🟢 arquitectura conceptual definida; detalle pendiente.**
+
+Se requiere separar al menos:
+- estado documental;
+- estado de recepción;
+- estado de custodia/almacenamiento;
+- estado aduanero;
+- estado de distribución;
+- estado de entrega.
+
+No deben existir como un único `status` universal.
+
+## 11. Restricción de implementación
+
+**No crear todavía tablas `packages`, `manifests`, `deliveries` definitivas ni migraciones PostgreSQL derivadas únicamente de estos documentos.**
+
+La próxima decisión técnica debe producir primero un **modelo de dominio validado** y una **máquina de estados explícita**, antes del modelo relacional.
