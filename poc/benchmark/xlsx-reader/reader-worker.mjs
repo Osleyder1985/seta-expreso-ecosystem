@@ -67,6 +67,6 @@ try {
   const result=await readers[reader]();
   process.stdout.write(JSON.stringify({ok:true,result,rss:process.memoryUsage().rss,maxRssBytes:process.resourceUsage().maxRSS*1024}));
 } catch (e) {
-  process.stdout.write(JSON.stringify({ok:false,error:{name:e.name,message:e.message},rss:process.memoryUsage().rss}));
+  process.stdout.write(JSON.stringify({ok:false,error:{name:e.name,message:e.message},rss:process.memoryUsage().rss,maxRssBytes:process.resourceUsage().maxRSS*1024}));
   process.exitCode=1;
 }
