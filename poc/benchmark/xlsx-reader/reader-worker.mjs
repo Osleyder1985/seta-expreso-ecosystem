@@ -55,9 +55,18 @@ async function sheetjsRead() {
 }
 
 async function readExcelFile() {
-  const parsed=await readXlsxFile(buffer);
-  const rows=Array.isArray(parsed) ? parsed : [];
-  return {sheets:[{name:'first-sheet',rows}],formulas:[]};
+  // read-excel-file 9.x default export returns all sheets as:
+  // [{ sheet: 'Sheet1', data: [[...], [...]] }, ...].
+  // The previous adapter incorrectly treated that array as the row matrix,
+  // causing false failures for otherwise supported raw-cell invariants.
+  const parsed = await readXlsxFile(buffer);
+  const sheets = Array.isArray(parsed)
+    ? parsed.map(({ sheet, data }) => ({ name: sheet, rows: data }))
+    : [];
+  // read-excel-file exposes cached formula results but not the formula
+  // expression/number format through this raw-sheet API, so F10 remains
+  // an intentional capability limitation rather than an adapter artifact.
+  return {sheets, formulas:[]};
 }
 
 const readers={exceljs:exceljsRead,sheetjs:sheetjsRead,'read-excel-file':readExcelFile};
