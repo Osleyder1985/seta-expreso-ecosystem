@@ -1,7 +1,6 @@
 import { readFile, writeFile, readdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import ExcelJS from 'exceljs';
-import ExcelJSHardened from 'exceljs-hardened';
 import readXlsxFile from 'read-excel-file/node';
 import * as XLSX from 'xlsx';
 import { evaluateFixture } from './acceptance-contract.mjs';
@@ -100,12 +99,6 @@ async function readExcelFile(buffer) {
 
 const readers = {
   exceljs: exceljsRead,
-  'exceljs-hardened': async buffer => {
-    const wb = new ExcelJSHardened.Workbook(); await wb.xlsx.load(buffer);
-    const sheets = wb.worksheets.map(s => ({name:s.name,state:s.state,rowCount:s.rowCount,columnCount:s.columnCount,mergedCount:Object.keys(s._merges ?? {}).length,rows:Array.from({length:s.rowCount},(_,i)=>s.getRow(i+1).values.slice(1).map(v=>typeof v==='object'&&v?.formula? v.result : v))}));
-    const formulas=[]; for(const s of wb.worksheets){s.eachRow(r=>r.eachCell(cell=>{if(cell.value&&typeof cell.value==='object'&&cell.value.formula) formulas.push({sheet:s.name,address:cell.address,formula:cell.value.formula,result:cell.value.result,numFmt:cell.numFmt??null});}));}
-    return {sheets,formulas};
-  },
   sheetjs: sheetjsRead,
   'read-excel-file': readExcelFile
 };
