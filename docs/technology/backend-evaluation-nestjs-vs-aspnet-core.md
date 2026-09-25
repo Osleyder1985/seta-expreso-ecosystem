@@ -1,7 +1,7 @@
 # Evaluación objetiva del Backend: NestJS vs ASP.NET Core
 
 **Versión:** 0.3.0  
-**Estado:** Evaluación en curso  
+**Estado:** En validación
 **Issue:** #7  
 **Actualización de versión:** #20  
 **Fecha:** 2026-09-24
@@ -164,3 +164,6 @@ La siguiente etapa es validar CI, ejecutar las pruebas locales disponibles y pos
 El PoC .NET 8 queda únicamente como referencia histórica. El experimento vigente utiliza .NET 10 LTS.
 
 **Fin de la evaluación preliminar.**
+
+
+**Fase/nota:** Las etiquetas históricas de fase o baseline no constituyen estados formales; el campo `Estado` se rige exclusivamente por la taxonomía de gobernanza.
