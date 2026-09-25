@@ -34,4 +34,4 @@ try {
   await client.end();
 }
 
-process.stdout.write(JSON.stringify(ids));
+process.stdout.write(JSON.stringify({ count: ids.length, ids }));
