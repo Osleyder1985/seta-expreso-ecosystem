@@ -3,6 +3,7 @@
 **Versión:** 0.1.0  
 **Estado:** Vigente como política de assurance para el estado actual del repositorio  
 **Fecha:** 2026-09-25  
+**Verificación CI:** ejecutada mediante workflow `Security Assurance`  
 **Issue:** #82
 
 ## 1. Objetivo
