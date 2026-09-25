@@ -17,15 +17,34 @@ La ejecución de referencia debe hacerse en el equipo de desarrollo Windows 11 P
 
 GitHub Actions puede ejecutar la validación CI en Linux; esos resultados sirven para verificar corrección y reproducibilidad, pero no deben mezclarse con las mediciones de rendimiento del equipo Windows de referencia.
 
-## Requisitos
+## Perfiles de ejecución
 
-- Docker Desktop funcionando.
+### Perfil nativo Windows
+
+Es el perfil utilizado cuando no se dispone de conectividad suficiente para descargar imágenes Docker. Requiere:
+
+- Windows 11 Pro del equipo de referencia.
 - Node.js 24.21.0.
 - .NET 10 SDK.
-- PostgreSQL se ejecuta dentro de los Compose de cada PoC.
+- PostgreSQL/PostGIS accesible mediante DATABASE_URL.
 - Puertos libres 3000 y 8081.
+- Dependencias npm ya instaladas para el PoC NestJS.
 
-## Ejecución
+Desde PowerShell:
+
+```powershell
+$env:DATABASE_URL="postgresql://usuario:password@localhost:5433/base"
+cd poc/backend/benchmark
+.\run-benchmark-native.ps1 -Requests 1000 -Concurrency 20 -Runs 5 -WarmupRequests 20
+```
+
+El runner nativo construye ambos PoC fuera de contenedores, inicia un solo candidato a la vez, espera `/health`, restablece la tabla `packages` antes de cada medición y guarda resultados en `native-results.jsonl`. El entorno queda registrado en `native-run-metadata.json`.
+
+Las métricas de proceso nativas no deben compararse directamente con las métricas de snapshots de contenedor del perfil Docker.
+
+### Perfil Docker
+
+Requiere Docker Desktop, Node.js 24.21.0, .NET 10 SDK y PostgreSQL ejecutado por los Compose de cada PoC.
 
 Desde PowerShell:
 
