@@ -1,7 +1,7 @@
 # Extracción normativa del Servicio de Paquetería — v0.2.0
 
 **Issue:** #41
-**Estado:** evidencia inicial verificada; extracción pendiente de completar
+**Estado:** En validación
 
 ## 1. Fuentes y normas verificadas
 
@@ -79,3 +79,6 @@ Las actuaciones de Aduana, operadores aeroportuarios y otros actores externos de
 - https://www.aduana.gob.cu/
 - https://www.aduana.gob.cu/documentos
 - https://www.aerovaradero.com.cu/
+
+
+**Fase/nota:** Las etiquetas históricas de fase o baseline no constituyen estados formales; el campo `Estado` se rige exclusivamente por la taxonomía de gobernanza.
