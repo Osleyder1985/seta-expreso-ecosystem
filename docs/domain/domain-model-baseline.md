@@ -2,7 +2,7 @@
 
 **Ecosistema:** SETA EXPRESO SURL  
 **Versión:** 0.1.0  
-**Estado:** Baseline inicial para descubrimiento  
+**Estado:** En validación
 **Issue:** #14  
 **Arquitectura de referencia:** Architecture Baseline v0.1.0  
 **Idioma:** Español
@@ -428,3 +428,6 @@ No se deberá saltar directamente del modelo conceptual a las tablas o endpoints
 El documento será actualizado cuando se obtenga nueva evidencia del negocio.
 
 **Trazabilidad:** Issue #14 → modelo de dominio → requisitos → diseño → implementación → pruebas → Pull Request.
+
+
+**Fase/nota:** El estado anterior, si existía, se conserva como descripción histórica de fase; el campo `Estado` usa exclusivamente la taxonomía formal de gobernanza.

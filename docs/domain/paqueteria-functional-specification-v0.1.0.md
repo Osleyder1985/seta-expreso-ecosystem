@@ -1,6 +1,6 @@
 # Especificación funcional de Paquetería — v0.1.0
 
-**Estado:** baseline funcional para validación de dominio
+**Estado:** En validación
 **Ámbito:** Servicio de Paquetería de SETA EXPRESO SURL
 **Base:** modelo de dominio v0.2.0, casos de uso v0.1.0, decisiones críticas v0.2.0, máquina de estados y evidencia del manifiesto 649-31382945.
 
@@ -388,3 +388,6 @@ Modelo lógico PostgreSQL: todavía bloqueado.
 Motivo: permanecen decisiones operacionales sobre agrupación de entregas, POD, jerarquía documental exacta y catálogos operativos.
 
 Siguiente artefacto: matriz completa Requisito → Caso de Uso → Regla → Evento → Prueba → futura API, seguida por el diseño lógico PostgreSQL/PostGIS cuando los bloqueadores estén cerrados.
+
+
+**Fase/nota:** El estado anterior, si existía, se conserva como descripción histórica de fase; el campo `Estado` usa exclusivamente la taxonomía formal de gobernanza.

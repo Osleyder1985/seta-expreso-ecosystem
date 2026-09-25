@@ -1,3 +1,5 @@
+**Estado:** En validación
+
 # Análisis del manifiesto real de referencia — 649-31382945
 
 **Fuente:** 649-31382945.xlsx  
@@ -423,3 +425,6 @@ Debe consolidar:
 - trazabilidad con el manifiesto real.
 
 Después de ese documento podremos diseñar el modelo lógico PostgreSQL con mucha mayor seguridad.
+
+
+**Fase/nota:** Las etiquetas históricas de fase o baseline no constituyen estados formales; el campo `Estado` se rige exclusivamente por la taxonomía de gobernanza.

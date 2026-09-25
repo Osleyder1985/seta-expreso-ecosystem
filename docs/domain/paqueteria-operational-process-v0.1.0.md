@@ -2,7 +2,7 @@
 
 **Issue:** #38  
 **PR relacionado:** #42  
-**Estado:** modelo operativo de referencia; pendiente de validación con procedimiento real de SETA y evidencia operativa de AeroVaradero.
+**Estado:** En validación
 
 ## 1. Propósito
 
@@ -438,3 +438,6 @@ Después se debe confrontar el modelo con un manifiesto real anonimizado antes d
 - Evidencia normativa consolidada en paqueteria-normative-extraction-v0.3.0.md.
 
 **Nota:** este documento es una especificación de dominio de software. Las reglas jurídicas ejecutables deben permanecer vinculadas a la fuente normativa vigente y a su evidencia verificable.
+
+
+**Fase/nota:** Las etiquetas históricas de fase o baseline no constituyen estados formales; el campo `Estado` se rige exclusivamente por la taxonomía de gobernanza.

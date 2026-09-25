@@ -1,6 +1,6 @@
 # Protocolo de sincronización móvil offline-first — v0.1.0
 
-**Estado:** Propuesto  
+**Estado:** Propuesto
 **Issue:** #56  
 **Derivado de:** PR #55 — arquitectura mobile offline-first  
 **Alcance:** contrato conceptual/técnico para sincronización móvil ↔ backend
@@ -401,3 +401,6 @@ La PoC debe demostrar al menos:
 
 No implementar endpoints definitivos ni persistencia local definitiva hasta que este protocolo y sus pruebas de PoC hayan sido revisados.
 
+
+
+**Fase/nota:** Las etiquetas históricas de fase o baseline no constituyen estados formales; el campo `Estado` se rige exclusivamente por la taxonomía de gobernanza.

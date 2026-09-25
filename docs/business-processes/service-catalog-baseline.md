@@ -1,7 +1,7 @@
 # Catálogo Inicial de Servicios y Fronteras de Proceso
 
 **Versión:** 0.1.0  
-**Estado:** Baseline inicial para validación empresarial  
+**Estado:** En validación
 **Issue:** #18  
 **Fuentes:** Ecosistema.txt, Servicio 1.txt, Servicio 2.txt, Servicio 3.txt, Servicio 4.txt, Servicio 5.txt
 
@@ -391,3 +391,6 @@ Ecosistema.txt + Servicio 1.txt + Servicio 2.txt + Servicio 3.txt + Servicio 4.t
 → Pruebas
 
 **Estado:** Baseline inicial para validación empresarial.
+
+
+**Fase/nota:** Las etiquetas históricas de fase o baseline no constituyen estados formales; el campo `Estado` se rige exclusivamente por la taxonomía de gobernanza.

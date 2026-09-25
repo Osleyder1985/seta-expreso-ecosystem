@@ -1,7 +1,7 @@
 # Arquitectura Mobile Offline-First y Sincronización — v0.1.0
 
 **Issue:** #54  
-**Estado:** Propuesto  
+**Estado:** Propuesto
 **Ámbito:** Aplicaciones móviles operativas Android/iOS — Paquetería
 
 ## 1. Objetivo
@@ -263,3 +263,6 @@ La PoC debe demostrar:
 6. **GPS capture != immediate network transmission.**
 7. **Device != worker identity.**
 8. **Historical fact != mutable current state.**
+
+
+**Fase/nota:** Las etiquetas históricas de fase o baseline no constituyen estados formales; el campo `Estado` se rige exclusivamente por la taxonomía de gobernanza.

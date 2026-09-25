@@ -2,7 +2,7 @@
 
 **Código:** SEM-001  
 **Versión:** 0.1.0  
-**Estado:** Baseline inicial  
+**Estado:** En validación
 **Idioma:** Español  
 **Repositorio oficial:** `Osleyder1985/seta-expreso-ecosystem`
 
@@ -929,3 +929,6 @@ La Ingeniería de Software será un proceso continuo de aprendizaje y control de
 |---|---|---|
 | 0.1.0 | Baseline inicial | Creación del Plan Maestro de Ingeniería de Software |
 
+
+
+**Fase/nota:** Las etiquetas históricas de fase o baseline no constituyen estados formales; el campo `Estado` se rige exclusivamente por la taxonomía de gobernanza.

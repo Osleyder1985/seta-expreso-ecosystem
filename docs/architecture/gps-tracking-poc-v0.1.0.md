@@ -1,7 +1,7 @@
 # PoC de GPS y Tracking Vehicular — v0.1.0
 
 **Issue:** #60  
-**Estado:** Propuesto  
+**Estado:** Propuesto
 **Tipo:** PoC de arquitectura y comportamiento
 
 ## 1. Objetivo
@@ -205,3 +205,6 @@ Permanecen abiertas la frecuencia definitiva de captura/transmisión, política 
 Resultados → análisis comparativo → decisión tecnológica/política → ADR de GPS/Tracking → refinamiento OpenAPI → implementación.
 
 No se adopta una tecnología de tracking por preferencia; se adopta únicamente si la evidencia del PoC satisface los requisitos operativos del Ecosistema.
+
+
+**Fase/nota:** Las etiquetas históricas de fase o baseline no constituyen estados formales; el campo `Estado` se rige exclusivamente por la taxonomía de gobernanza.

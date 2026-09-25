@@ -1,7 +1,7 @@
 # Baseline Integral de Procesos Empresariales
 
 **Versión:** 0.1.0  
-**Estado:** Baseline inicial para descubrimiento y levantamiento de requisitos  
+**Estado:** En validación
 **Fuente primaria:** `Ecosistema.txt`  
 **Issue:** #16
 
@@ -571,3 +571,6 @@ Release
 ```
 
 **Estado:** Baseline inicial — sujeto a validación y evolución mediante Issues/PRs.
+
+
+**Fase/nota:** Las etiquetas históricas de fase o baseline no constituyen estados formales; el campo `Estado` se rige exclusivamente por la taxonomía de gobernanza.

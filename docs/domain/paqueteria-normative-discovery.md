@@ -1,7 +1,7 @@
 # Descubrimiento normativo y operativo del Servicio de Paquetería
 
 **Versión:** 0.1.0  
-**Estado:** Evidencia inicial para diseño de dominio  
+**Estado:** En validación
 **Issue:** #38  
 **Alcance:** Servicio de Paquetería del Ecosistema SETA EXPRESO SURL
 
@@ -231,3 +231,6 @@ Después:
 - https://www.gacetaoficial.gob.cu/es/busqueda-avanzada
 
 **Nota:** para decisiones jurídicas concretas debe conservarse siempre la referencia exacta de la norma y su texto oficial vigente.
+
+
+**Fase/nota:** El estado anterior, si existía, se conserva como descripción histórica de fase; el campo `Estado` usa exclusivamente la taxonomía formal de gobernanza.

@@ -1,7 +1,7 @@
 # Comparación experimental de almacenamiento de evidencias POD — v0.1.0
 
 ## Estado
-**Estado:** evidencia experimental consolidada.  
+**Estado:** Vigente
 **Issue:** #70  
 **Comparación:** PR #69  
 **Commit validado:** `9b3575d3ef10ebb0c12341d2d5ec35ff79d9059e`
@@ -120,3 +120,6 @@ Se mantiene:
 El dominio seguirá sin conocer filesystem, S3, CloudServer, MinIO u otro proveedor.
 
 La siguiente fase deberá cubrir benchmark repetido, concurrencia, recuperación conjunta, backup/restore, seguridad física, operación, coste y migración A → B preservando `evidenceId` y hashes.
+
+
+**Fase/nota:** El estado anterior, si existía, se conserva como descripción histórica de fase; el campo `Estado` usa exclusivamente la taxonomía formal de gobernanza.

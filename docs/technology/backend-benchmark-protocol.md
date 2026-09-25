@@ -3,7 +3,7 @@
 **Issue:** #9  
 **Actualización de versiones:** #20  
 **Relacionado:** #7  
-**Estado:** Preparación del experimento
+**Estado:** Propuesto
 
 ## Objetivo
 
@@ -124,3 +124,6 @@ El experimento debe permitir:
 5. proporcionar evidencia para el ADR del backend.
 
 **Importante:** este protocolo no contiene resultados inventados. Los resultados se incorporarán después de ejecutar el experimento.
+
+
+**Fase/nota:** Las etiquetas históricas de fase o baseline no constituyen estados formales; el campo `Estado` se rige exclusivamente por la taxonomía de gobernanza.
