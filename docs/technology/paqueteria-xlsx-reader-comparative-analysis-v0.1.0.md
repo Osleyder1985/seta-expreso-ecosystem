@@ -1,6 +1,6 @@
 # XLSX reader comparative analysis — evidence baseline v0.1.0
 
-**Evidence run:** GitHub Actions run #26, Node.js 24.21.0, Ubuntu 24.04 x64  
+**Evidence run:** GitHub Actions run #29, Node.js 24.21.0, Ubuntu 24.04 x64  
 **Candidates:** ExcelJS 4.4.0; ExcelJS Hardened 5.0.0; SheetJS CE 0.20.3; read-excel-file 9.3.10
 
 ## 1. Functional acceptance
@@ -12,19 +12,19 @@ F01–F20, 20 contracts per candidate:
 | ExcelJS 4.4.0 | 20 | 0 | 0 | 20/20 |
 | ExcelJS Hardened 5.0.0 | 20 | 0 | 0 | 20/20 |
 | SheetJS CE 0.20.3 | 20 | 0 | 0 | 20/20 |
-| read-excel-file 9.3.10 | 1 | 19 | 0 | 20/20 |
+| read-excel-file 9.3.10 | 19 | 1 | 0 | 20/20 |
 
-The failures for read-excel-file are capability mismatches against this source-fidelity contract, not execution crashes. The most important gaps include workbook/sheet identity, multi-sheet preservation, formula/cached-result preservation, and source-cell fidelity.
+The single remaining read-excel-file failure is F10: formula expression + cached result + number-format preservation. The earlier 19 failures were partly caused by the harness adapter shape and were corrected before Run #29; the corrected result is therefore the evidence to use.
 
 ## 2. Stress fixtures
 
-Three synthetic stress workbooks were executed:
+Three synthetic stress workbooks were executed, plus three malformed inputs:
 
 - ST01: 100,000 rows, 2.81 MB XLSX.
 - ST02: 50,000 rows with header at row 6, 1.46 MB.
 - ST03: 20,000 rows across two sheets, 0.62 MB.
 
-Approximate median read time / peak RSS delta:
+Median read time / P95 / maximum observed RSS delta:
 
 | Candidate | ST01 | ST02 | ST03 |
 |---|---|---|---|
@@ -58,7 +58,7 @@ ExcelJS Hardened 5.0.0 is a non-upstream fork that specifically introduces parse
 
 ## 6. Real manifest evidence
 
-The actual Library workbook 649-31382945.xlsx was materialized and structurally inspected without committing it. Verified: one sheet (`Manifiesto`), 134 × 12 cells, metadata rows 1–5, operational header row 6, first data row 7, no merged ranges, no formulas, visible sheet, and mixed string/integer/float/blank values.
+The private real-manifest evidence already recorded in the project remains separate from the public synthetic fixtures. In addition, eight representative local manifest workbooks were structurally inspected without committing raw data: they span 1–8 sheets, 84–419 maximum rows, 12–23 columns, 0–3 merged ranges and 0–1,829 formula cells. One multi-sheet workbook contains 8 sheets and 1,829 formulas; another contains 2 sheets and 290 formulas. This confirms that the production-like input can require substantially richer workbook metadata than a simple one-sheet table.
 
 Actual parser execution against this private workbook is still a separate privacy-controlled gate; the raw workbook is not copied into GitHub.
 
