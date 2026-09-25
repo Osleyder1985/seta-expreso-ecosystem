@@ -9,6 +9,9 @@ PoC mínimo para comparación objetiva con ASP.NET Core.
 - TypeScript 5.9.2
 - PostgreSQL 16
 - OpenAPI mediante @nestjs/swagger 12.0.1
+- Vitest 5.0.1 para pruebas
+
+NestJS 12 utiliza paquetes core ESM. El PoC utiliza Vitest para evitar una configuración de compatibilidad innecesaria entre Jest y los paquetes ESM de Nest 12.
 
 La vertical CRUD es deliberadamente pequeña. Debe mantener equivalencia funcional con el PoC ASP.NET Core y no representa todavía el dominio definitivo de paquetería.
 
