@@ -22,7 +22,7 @@ from botocore.exceptions import ClientError
 
 
 SIZES = {"1MiB": 1 << 20, "5MiB": 5 << 20, "10MiB": 10 << 20, "20MiB": 20 << 20}
-CHUNK = 1 << 20
+CHUNK = 5 << 20
 BUCKET = os.getenv("POD_POC_BUCKET", "seta-pod-poc")
 
 
@@ -101,6 +101,11 @@ def t03(s, eid, content):
 
 
 def t04(client, eid, content):
+    if len(content) < CHUNK:
+        return {
+            "not_applicable": True,
+            "reason": "S3 multipart parts require a minimum 5 MiB size except the final part",
+        }
     key = f"evidence/{eid}-multipart"
     upload = client.create_multipart_upload(Bucket=BUCKET, Key=key, Metadata={"sha256": digest(content)})
     upload_id = upload["UploadId"]
