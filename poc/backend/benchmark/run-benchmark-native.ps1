@@ -132,6 +132,8 @@ $metadataObject = [ordered]@{
   runs = $Runs
   warmup_requests = $WarmupRequests
   endpoint = "/packages"
+  command = ".\\run-benchmark-native.ps1 -Requests $Requests -Concurrency $Concurrency -Runs $Runs -WarmupRequests $WarmupRequests"
+  postgres_container = try { (docker inspect seta-expreso-benchmark-postgres --format "{{.Config.Image}}|{{.Image}}|{{.State.Status}}").Trim() } catch { "unavailable" }
   note = "Native Windows measurements. DATABASE_URL uses PostgreSQL URI syntax for the Node.js candidate; the runner derives an equivalent ADO.NET/Npgsql connection string for ASP.NET Core. CPU is process CPU seconds consumed during the measured HTTP load; memory values are process snapshots after the measured load. Do not compare these resource metrics directly with Docker container snapshots."
 }
 $metadataObject | ConvertTo-Json | Set-Content -Encoding UTF8 $metadata
@@ -155,6 +157,10 @@ function Stop-ProcessOnPort([int]$Port) {
 }
 
 Write-Host "=== Native build ==="
+# Clean up stale benchmark listeners before compiling. A previous interrupted run can leave
+# a .NET/Node process holding bin artifacts open, causing MSB3021/MSB3027 during build.
+Stop-ProcessOnPort 3000
+Stop-ProcessOnPort 8081
 Push-Location $nestDir
 try { $nestBuild = Measure-Command { npm run build | Out-Host } } finally { Pop-Location }
 if ($LASTEXITCODE -ne 0) { throw "NestJS build failed." }
