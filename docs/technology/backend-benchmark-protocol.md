@@ -1,6 +1,7 @@
-# Protocolo de benchmark del backend v0.1.0
+# Protocolo de benchmark del backend v0.2.0
 
 **Issue:** #9  
+**Actualización de versiones:** #20  
 **Relacionado:** #7  
 **Estado:** Preparación del experimento
 
@@ -8,8 +9,8 @@
 
 Comparar dos implementaciones funcionalmente equivalentes:
 
-- NestJS + TypeScript
-- ASP.NET Core + .NET
+- NestJS 12.1.0 + TypeScript + Node.js 24.21.0 LTS
+- ASP.NET Core + .NET 10 LTS
 
 La comparación debe medir propiedades técnicas relevantes para el Ecosistema sin convertir una métrica aislada en una decisión.
 
@@ -91,6 +92,20 @@ El informe deberá conservar:
 - sistema operativo;
 - configuración;
 - comando exacto.
+
+## Reglas de versión
+
+El experimento vigente utilizará versiones estables y soportadas, priorizando LTS cuando corresponda.
+
+A fecha de septiembre de 2026:
+
+- Node.js 24.21.0 está en LTS;
+- Node.js 26.10.0 está en Current y no se utilizará como baseline LTS del experimento;
+- NestJS 12.1.0 es la versión latest de @nestjs/core;
+- @nestjs/swagger 12.0.1 es la versión latest del paquete;
+- .NET 10 es la línea LTS del candidato ASP.NET Core.
+
+Las versiones exactas deberán conservarse en los artefactos de reproducibilidad.
 
 ## Regla de interpretación
 

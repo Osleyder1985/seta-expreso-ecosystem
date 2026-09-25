@@ -1,26 +1,29 @@
 import { performance } from 'node:perf_hooks';
 
-const [requestsArg, concurrencyArg, ...pairs] = process.argv.slice(2);
+const [requestsArg, concurrencyArg, warmupArg, name, baseUrl] = process.argv.slice(2);
 const requests = Number(requestsArg);
 const concurrency = Number(concurrencyArg);
-if (!Number.isInteger(requests) || requests < 1 || !Number.isInteger(concurrency) || concurrency < 1 || pairs.length % 2 !== 0) {
-  throw new Error('Usage: node http-benchmark.mjs <requests> <concurrency> <name> <baseUrl> [<name> <baseUrl>...]');
-}
-const targets = [];
-for (let i = 0; i < pairs.length; i += 2) targets.push({ name: pairs[i], base: pairs[i + 1] });
+const warmupRequests = Number(warmupArg);
 
-async function run(target) {
-  const latencies = [];
+if (!Number.isInteger(requests) || requests < 1 ||
+    !Number.isInteger(concurrency) || concurrency < 1 ||
+    !Number.isInteger(warmupRequests) || warmupRequests < 0 ||
+    !name || !baseUrl) {
+  throw new Error('Usage: node http-benchmark.mjs <requests> <concurrency> <warmupRequests> <name> <baseUrl>');
+}
+
+async function load(count) {
   let errors = 0;
   let next = 0;
+  const latencies = [];
 
   const worker = async () => {
     while (true) {
       const index = next++;
-      if (index >= requests) return;
+      if (index >= count) return;
       const started = performance.now();
       try {
-        const response = await fetch(target.base + '/packages');
+        const response = await fetch(baseUrl + '/packages');
         if (!response.ok) errors++;
         else await response.text();
       } catch {
@@ -32,25 +35,29 @@ async function run(target) {
   };
 
   const started = performance.now();
-  await Promise.all(Array.from({ length: Math.min(concurrency, requests) }, worker));
-  const elapsed = performance.now() - started;
-  latencies.sort((a, b) => a - b);
-  const percentile = p => latencies[Math.min(latencies.length - 1, Math.ceil(latencies.length * p) - 1)];
-  const rps = requests / (elapsed / 1000);
-  const errorRate = errors / requests;
-
+  await Promise.all(Array.from({length: Math.min(concurrency, count)}, worker));
   return {
-    implementation: target.name,
-    requests,
-    concurrency,
-    elapsed_ms: Number(elapsed.toFixed(2)),
-    throughput_rps: Number(rps.toFixed(2)),
-    p50_ms: Number(percentile(0.50).toFixed(2)),
-    p95_ms: Number(percentile(0.95).toFixed(2)),
-    error_rate: Number(errorRate.toFixed(4))
+    elapsed_ms: performance.now() - started,
+    errors,
+    latencies
   };
 }
 
-for (const target of targets) {
-  console.log(JSON.stringify(await run(target)));
-}
+if (warmupRequests > 0) await load(warmupRequests);
+
+const result = await load(requests);
+result.latencies.sort((a,b) => a-b);
+const percentile = p => result.latencies[Math.min(result.latencies.length - 1, Math.ceil(result.latencies.length * p) - 1)];
+const elapsedSeconds = result.elapsed_ms / 1000;
+
+console.log(JSON.stringify({
+  implementation: name,
+  requests,
+  concurrency,
+  warmup_requests: warmupRequests,
+  elapsed_ms: Number(result.elapsed_ms.toFixed(2)),
+  throughput_rps: Number((requests / elapsedSeconds).toFixed(2)),
+  p50_ms: Number(percentile(0.50).toFixed(2)),
+  p95_ms: Number(percentile(0.95).toFixed(2)),
+  error_rate: Number((result.errors / requests).toFixed(4))
+}));

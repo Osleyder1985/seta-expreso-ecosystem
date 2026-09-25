@@ -33,16 +33,15 @@ No se deben completar resultados con estimaciones o datos inventados.
 
 ## 4. Resultados brutos
 
-Registrar cada corrida sin promediar previamente.
-
-| Implementación | Corrida | Build ms | Startup ms | Memoria MB | CPU idle % | Throughput RPS | p50 ms | p95 ms | Error % | Tests ms | Notas |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| Implementación | Corrida | Build ms | Startup ms | Memoria snapshot | CPU snapshot | Throughput RPS | p50 ms | p95 ms | Error | Tests ms | Notas |
+|---|---:|---:|---:|---|---|---:|---:|---:|---:|---:|---|
 | NestJS | | | | | | | | | | | |
 | ASP.NET Core | | | | | | | | | | | |
 
 ## 5. Análisis
 
 Separar:
+
 - observación;
 - medición;
 - interpretación;
@@ -55,6 +54,7 @@ No convertir una métrica aislada en una decisión tecnológica.
 - Logs:
 - Artefactos:
 - Resultados JSONL:
+- Metadatos:
 - Configuración:
 - Commit:
 - Workflow/ejecución CI:

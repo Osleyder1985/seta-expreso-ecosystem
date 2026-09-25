@@ -1,5 +1,5 @@
-import { Test } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import { describe, beforeAll, afterAll, it, expect } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../src/main';
 

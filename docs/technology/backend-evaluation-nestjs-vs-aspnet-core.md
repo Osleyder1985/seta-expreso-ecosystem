@@ -1,61 +1,56 @@
 # Evaluación objetiva del Backend: NestJS vs ASP.NET Core
 
-**Versión:** 0.1.0  
+**Versión:** 0.3.0  
 **Estado:** Evaluación en curso  
 **Issue:** #7  
+**Actualización de versión:** #20  
 **Fecha:** 2026-09-24
 
 ## 1. Objetivo
 
 Aplicar la matriz oficial de evaluación tecnológica al backend del Ecosistema SETA EXPRESO SURL.
 
-Los candidatos evaluados son:
+Los candidatos del experimento vigente son:
 
-- NestJS + TypeScript + Node.js LTS
-- ASP.NET Core + .NET LTS
+- **NestJS 12.1.0 + TypeScript + Node.js 24.21.0 LTS**
+- **ASP.NET Core + .NET 10 LTS**
 
-La evaluación no debe convertir una preferencia tecnológica en una conclusión. Se separa la evidencia documental de la evidencia experimental.
+La evaluación no selecciona un backend por anticipado. Se separa la evidencia documental de la evidencia experimental.
 
-## 2. Evidencia disponible
+## 2. Baseline de versiones
 
-El repositorio oficial contiene actualmente la arquitectura baseline y la matriz de evaluación, pero no contiene los PoC de backend mencionados en trabajos anteriores.
+Las versiones fueron verificadas contra fuentes actuales antes de actualizar el PoC:
 
-Por tanto:
+- @nestjs/core 12.1.0 — etiqueta latest.
+- @nestjs/common 12.1.0.
+- @nestjs/platform-express 12.1.0.
+- @nestjs/swagger 12.0.1.
+- @nestjs/cli 12.0.5.
+- Node.js 24.21.0 — LTS.
+- Node.js 26.10.0 — Current; no se utiliza como baseline LTS del experimento.
+- .NET 10 — LTS.
 
-- no se inventan resultados de benchmark;
-- no se asignan puntuaciones experimentales que no hayan sido reproducidas;
-- los criterios que dependan de medición quedan pendientes;
+Node.js 24.21.0 es además la versión disponible en el entorno Windows de referencia del proyecto. El PoC NestJS utiliza Vitest 5.0.1, alineado con el flujo ESM recomendado para NestJS 12.
+
+## 3. Evidencia disponible
+
+El repositorio contiene la arquitectura baseline, la matriz de evaluación, el protocolo de benchmark y los PoC reconstruidos.
+
+No se inventan resultados:
+
+- no se asignan puntuaciones experimentales sin medición;
+- los criterios que dependan de benchmark permanecen pendientes;
 - la decisión final queda abierta hasta completar la evidencia requerida.
-
-## 3. Evidencia documental inicial
-
-### 3.1 NestJS
-
-La documentación oficial describe módulos como mecanismo para organizar capacidades relacionadas y encapsular providers; también documenta inyección de dependencias, testing, validación, seguridad, OpenAPI, health checks, eventos y observabilidad. [E1]
-
-La documentación oficial de testing indica soporte para pruebas unitarias, integración y e2e, integración con herramientas como Vitest y Supertest y utilización del sistema de DI para pruebas. [E1]
-
-Nest dispone de integración dedicada para generar especificaciones OpenAPI desde el código mediante `@nestjs/swagger`. [E1]
-
-### 3.2 ASP.NET Core
-
-La documentación oficial de ASP.NET Core documenta Dependency Injection y Minimal APIs, además de capacidades de infraestructura HTTP y binding de servicios. [E1]
-
-Microsoft documenta `WebApplicationFactory<TEntryPoint>` y `TestServer` para pruebas de integración, incluyendo configuración del host, sustitución de servicios y escenarios de autenticación. [E1]
-
-La documentación oficial también mantiene una sección específica de rendimiento y carga para ASP.NET Core. [E1]
 
 ## 4. Evaluación preliminar
 
-Esta tabla **no constituye todavía la puntuación final**. Se utiliza para identificar qué criterios pueden resolverse documentalmente y cuáles requieren PoC/benchmark.
-
 | Criterio | Peso | NestJS | Evidencia | ASP.NET Core | Evidencia |
 |---|---:|---|---|---|---|
-| B01 Adecuación Modular/Clean/Hexagonal | 15% | Pendiente de evaluación estructural | E1 | Pendiente de evaluación estructural | E1 |
-| B02 REST/OpenAPI | 10% | Evidencia favorable | E1 | Evidencia favorable | E1 |
-| B03 Testabilidad | 10% | Evidencia favorable | E1 | Evidencia favorable | E1 |
+| B01 Adecuación Modular/Clean/Hexagonal | 15% | Pendiente de evaluación estructural | E1/E2 | Pendiente de evaluación estructural | E1/E2 |
+| B02 REST/OpenAPI | 10% | Evidencia favorable | E1/E2 | Evidencia favorable | E1/E2 |
+| B03 Testabilidad | 10% | Evidencia favorable | E1/E2 | Evidencia favorable | E1/E2 |
 | B04 Seguridad | 10% | Evidencia disponible | E1 | Evidencia disponible | E1 |
-| B05 Rendimiento | 10% | **Pendiente benchmark** | E2 | **Pendiente benchmark** | E2 |
+| B05 Rendimiento | 10% | Pendiente benchmark | E2 | Pendiente benchmark | E2 |
 | B06 Mantenibilidad | 10% | Pendiente de PoC/estructura | E1/E2 | Pendiente de PoC/estructura | E1/E2 |
 | B07 Ecosistema | 10% | Evidencia documental | E1/E4 | Evidencia documental | E1/E4 |
 | B08 Documentación/madurez | 5% | Evidencia documental | E1 | Evidencia documental | E1 |
@@ -64,7 +59,7 @@ Esta tabla **no constituye todavía la puntuación final**. Se utiliza para iden
 | B11 Costo/licencia | 5% | Analizar TCO | E1/E4 | Analizar TCO | E1/E4 |
 | B12 Evolución futura | 5% | Pendiente de análisis contextual | E1/E2 | Pendiente de análisis contextual | E1/E2 |
 
-## 5. Hipótesis que deben comprobarse
+## 5. Hipótesis
 
 ### H01 — Adecuación arquitectónica
 
@@ -77,17 +72,13 @@ Ambas alternativas deben poder implementar:
 - PostgreSQL/PostGIS;
 - integración con proveedores externos sin acoplamiento del dominio.
 
-La prueba debe realizarse con una vertical pequeña del dominio de paquetería.
-
 ### H02 — Productividad
 
 Debe medirse el tiempo necesario para implementar la misma vertical funcional en ambos candidatos, manteniendo criterios equivalentes.
 
 ### H03 — Rendimiento
 
-Debe medirse el comportamiento bajo una carga controlada y reproducible.
-
-No se aceptará comparar resultados obtenidos con configuraciones diferentes o sin registrar versiones y entorno.
+Debe medirse el comportamiento bajo carga controlada y reproducible.
 
 ### H04 — Operación
 
@@ -96,79 +87,51 @@ Ambos candidatos deben producir una imagen Docker reproducible y ejecutar:
 - health check;
 - configuración por variables de entorno;
 - conexión PostgreSQL;
-- migraciones;
-- logging;
+- transacciones;
 - pruebas;
 - documentación OpenAPI.
 
-## 6. Benchmark mínimo
+## 6. Benchmark
 
-El benchmark deberá utilizar la misma especificación funcional.
+El benchmark utiliza la misma especificación funcional y el mismo esquema PostgreSQL.
 
-### Endpoint mínimo
+Debe registrar como mínimo:
 
-Implementar una operación CRUD sencilla representativa, evitando introducir reglas de negocio que favorezcan artificialmente una tecnología.
-
-### Persistencia
-
-PostgreSQL será la base común.
-
-### Pruebas
-
-Cada implementación deberá incluir:
-
-- unit tests;
-- integration tests;
-- API tests;
-- validación de entrada;
-- manejo de errores;
-- health check.
-
-### Contrato
-
-La API deberá exponer OpenAPI equivalente.
-
-### Contenedores
-
-Cada implementación deberá ejecutarse mediante Docker con configuración equivalente.
-
-## 7. Métricas
-
-Registrar como mínimo:
-
-- tiempo de compilación/build;
-- tiempo de arranque;
-- consumo de memoria en reposo;
-- latencia p50;
-- latencia p95;
+- build;
+- startup/readiness;
+- memoria;
+- CPU;
 - throughput;
-- duración de la suite de pruebas;
-- tiempo de implementación de la vertical;
-- tamaño de artefactos/imágenes cuando sea relevante.
+- p50;
+- p95;
+- error rate;
+- duración de tests;
+- versiones;
+- configuración;
+- commit evaluado.
 
-Las métricas de rendimiento se repetirán varias veces y se documentará el método de medición.
+## 7. Entorno de referencia
 
-## 8. Entorno de referencia
-
-El entorno de desarrollo del proyecto es Windows 11 Pro con:
+Windows 11 Pro:
 
 - Intel Core i7-13700H;
 - 16 GB RAM;
 - NVIDIA GeForce RTX 4080 Laptop GPU.
 
-La GPU no se considera relevante para este benchmark inicial de backend, salvo que una prueba posterior demuestre lo contrario.
+La GPU no se considera relevante para el benchmark inicial.
 
-El benchmark debe registrar además:
+El entorno debe registrar además:
 
-- versión exacta de Node.js/.NET;
-- versión exacta de NestJS/ASP.NET Core;
-- versión de PostgreSQL;
-- versión de Docker;
+- Node.js;
+- NestJS;
+- .NET SDK/runtime;
+- ASP.NET Core;
+- PostgreSQL;
+- Docker;
 - configuración de CPU/memoria;
-- configuración de PostgreSQL;
 - comandos ejecutados.
 
-## 9. Criterios de validez
+## 8. Criterios de validez
 
 Un resultado experimental será válido solamente si:
 
@@ -180,23 +143,24 @@ Un resultado experimental será válido solamente si:
 6. las mediciones están disponibles;
 7. las limitaciones están documentadas.
 
-## 10. Decisión
+## 9. Estado de decisión
 
-**Estado actual: PENDIENTE.**
+**PENDIENTE.**
 
-La evidencia documental demuestra que ambas alternativas disponen de capacidades relevantes para los requisitos arquitectónicos, API, testing y operación del Ecosistema.
+La actualización de versiones no constituye una selección de backend.
 
-No existe todavía en el repositorio oficial evidencia experimental suficiente para emitir una decisión final sobre NestJS frente a ASP.NET Core.
+La siguiente etapa es validar CI, ejecutar las pruebas locales disponibles y posteriormente ejecutar el benchmark común sobre el mismo entorno de referencia.
 
-La siguiente acción técnica es recuperar o reconstruir los dos PoC y ejecutar el benchmark común.
+## 10. Referencias de evidencia
 
-## 11. Referencias de evidencia
+- E1 — documentación oficial de NestJS, Node.js y Microsoft consultada en septiembre de 2026.
+- E2 — evidencia experimental del PoC/benchmark, pendiente de ejecución final.
+- E4 — evidencia externa confiable cuando corresponda.
 
-- E1 — Documentación oficial de NestJS y Microsoft Learn consultada el 2026-09-24.
-- E2 — Evidencia experimental: pendiente de reproducir.
+## 11. Trazabilidad
 
-## 12. Trazabilidad
+`#7 → #9 → #10/#12/#20 → PoC → benchmark → resultados → B01–B12 → ADR → Stack Baseline`
 
-`#7 → PoC/Benchmark → resultados → evaluación B01–B12 → ADR → Stack Baseline → PR`
+El PoC .NET 8 queda únicamente como referencia histórica. El experimento vigente utiliza .NET 10 LTS.
 
 **Fin de la evaluación preliminar.**
