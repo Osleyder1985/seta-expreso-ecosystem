@@ -1,3 +1,6 @@
+permissions:
+  contents: read
+
 name: pod-evidence-storage-s3-poc
 
 on:
@@ -16,8 +19,8 @@ jobs:
         ports:
           - 8000:8000
         env:
-          SCALITY_ACCESS_KEY_ID: accessKey1
-          SCALITY_SECRET_ACCESS_KEY: verySecretKey1
+          SCALITY_ACCESS_KEY_ID: ${{ secrets.POC_S3_ACCESS_KEY }}
+          SCALITY_SECRET_ACCESS_KEY: ${{ secrets.POC_S3_SECRET_KEY }}
           S3BACKEND: file
           S3DATAPATH: /usr/src/app/localData
           S3METADATAPATH: /usr/src/app/localMetadata
@@ -40,8 +43,8 @@ jobs:
       - run: pip install -r poc/pod-evidence-storage/requirements-s3.txt
       - env:
           S3_ENDPOINT: http://127.0.0.1:8000
-          S3_ACCESS_KEY: accessKey1
-          S3_SECRET_KEY: verySecretKey1
+          S3_ACCESS_KEY: ${{ secrets.POC_S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.POC_S3_SECRET_KEY }}
         run: python poc/pod-evidence-storage/s3_runner.py
       - uses: actions/upload-artifact@v4
         with:
