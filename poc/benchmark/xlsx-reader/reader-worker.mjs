@@ -10,6 +10,17 @@ if (!reader || !input) {
 }
 
 const buffer = await readFile(input);
+const hasZipSignature = buffer.length >= 4 &&
+  buffer.subarray(0, 4).equals(Buffer.from([0x50, 0x4b, 0x03, 0x04]));
+if (!hasZipSignature) {
+  process.stdout.write(JSON.stringify({
+    ok: false,
+    preflightRejected: true,
+    error: { name: 'InvalidXlsxContainer', message: 'Input does not have an XLSX ZIP container signature.' }
+  }));
+  process.exitCode = 1;
+  process.exit();
+}
 
 async function exceljsRead() {
   const wb = new ExcelJS.Workbook();
