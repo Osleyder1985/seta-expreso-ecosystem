@@ -95,12 +95,6 @@ async function readExcelFile(buffer) {
   return { sheets: [{ name: 'first-sheet', rows }], formulas: [] };
 }
 
-async function exceljsHardenedRead(buffer) {
-  const wb = new ExcelJSHardened.Workbook();
-  await wb.xlsx.load(buffer);
-  return exceljsRead.call(null, buffer);
-}
-
 const readers = {
   exceljs: exceljsRead,
   'exceljs-hardened': async buffer => {
