@@ -2,7 +2,7 @@
 
 **Código:** AUD-001  
 **Versión:** 1.0.0  
-**Estado:** En ejecución — corte inicial  
+**Estado:** En ejecución — auditoría integral por fases  
 **Fecha de auditoría:** 2026-09-25  
 **Issue:** #74  
 **Repositorio:** `Osleyder1985/seta-expreso-ecosystem`  
@@ -301,6 +301,158 @@ Esto es especialmente relevante porque el Ecosistema contempla documentos de ide
 
 ---
 
+
+
+---
+
+# 7A. Hallazgos adicionales derivados de la revisión normativa y estructural
+
+## H-07 — La descripción arquitectónica no alcanza todavía una cobertura suficiente de ISO/IEC/IEEE 42010:2022
+
+**Severidad: MEDIA**  
+**Estado: ABIERTO**
+
+El documento architecture-baseline.md contiene propósito, alcance, principios, arquitectura conceptual, estilos y decisiones pendientes. Sin embargo, como descripción arquitectónica, todavía no explicita de forma sistemática:
+
+- stakeholders y sus intereses arquitectónicos;
+- concerns asociados;
+- viewpoints/view conventions;
+- correspondencia entre concerns y vistas/modelos;
+- qué aspectos quedan deliberadamente fuera de cada vista;
+- criterios de evaluación de la arquitectura.
+
+ISO/IEC/IEEE 42010:2022 establece requisitos para la estructura y expresión de una Architecture Description y contempla explícitamente viewpoints y model kinds para soportar la descripción arquitectónica.
+
+**Impacto:** la arquitectura actual comunica bien la intención, pero todavía no constituye una descripción arquitectónica suficientemente completa para una evaluación formal de arquitectura.
+
+**Acción correctiva:** evolucionar el baseline arquitectónico con un registro de stakeholders/concerns y un conjunto mínimo de viewpoints/views apropiados para la fase actual. No se exige producir diagramas innecesarios; se exige que las preocupaciones relevantes puedan ser rastreadas hasta una vista o decisión.
+
+## H-08 — El requisito de “control de estados” no coincide con el estado real de los artefactos
+
+**Severidad: MEDIA**  
+**Estado: ABIERTO**
+
+El PMIS exige que los ADR tengan estado y que la documentación obsoleta se identifique. En main, sin embargo:
+
+- architecture-baseline.md declara **Propuesto para revisión**;
+- ADR-0001-modular-monolith.md declara **Propuesto**;
+- technology-stack-baseline.md utiliza simultáneamente decisiones **Adoptado**, **Adoptado provisionalmente**, **Candidato** y **No adoptado**.
+
+Esto no constituye por sí solo un error arquitectónico, pero sí demuestra que el mecanismo de estado documental no está gobernado con una taxonomía única.
+
+**Impacto:** puede resultar imposible determinar qué decisiones están vigentes para implementar y cuáles siguen siendo propuestas.
+
+**Acción correctiva:** establecer una taxonomía normativa única para el repositorio y aplicarla a arquitectura, ADRs, baselines y decisiones de dominio.
+
+## H-09 — La auditoría demuestra una diferencia entre “documentado” y “implantado”
+
+**Severidad: MEDIA**  
+**Estado: ABIERTO**
+
+El PMIS define Quality Gates, seguridad, pruebas, riesgos, documentación, trazabilidad y CI/CD. La revisión del baseline muestra que varios de esos controles existen principalmente como reglas documentales, mientras que la evidencia automatizada de su ejecución transversal todavía es limitada.
+
+Esto es un hallazgo metodológico importante: **un control descrito en el PMIS no constituye evidencia de que el control haya sido implantado**.
+
+**Impacto:** riesgo de sobreestimar la madurez real del sistema de ingeniería.
+
+**Acción correctiva:** para cada control relevante registrar al menos: propietario, mecanismo, frecuencia, evidencia generada, criterio de aceptación y resultado de la última ejecución.
+
+## H-10 — No existe todavía una cadena de requisitos suficientemente integrada en main
+
+**Severidad: MEDIA**  
+**Estado: ABIERTO**
+
+El PMIS establece una trazabilidad fuerte desde objetivo empresarial hasta funcionalidad operativa. Sin embargo, el baseline integrado contiene principalmente:
+
+- PMIS;
+- arquitectura;
+- stack y evaluación tecnológica;
+- modelo conceptual inicial de Paquetería;
+- PoCs.
+
+Los artefactos de requisitos funcionales, trazabilidad detallada, estados y cierre operativo producidos posteriormente permanecen en PRs abiertos y no forman parte del baseline main.
+
+**Impacto:** la trazabilidad diseñada existe como intención y en ramas de trabajo, pero no puede considerarse completamente integrada en el estado oficial auditado.
+
+**Acción correctiva:** integrar, superseder o cerrar formalmente esos artefactos, preservando una única fuente de verdad vigente.
+
+## H-11 — El repositorio auditado todavía no contiene producto de negocio implementado
+
+**Severidad: OBSERVACIÓN DE ALCANCE — no conformidad: NO**
+
+El árbol actual de main contiene documentación y PoCs, pero no una implementación productiva del backend, Web o aplicaciones móviles.
+
+Esto **no se considera un defecto**, porque el alcance de la auditoría se ajusta al estado real y el proyecto se encuentra en una fase inicial de ingeniería.
+
+Sí implica una limitación objetiva: no es posible evaluar todavía mediante evidencia real:
+
+- calidad de código de producto;
+- seguridad de endpoints productivos;
+- modelo físico productivo;
+- pruebas funcionales del producto;
+- rendimiento del sistema real;
+- despliegue y operación real.
+
+**Tratamiento:** mantener como limitación de auditoría, no convertirla artificialmente en una no conformidad.
+
+## H-12 — El CI existente está orientado principalmente a PoCs y no constituye todavía un quality gate integral del repositorio
+
+**Severidad: MEDIA**  
+**Estado: ABIERTO**
+
+Los workflows actuales de main cubren PoCs específicos, por ejemplo backend y almacenamiento de evidencias. No existe evidencia suficiente de un pipeline único y transversal que aplique sistemáticamente a todos los artefactos y controles definidos en el PMIS.
+
+Además, el workflow de backend se activa por cambios en poc/backend/**, mientras los workflows POD están delimitados a sus respectivos PoCs.
+
+**Impacto:** un cambio documental, arquitectónico o experimental puede pasar sin la misma batería de validaciones; esto es aceptable en parte por la fase actual, pero no equivale todavía a un sistema integral de quality gates.
+
+**Acción correctiva:** definir qué controles deben ser globales y cuáles específicos por tipo de artefacto, evitando crear un pipeline monolítico innecesario.
+
+## H-13 — La matriz tecnológica incorpora una escala numérica antes de que exista suficiente evidencia para usarla como evaluación de producto
+
+**Severidad: BAJA**  
+**Estado: ABIERTO**
+
+La matriz tecnológica define puntuaciones 0–5 y normalización 0–100, pero también exige correctamente que las puntuaciones críticas no se basen únicamente en inferencias.
+
+La auditoría no considera incorrecta la existencia de la escala. El riesgo está en utilizarla como apariencia de precisión cuando la evidencia experimental todavía es limitada.
+
+**Acción correctiva:** exigir que cada puntuación publicada incluya evidencia identificable, fecha de medición y nivel de confianza; si no existe evidencia suficiente, utilizar explícitamente “no evaluado” en lugar de completar una puntuación por estimación.
+
+---
+
+# 7B. Verificación del marco normativo
+
+La revisión de fuentes oficiales de ISO confirma que:
+
+- ISO/IEC/IEEE 12207:2026 es la edición publicada vigente y sustituyó a 12207:2017.
+- ISO 19011:2026 es la edición vigente publicada en mayo de 2026 y proporciona directrices para programas y realización de auditorías, incluyendo principios de integridad, presentación justa, debido cuidado profesional, confidencialidad, independencia, enfoque basado en evidencia y enfoque basado en riesgos.
+- ISO/IEC/IEEE 15288:2023 sigue siendo la edición publicada vigente para procesos del ciclo de vida de sistemas.
+- ISO/IEC/IEEE 29148:2018 continúa siendo la edición publicada vigente, aunque existe una DIS de tercera edición en desarrollo; por tanto, no debe tratarse el DIS como norma publicada.
+- ISO/IEC/IEEE 42010:2022 es la edición publicada vigente para Architecture Description.
+- ISO/IEC 25010:2023 es la edición publicada vigente del modelo de calidad de producto.
+- ISO/IEC 25012:2008 continúa vigente y fue confirmada en 2025.
+- ISO/IEC 27001:2022 continúa siendo la norma de requisitos para un ISMS y tiene una enmienda publicada.
+- ISO/IEC 27701:2025 es la edición publicada vigente para un Privacy Information Management System y sustituyó a la edición 2019.
+
+**Corrección metodológica importante:** la auditoría no debe afirmar que “cumplimos todas las ISO”. Las normas se utilizan como **criterios aplicables**, seleccionados según el objeto auditado, alcance y madurez. ISO 19011 es una guía para auditar; no es por sí misma una certificación.
+
+---
+
+# 7C. Criterio de clasificación utilizado
+
+Para mantener rigor y justicia se utilizarán las siguientes categorías:
+
+- **NC-CRÍTICA:** incumplimiento o defecto actual con potencial severo para seguridad, integridad, legalidad, continuidad o trazabilidad.
+- **NC-MAYOR:** defecto actual relevante que compromete un control, decisión o artefacto importante.
+- **NC-MENOR:** defecto actual localizado sin impacto sistémico inmediato.
+- **OBSERVACIÓN:** condición que no constituye una no conformidad pero debe vigilarse.
+- **OPORTUNIDAD DE MEJORA:** mejora que eleva la madurez sin existir un defecto actual.
+- **LIMITACIÓN DE AUDITORÍA:** algo que no puede evaluarse porque todavía no existe en el estado auditado; no se penaliza como defecto.
+
+Esta clasificación evita convertir la ausencia legítima de funcionalidades futuras en incumplimientos ficticios.
+
+
 # 8. Observaciones de calidad documental
 
 ## O-01 — El PMIS es fuerte como marco, pero todavía es un marco y no evidencia por sí mismo su implantación
@@ -485,3 +637,4 @@ Cada hallazgo posterior deberá indicar:
 | Versión | Fecha | Estado | Descripción |
 |---|---|---|---|
 | 1.0.0 | 2026-09-25 | En ejecución | Corte inicial de auditoría integral basado en evidencia del repositorio |
+| 1.0.1 | 2026-09-25 | En ejecución | Profundización normativa, arquitectónica, de requisitos y quality gates; incorporación de H-07 a H-13 |
