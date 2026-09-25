@@ -45,7 +45,7 @@ jobs:
 
       - name: Enforce acceptance and malformed-input gates
         run: |
-          node -e "const r=require('./comparison-report.json'); if((r.acceptanceSummary.ERROR||0)>0 || (r.acceptanceSummary.UNEXPECTED_ACCEPTANCE||0)>0) process.exit(1)"
+          node -e "const r=require('./comparison-report.json'); if((r.acceptanceSummary.ERROR||0)>0 || (r.acceptanceSummary.FAIL||0)>0 || (r.acceptanceSummary.UNEXPECTED_ACCEPTANCE||0)>0) process.exit(1)"
 
       - name: Publish supply-chain evidence
         if: always()
