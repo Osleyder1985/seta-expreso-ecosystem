@@ -316,7 +316,7 @@ Estos umbrales son criterios de calidad, no una selección automática. Una alte
 ## 20. Registro de evaluación
 
 | Criterio | Peso | Candidato A | Fecha A | Evidencia A | Nivel A | Confianza A | Candidato B | Fecha B | Evidencia B | Nivel B | Confianza B |
-|---|---:|---:|---|---:|---|
+|---|---:|---|---|---|---|---|---|---|---|---|---|
 | Adecuación | 15% | No evaluado | YYYY-MM-DD | E1/E2/... | A/B/C/D/E | Alta/Media/Baja | No evaluado | YYYY-MM-DD | E1/E2/... | A/B/C/D/E | Alta/Media/Baja |
 | Seguridad | 10% | No evaluado | YYYY-MM-DD | E1/E2/... | A/B/C/D/E | Alta/Media/Baja | No evaluado | YYYY-MM-DD | E1/E2/... | A/B/C/D/E | Alta/Media/Baja |
 | Rendimiento | 10% | No evaluado | YYYY-MM-DD | E2/E3 | A/B/C/D/E | Alta/Media/Baja | No evaluado | YYYY-MM-DD | E2/E3 | A/B/C/D/E | Alta/Media/Baja |
