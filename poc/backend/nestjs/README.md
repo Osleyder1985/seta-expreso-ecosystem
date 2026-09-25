@@ -6,7 +6,7 @@ PoC mínimo para comparación objetiva con ASP.NET Core.
 
 - NestJS 12.1.0
 - Node.js 24.21.0 LTS
-- TypeScript 5.9.2
+- TypeScript 5.9.3
 - PostgreSQL 16
 - OpenAPI mediante @nestjs/swagger 12.0.1
 - Vitest 5.0.1 para pruebas
