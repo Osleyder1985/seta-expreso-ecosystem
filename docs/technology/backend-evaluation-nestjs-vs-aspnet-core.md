@@ -30,7 +30,7 @@ Las versiones fueron verificadas contra fuentes actuales antes de actualizar el 
 - Node.js 26.10.0 — Current; no se utiliza como baseline LTS del experimento.
 - .NET 10 — LTS.
 
-Node.js 24.21.0 es además la versión disponible en el entorno Windows de referencia del proyecto.
+Node.js 24.21.0 es además la versión disponible en el entorno Windows de referencia del proyecto. El PoC NestJS utiliza Vitest 5.0.1, alineado con el flujo ESM recomendado para NestJS 12.
 
 ## 3. Evidencia disponible
 
