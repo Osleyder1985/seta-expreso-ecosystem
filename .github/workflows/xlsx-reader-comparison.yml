@@ -11,6 +11,9 @@ on:
       - '.github/workflows/xlsx-reader-comparison.yml'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   acceptance:
     runs-on: ubuntu-latest
