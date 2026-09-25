@@ -1,4 +1,5 @@
 import { readFile, writeFile, readdir } from 'node:fs/promises';
+import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import ExcelJS from 'exceljs';
 import readXlsxFile from 'read-excel-file/node';
@@ -103,6 +104,36 @@ const readers = {
   'read-excel-file': readExcelFile
 };
 
+const EXECUTION_TIMEOUT_MS = 15000;
+
+function runIsolated(reader, filePath) {
+  return new Promise((resolve) => {
+    const child = spawn(process.execPath, ['reader-worker.mjs', reader, filePath], {
+      cwd: new URL('.', import.meta.url),
+      stdio: ['ignore', 'pipe', 'pipe']
+    });
+    let stdout = '', stderr = '';
+    let settled = false;
+    const started = process.hrtime.bigint();
+    const finish = value => { if (!settled) { settled = true; clearTimeout(timer); resolve(value); } };
+    const timer = setTimeout(() => {
+      child.kill('SIGKILL');
+      finish({timeout:true, elapsedMs:Number(process.hrtime.bigint()-started)/1e6, error:{name:'TimeoutError',message:`Reader exceeded hard timeout of ${EXECUTION_TIMEOUT_MS} ms`}});
+    }, EXECUTION_TIMEOUT_MS);
+    child.stdout.on('data', d => { stdout += d; });
+    child.stderr.on('data', d => { stderr += d; });
+    child.on('error', e => finish({timeout:false, elapsedMs:Number(process.hrtime.bigint()-started)/1e6, error:{name:e.name,message:e.message}}));
+    child.on('close', code => {
+      if (settled) return;
+      let parsed;
+      try { parsed = JSON.parse(stdout); } catch {
+        finish({timeout:false,elapsedMs:Number(process.hrtime.bigint()-started)/1e6,error:{name:'WorkerProtocolError',message:`Invalid worker output (exit ${code}): ${stderr.slice(0,500)}`}}); return;
+      }
+      finish({timeout:false,elapsedMs:Number(process.hrtime.bigint()-started)/1e6,...parsed});
+    });
+  });
+}
+
 const results = [];
 
 for (const fixture of fixtureFiles) {
@@ -120,19 +151,19 @@ for (const fixture of fixtureFiles) {
     for (let i = 0; i < 6; i++) {
       global.gc?.();
       const before = rss();
-      const start = process.hrtime.bigint();
-
-      try {
-        const result = await fn(buffer);
-        lastResult = result;
-        snapshotHashes.push(hash(result));
-      } catch (e) {
-        errors.push({ iteration: i + 1, name: e.name, message: e.message });
+      const isolated = await runIsolated(reader, new URL(file, dir).pathname);
+      const durationMs = isolated.elapsedMs;
+      if (isolated.timeout) {
+        errors.push({ iteration: i + 1, name: isolated.error.name, message: isolated.error.message });
         snapshotHashes.push(null);
+      } else if (!isolated.ok) {
+        errors.push({ iteration: i + 1, name: isolated.error.name, message: isolated.error.message });
+        snapshotHashes.push(null);
+      } else {
+        lastResult = isolated.result;
+        snapshotHashes.push(hash(isolated.result));
       }
-
-      const durationMs = Number(process.hrtime.bigint() - start) / 1e6;
-      samples.push({ durationMs, rssDelta: rss() - before });
+      samples.push({ durationMs, rssDelta: isolated.rss ? isolated.rss - before : rss() - before });
     }
 
     const warm = samples.slice(1).map(x => x.durationMs);
@@ -195,7 +226,8 @@ const robustnessSummary = results
   }, { EXECUTED: 0, EXPECTED_REJECTION: 0, UNEXPECTED_ACCEPTANCE: 0, ERROR: 0 });
 
 const report = {
-  protocol: 'xlsx-reader-comparison-v0.6.0',
+  protocol: 'xlsx-reader-comparison-v0.7.0',
+  executionTimeoutMs: EXECUTION_TIMEOUT_MS,
   node: process.version,
   platform: process.platform,
   arch: process.arch,
