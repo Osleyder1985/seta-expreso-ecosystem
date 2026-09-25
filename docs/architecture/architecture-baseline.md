@@ -1,7 +1,7 @@
 # Baseline de Arquitectura del Ecosistema
 
 **Versión:** 0.1.0  
-**Estado:** Propuesto para revisión  
+**Estado:** Propuesto  
 **Issue:** #1  
 **Fecha:** 2026-09-24
 
