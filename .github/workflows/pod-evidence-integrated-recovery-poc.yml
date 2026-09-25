@@ -1,0 +1,38 @@
+name: POD integrated recovery PoC
+
+on:
+  push:
+    branches: [main, "poc/**"]
+  pull_request:
+    paths:
+      - "poc/pod-evidence-recovery/**"
+      - ".github/workflows/pod-evidence-integrated-recovery-poc.yml"
+
+jobs:
+  recovery:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - name: Run PoC
+        run: python poc/pod-evidence-recovery/runner.py > recovery-results.json
+      - name: Validate scenarios
+        run: |
+          python - <<'PY'
+          import json
+          d=json.load(open("recovery-results.json"))
+          assert d["R02_restore_complete"]["missing_content"] == []
+          assert d["R02_restore_complete"]["orphan_objects"] == []
+          assert d["R02_restore_complete"]["corrupt_content"] == []
+          assert len(d["R03_missing_content"]["missing_content"]) == 1
+          assert len(d["R04_corrupt_content"]["corrupt_content"]) == 1
+          assert len(d["R06_orphan_object"]["orphan_objects"]) == 1
+          assert d["R08_partial_recovery"]["after"]["missing_content"] == []
+          assert d["R08_partial_recovery"]["after"]["corrupt_content"] == []
+          print("All recovery assertions passed.")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pod-evidence-integrated-recovery-results
+          path: recovery-results.json
