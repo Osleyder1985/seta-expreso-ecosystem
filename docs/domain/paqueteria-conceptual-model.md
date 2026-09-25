@@ -1,7 +1,7 @@
 # Modelo conceptual del Servicio de Paquetería
 
 **Versión:** 0.1.0  
-**Estado:** Propuesta de dominio para revisión  
+**Estado:** Propuesto
 **Issue:** #36  
 **Alcance:** Servicio de Paquetería del Ecosistema SETA EXPRESO SURL
 
@@ -408,3 +408,6 @@ Después se podrá pasar a:
 - Issue de modelo conceptual: #36
 - Evidencia documental: requisitos y material operativo disponible del Servicio de Paquetería
 - Estado: propuesta de dominio v0.1.0; no constituye todavía contrato de persistencia
+
+
+**Fase/nota:** Las etiquetas históricas de fase o baseline no constituyen estados formales; el campo `Estado` se rige exclusivamente por la taxonomía de gobernanza.
