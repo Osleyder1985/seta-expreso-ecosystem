@@ -64,6 +64,42 @@ function Stop-NativeProcess([System.Diagnostics.Process]$Process) {
   }
 }
 
+function Convert-ToNpgsqlConnectionString([string]$ConnectionUri) {
+  try {
+    $uri = [System.Uri]$ConnectionUri
+  } catch {
+    throw "DATABASE_URL must be a valid PostgreSQL URI for the native benchmark, e.g. postgresql://user:password@host:port/database."
+  }
+
+  if ($uri.Scheme -notin @("postgresql", "postgres")) {
+    throw "DATABASE_URL must use postgresql:// or postgres:// for the native benchmark."
+  }
+
+  $user = [System.Uri]::UnescapeDataString($uri.UserInfo.Split(":", 2)[0])
+  $password = if ($uri.UserInfo.Contains(":")) {
+    [System.Uri]::UnescapeDataString($uri.UserInfo.Split(":", 2)[1])
+  } else {
+    ""
+  }
+  $database = [System.Uri]::UnescapeDataString($uri.AbsolutePath.TrimStart("/"))
+  if (-not $user -or -not $database) {
+    throw "DATABASE_URL must include username and database."
+  }
+
+  function Quote-NpgsqlValue([string]$Value) {
+    return '"' + $Value.Replace('"', '""') + '"'
+  }
+
+  $host = if ($uri.HostNameType -eq [System.UriHostNameType]::IPv6) {
+    "[" + $uri.Host + "]"
+  } else {
+    $uri.Host
+  }
+  $port = if ($uri.IsDefaultPort) { 5432 } else { $uri.Port }
+
+  return "Host=$host;Port=$port;Database=$(Quote-NpgsqlValue $database);Username=$(Quote-NpgsqlValue $user);Password=$(Quote-NpgsqlValue $password)"
+}
+
 function Reset-Database {
   $env:DATABASE_URL = $DatabaseUrl
   & node (Join-Path $benchmarkDir "reset-database.mjs")
@@ -75,6 +111,8 @@ function Invoke-HttpBenchmark([string]$Name, [string]$BaseUrl) {
   if ($LASTEXITCODE -ne 0) { throw "HTTP benchmark failed for $Name." }
   return $output | ConvertFrom-Json
 }
+
+$aspDatabaseUrl = Convert-ToNpgsqlConnectionString $DatabaseUrl
 
 $metadataObject = [ordered]@{
   timestamp_utc = (Get-Date).ToUniversalTime().ToString("o")
@@ -94,7 +132,7 @@ $metadataObject = [ordered]@{
   runs = $Runs
   warmup_requests = $WarmupRequests
   endpoint = "/packages"
-  note = "Native Windows measurements. CPU is process CPU seconds consumed during the measured HTTP load; memory values are process snapshots after the measured load. Do not compare these resource metrics directly with Docker container snapshots."
+  note = "Native Windows measurements. DATABASE_URL uses PostgreSQL URI syntax for the Node.js candidate; the runner derives an equivalent ADO.NET/Npgsql connection string for ASP.NET Core. CPU is process CPU seconds consumed during the measured HTTP load; memory values are process snapshots after the measured load. Do not compare these resource metrics directly with Docker container snapshots."
 }
 $metadataObject | ConvertTo-Json | Set-Content -Encoding UTF8 $metadata
 
@@ -172,7 +210,11 @@ for ($run = 1; $run -le $Runs; $run++) {
     # Los puertos 3000/8081 están reservados para este benchmark.
     Stop-ProcessOnPort $port
 
-    $env:DATABASE_URL = $DatabaseUrl
+    if ($target.name -eq "nestjs") {
+      $env:DATABASE_URL = $DatabaseUrl
+    } else {
+      $env:DATABASE_URL = $aspDatabaseUrl
+    }
     $process = $null
     try {
       $process = Start-NativeProcess $target.command $target.arguments $target.working_directory $stdout $stderr
