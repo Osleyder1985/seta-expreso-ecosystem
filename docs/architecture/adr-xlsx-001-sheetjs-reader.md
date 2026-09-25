@@ -9,7 +9,7 @@
 
 El importador de Paquetería debe recibir libros XLSX reales, preservar estructura y procedencia, detectar encabezados que no necesariamente están en la fila 1, conservar información de celdas y permitir validación/reconciliación antes de promover datos al dominio.
 
-La evidencia real disponible muestra libros con 1–8 hojas, 12–23 columnas, filas de metadatos antes del encabezado, rangos combinados y hasta 1.829 fórmulas. El manifiesto operacional analizado de forma privada contiene 134 filas, 12 columnas, 128 filas de datos, 70 direcciones únicas y 34 grupos de direcciones repetidas.
+La evidencia real disponible muestra libros con 1–8 hojas, 12–23 columnas, filas de metadatos antes del encabezado, rangos combinados y hasta 1.829 fórmulas. El manifiesto operacional analizado de forma privada contiene 134 filas, 12 columnas, 127 filas operacionales, 70 direcciones únicas y 34 grupos de direcciones repetidas.
 
 ## Evidencia experimental
 
@@ -99,7 +99,7 @@ La selección del reader no elimina la necesidad de defensa en profundidad:
 
 La geocodificación no debe ejecutarse por fila de paquete. Debe operar sobre la dirección normalizada/deduplicada y conservar la relación paquete → dirección.
 
-En el manifiesto real analizado: 128 paquetes → 70 direcciones únicas. Por tanto, el diseño inicial puede reducir las consultas de geocodificación a un máximo de 70 para ese libro, sin perder las 128 relaciones operacionales.
+En el manifiesto real analizado: 127 paquetes operacionales → 70 direcciones únicas. Por tanto, el diseño inicial puede reducir las consultas de geocodificación a un máximo de 70 para ese libro, sin perder las 128 relaciones operacionales.
 
 ## Gates pendientes antes de declarar adopción definitiva
 
