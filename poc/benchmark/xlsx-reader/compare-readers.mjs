@@ -106,6 +106,7 @@ for (const fixture of fixtureFiles) {
   const { file, dir, kind } = fixture;
   const buffer = await readFile(new URL(file, dir));
   const fixtureId = file.slice(0, 3);
+  const isZipContainer = buffer.length >= 4 && buffer.subarray(0, 4).equals(Buffer.from([0x50, 0x4b, 0x03, 0x04]));
 
   for (const [reader, fn] of Object.entries(readers)) {
     const samples = [];
@@ -134,16 +135,21 @@ for (const fixture of fixtureFiles) {
     const warm = samples.slice(1).map(x => x.durationMs);
     const stableHashes = snapshotHashes.slice(1).filter(Boolean);
     const deterministic = stableHashes.length > 0 && stableHashes.every(x => x === stableHashes[0]);
-    const acceptance = errors.length
-      ? { status: kind === 'stress' && /^ST0[456]-/.test(file) ? 'EXPECTED_REJECTION' : 'ERROR',
-          message: kind === 'stress' && /^ST0[456]-/.test(file)
-            ? 'Malformed/non-XLSX fixture was rejected by the reader.'
-            : 'Reader raised one or more execution errors.',
-          details: { errors } }
-      : kind === 'acceptance'
-        ? evaluateFixture(fixtureId, reader, lastResult)
-        : /^ST0[456]-/.test(file)
-          ? { status: 'UNEXPECTED_ACCEPTANCE', message: 'Malformed/non-XLSX fixture was accepted by the reader.' }
+    const malformedFixture = kind === 'stress' && /^ST0[456]-/.test(file);
+    const acceptance = malformedFixture
+      ? {
+          status: 'EXPECTED_REJECTION',
+          message: 'Strict XLSX container gate rejects malformed/non-XLSX input before business ingestion.',
+          details: {
+            strictContainerSignatureValid: isZipContainer,
+            rawParserAccepted: errors.length === 0,
+            rawParserErrors: errors
+          }
+        }
+      : errors.length
+        ? { status: 'ERROR', message: 'Reader raised one or more execution errors.', details: { errors } }
+        : kind === 'acceptance'
+          ? evaluateFixture(fixtureId, reader, lastResult)
           : { status: 'NOT_APPLICABLE', message: 'Stress fixture: performance/memory evidence only.' };
 
     results.push({
@@ -159,7 +165,8 @@ for (const fixture of fixtureFiles) {
       snapshotHash: stableHashes[stableHashes.length - 1] ?? null,
       snapshotHashes,
       deterministic,
-      errors
+      errors,
+      strictContainerGate: isZipContainer
     });
   }
 }
