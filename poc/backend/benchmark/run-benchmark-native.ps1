@@ -96,6 +96,17 @@ $nestStdErr = Join-Path $benchmarkDir "native-nestjs.stderr.log"
 $aspStdOut = Join-Path $benchmarkDir "native-aspnet.stdout.log"
 $aspStdErr = Join-Path $benchmarkDir "native-aspnet.stderr.log"
 
+function Stop-ProcessOnPort([int]$Port) {
+  try {
+    $connections = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
+    foreach ($connection in $connections) {
+      if ($connection.OwningProcess -gt 0) {
+        try { Stop-Process -Id $connection.OwningProcess -Force -ErrorAction Stop } catch {}
+      }
+    }
+  } catch {}
+}
+
 Write-Host "=== Native build ==="
 Push-Location $nestDir
 try { $nestBuild = Measure-Command { npm run build | Out-Host } } finally { Pop-Location }
@@ -137,10 +148,15 @@ for ($run = 1; $run -le $Runs; $run++) {
     Write-Host "--- $($target.name) ---"
     Reset-Database
 
-    $stdout = if ($target.name -eq "nestjs") { $nestStdOut } else { $aspStdOut }
-    $stderr = if ($target.name -eq "nestjs") { $nestStdErr } else { $aspStdErr }
-    if (Test-Path $stdout) { Remove-Item $stdout -Force }
-    if (Test-Path $stderr) { Remove-Item $stderr -Force }
+    $stdoutBase = if ($target.name -eq "nestjs") { $nestStdOut } else { $aspStdOut }
+    $stderrBase = if ($target.name -eq "nestjs") { $nestStdErr } else { $aspStdErr }
+    $stdout = "$stdoutBase.$run.log"
+    $stderr = "$stderrBase.$run.log"
+    $port = if ($target.name -eq "nestjs") { 3000 } else { 8081 }
+
+    # El runner puede haber quedado interrumpido en una ejecución anterior.
+    # Los puertos 3000/8081 están reservados para este benchmark.
+    Stop-ProcessOnPort $port
 
     $env:DATABASE_URL = $DatabaseUrl
     $process = $null
