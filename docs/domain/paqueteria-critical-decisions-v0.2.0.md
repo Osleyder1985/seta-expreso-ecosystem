@@ -1,6 +1,6 @@
 # Cierre de decisiones críticas de Paquetería — v0.2.0
 
-**Estado:** análisis de evidencia oficial y propuesta de cierre parcial  
+**Estado:** En validación
 **Fecha:** 2026-09-24
 
 ## 1. Objetivo
@@ -229,3 +229,6 @@ D12 permanece abierto.
 **No se autoriza todavía el esquema físico PostgreSQL definitivo.**
 
 El siguiente paso es cerrar la semántica operacional de recepción → liberación → preparación para distribución → entrega y convertir las reglas confirmadas en especificación funcional y contratos de aplicación.
+
+
+**Fase/nota:** El estado anterior, si existía, se conserva como descripción histórica de fase; el campo `Estado` usa exclusivamente la taxonomía formal de gobernanza.
