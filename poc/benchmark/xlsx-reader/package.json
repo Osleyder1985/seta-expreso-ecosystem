@@ -5,6 +5,8 @@
   "engines": { "node": "24.21.0" },
   "scripts": {
     "generate-fixtures": "node generate-fixtures.mjs",
+    "generate-stress-fixtures": "node generate-stress-fixtures.mjs",
+    "generate-malformed-fixtures": "node generate-malformed-fixtures.mjs",
     "compare": "node compare-readers.mjs"
   },
   "dependencies": {
