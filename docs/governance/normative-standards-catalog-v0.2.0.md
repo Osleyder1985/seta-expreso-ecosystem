@@ -1,9 +1,9 @@
 # Catálogo normativo de estándares de ingeniería
 
-**Versión:** 0.2.0  
+**Versión:** 0.3.0  
 **Estado:** Vigente como catálogo de referencia  
 **Fecha de verificación:** 2026-09-25  
-**Issue:** #79
+**Issue:** #109
 
 ## Propósito
 Fuente única para registrar edición, estado, aplicabilidad y trazabilidad de estándares internacionales usados como referencia del Ecosistema. No constituye certificación ni declaración de conformidad.
@@ -17,6 +17,12 @@ Fuente única para registrar edición, estado, aplicabilidad y trazabilidad de e
 | ISO/IEC/IEEE 29148 | 2018 | Vigente; revisión futura | Requisitos |
 | ISO/IEC/IEEE 42010 | 2022 | Publicada | Arquitectura |
 | ISO/IEC/IEEE 15289 | 2019 | Publicada; revisión en desarrollo | Documentación |
+| ISO/IEC/IEEE 16326 | 2019 | Publicada | Gestión de proyectos |
+| ISO/IEC/IEEE 14764 | 2022 | Publicada | Mantenimiento de software |
+| ISO/IEC 25012 | 2008 | Vigente | Calidad de datos |
+| ISO/IEC 27005 | 2022 | Publicada | Riesgo de seguridad |
+| ISO 31000 | 2018 | Vigente; revisión en desarrollo | Gestión del riesgo |
+| ISO 22301 | 2019 + Amd 1:2024 | Publicada | Continuidad |
 | ISO/IEC 25010 | 2023 | Publicada | Calidad de producto |
 | ISO/IEC 25002 | 2024 | Publicada | Modelos de calidad |
 | ISO/IEC 5055 | 2021 | Publicada; revisión 2026 | Métricas de código |
@@ -41,6 +47,12 @@ Fuente única para registrar edición, estado, aplicabilidad y trazabilidad de e
 
 ## Estándares en desarrollo
 Existe un Committee Draft de la próxima edición de 15289. No se trata como estándar vigente.
+
+## Matriz de aplicabilidad
+
+La aplicabilidad se determina por proceso, dato, actor y obligación. Una norma incluida no implica que todos sus requisitos sean aplicables ni que exista conformidad.
+
+La matriz operativa detallada se mantiene en `docs/governance/normative-applicability-matrix-v0.1.0.md`.
 
 ## Alcance
 Este catálogo no declara certificación, conformidad formal ni cumplimiento legal. No sustituye la normativa cubana.
