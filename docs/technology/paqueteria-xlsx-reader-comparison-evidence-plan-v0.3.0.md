@@ -7,7 +7,6 @@ Define the reproducible evidence required before selecting an XLSX reader for th
 ## Candidate set
 
 - ExcelJS 4.4.0
-- ExcelJS Hardened 5.0.0 (security-maintained fork; non-upstream candidate)
 - SheetJS CE 0.20.3
 - read-excel-file 9.3.10
 
@@ -88,6 +87,6 @@ A candidate can only be selected when every mandatory requirement is either sati
 
 ## Current limitation
 
-The source repository contains the executable protocol and fixture definitions, but measured CI results, dependency/security scans, lockfile evidence and real-manifest evidence must be obtained from execution/review. They must never be inferred from source code.
+The source repository contains the executable protocol and fixture definitions. The benchmark candidate set is limited to readers actually installed and exercised by the harness; alternative hardened forks are not candidates until an executable adapter and reproducible dependency evidence are added. Measured CI results, dependency/security scans, lockfile evidence and real-manifest evidence must be obtained from execution/review. They must never be inferred from source code.
 
 <!-- benchmark harness hardening checkpoint -->
