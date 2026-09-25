@@ -99,7 +99,7 @@ La selección del reader no elimina la necesidad de defensa en profundidad:
 
 La geocodificación no debe ejecutarse por fila de paquete. Debe operar sobre la dirección normalizada/deduplicada y conservar la relación paquete → dirección.
 
-En el manifiesto real analizado: 127 paquetes operacionales → 70 direcciones únicas. Por tanto, el diseño inicial puede reducir las consultas de geocodificación a un máximo de 70 para ese libro, sin perder las 128 relaciones operacionales.
+En el manifiesto real analizado: 127 paquetes operacionales → 70 direcciones únicas. Por tanto, el diseño inicial puede reducir las consultas de geocodificación a un máximo de 70 para ese libro, sin perder las 127 relaciones operacionales.
 
 ## Gates pendientes antes de declarar adopción definitiva
 
