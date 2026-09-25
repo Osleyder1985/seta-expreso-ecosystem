@@ -1,0 +1,35 @@
+name: pod-evidence-storage-poc
+
+on:
+  push:
+    branches:
+      - main
+      - 'poc/**'
+  pull_request:
+    paths:
+      - 'poc/pod-evidence-storage/**'
+      - '.github/workflows/pod-evidence-storage-poc.yml'
+
+jobs:
+  filesystem-baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Execute reproducible filesystem baseline
+        run: python poc/pod-evidence-storage/runner.py
+
+      - name: Validate structured result
+        run: python -c "import json; p=json.load(open('poc/pod-evidence-storage/results.json')); assert p['implementation']=='filesystem'; assert set(p['tests']) == {'1MiB','5MiB','10MiB','20MiB'}"
+
+      - name: Publish PoC results
+        uses: actions/upload-artifact@v4
+        with:
+          name: pod-evidence-storage-results
+          path: poc/pod-evidence-storage/results.json

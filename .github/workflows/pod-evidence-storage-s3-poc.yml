@@ -1,0 +1,49 @@
+name: pod-evidence-storage-s3-poc
+
+on:
+  pull_request:
+    paths:
+      - 'poc/pod-evidence-storage/**'
+      - '.github/workflows/pod-evidence-storage-s3-poc.yml'
+  workflow_dispatch:
+
+jobs:
+  s3-compatible:
+    runs-on: ubuntu-latest
+    services:
+      cloudserver:
+        image: ghcr.io/scality/cloudserver:c1ba296859690c1cbbec609aaae430f6b04b4745
+        ports:
+          - 8000:8000
+        env:
+          SCALITY_ACCESS_KEY_ID: accessKey1
+          SCALITY_SECRET_ACCESS_KEY: verySecretKey1
+          S3BACKEND: file
+          S3DATAPATH: /usr/src/app/localData
+          S3METADATAPATH: /usr/src/app/localMetadata
+          REMOTE_MANAGEMENT_DISABLE: 1
+        options: >-
+          --health-cmd "node -e \"require('net').connect(8000,'127.0.0.1').on('connect',()=>process.exit(0)).on('error',()=>process.exit(1))\""
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+        volumes:
+          - /tmp/cloudserver-data:/usr/src/app/localData
+          - /tmp/cloudserver-metadata:/usr/src/app/localMetadata
+
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r poc/pod-evidence-storage/requirements-s3.txt
+      - env:
+          S3_ENDPOINT: http://127.0.0.1:8000
+          S3_ACCESS_KEY: accessKey1
+          S3_SECRET_KEY: verySecretKey1
+        run: python poc/pod-evidence-storage/s3_runner.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pod-evidence-storage-s3-results
+          path: poc/pod-evidence-storage/s3-results.json
