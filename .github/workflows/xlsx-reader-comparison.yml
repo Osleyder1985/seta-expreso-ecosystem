@@ -1,0 +1,46 @@
+name: XLSX reader comparison
+
+on:
+  pull_request:
+    paths:
+      - 'poc/benchmark/xlsx-reader/**'
+      - '.github/workflows/xlsx-reader-comparison.yml'
+  workflow_dispatch:
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: poc/benchmark/xlsx-reader
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24.21.0
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.21.0
+          cache: npm
+          cache-dependency-path: poc/benchmark/xlsx-reader/package.json
+
+      - name: Install benchmark dependencies
+        run: npm install --ignore-scripts
+
+      - name: Generate F01-F20 fixtures
+        run: npm run generate-fixtures
+
+      - name: Generate stress fixtures
+        run: npm run generate-stress-fixtures
+
+      - name: Generate malformed fixtures
+        run: npm run generate-malformed-fixtures
+
+      - name: Execute F01-F20 acceptance contract
+        run: node --expose-gc compare-readers.mjs
+
+      - name: Publish comparison report
+        uses: actions/upload-artifact@v4
+        with:
+          name: xlsx-reader-comparison-report
+          path: poc/benchmark/xlsx-reader/fixtures/comparison-report.json
