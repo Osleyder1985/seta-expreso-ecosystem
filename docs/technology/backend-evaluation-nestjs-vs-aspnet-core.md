@@ -4,6 +4,7 @@
 **Estado:** En validación
 **Issue:** #7  
 **Actualización de versión:** #20  
+**Entorno de referencia:** `docs/technology/backend-benchmark-environment-2026-09-25.md`  
 **Fecha:** 2026-09-24
 
 ## 1. Objetivo
