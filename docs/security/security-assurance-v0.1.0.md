@@ -1,7 +1,7 @@
 # Security Assurance en CI
 
-**Versión:** 0.1.0  
-**Estado:** Vigente como política de assurance para el estado actual del repositorio  
+**Versión:** 0.2.0  
+**Estado:** Vigente como control de assurance — Vigente como política de assurance para el estado actual del repositorio  
 **Fecha:** 2026-09-25  
 **Verificación CI:** ejecutada mediante workflow `Security Assurance`  
 **Issue:** #82
@@ -124,3 +124,8 @@ Los resultados de seguridad deben permanecer vinculados al commit evaluado.
 Issue #82 se considera resuelta para la fase actual cuando los controles obligatorios SEC-01 a SEC-04 estén definidos en política y ejecutados mediante workflow versionado, con evidencia de ejecución exitosa en un commit/PR posterior a su integración.
 
 **No se declara assurance completo del producto:** el alcance es el assurance automatizado disponible para el estado actual del repositorio.
+
+
+## Verificación CI reforzada — 2026-09-25
+
+SEC-03 ahora verifica que todos los workflows existentes declaren permisos de nivel superior. SEC-01 utiliza únicamente `contents: read`; no se concede escritura de `security-events` ni `pull-requests` para el escaneo de secretos. Las acciones de terceros de los workflows auditados están fijadas a SHA completo.
