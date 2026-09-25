@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - feat/paqueteria-xlsx-workbook-reader
+      - feat/paqueteria-xlsx-reader-comparison-harness
   workflow_dispatch:
 
 permissions:
