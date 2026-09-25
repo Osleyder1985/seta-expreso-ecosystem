@@ -58,8 +58,8 @@ The contract intentionally tests source fidelity rather than business validation
 | Provenance | source row/cell recoverability | required |
 | Determinism | repeated identical input and snapshot hashes | required |
 | Performance | median/p95, warmup, repeated runs | required |
-| Memory | RSS plus stress-workbook execution | required |
-| Robustness | malformed/edge-case XLSX execution | required |
+| Memory | Child-process peak RSS plus stress-workbook execution | required |
+| Robustness | malformed/edge-case XLSX execution with hard timeout | required |
 | Security | dependency tree, advisories, parser resource limits | blocking |
 | Supply chain | exact version, lockfile, license, provenance | blocking |
 | Real manifests | anonymized production-like samples | required |
@@ -83,7 +83,7 @@ The current benchmark package intentionally has no lockfile yet. Therefore the s
 
 No global score, ranking or winner is permitted.
 
-A candidate can only be selected when every mandatory requirement is either satisfied or has an explicitly documented compensating control accepted by an ADR. Performance is supporting evidence, not the selection criterion.
+A candidate can only be selected when every mandatory requirement is either satisfied or has an explicitly documented compensating control accepted by an ADR. Performance and memory are supporting evidence, not the selection criterion. No hard resource threshold is imposed until the real-manifest workload and CI runner characteristics establish a justified baseline; any production limit must be documented separately as an operational/security control.
 
 ## Current limitation
 
