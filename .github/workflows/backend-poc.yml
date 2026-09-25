@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: '24.21.0'
           cache: npm
           cache-dependency-path: poc/backend/nestjs/package.json
       - run: sudo apt-get update && sudo apt-get install -y postgresql-client
@@ -60,7 +60,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '10.0.x'
       - run: sudo apt-get update && sudo apt-get install -y postgresql-client
       - run: psql postgresql://poc:poc@localhost:5432/poc -f init.sql
       - run: dotnet build -c Release
