@@ -8,10 +8,18 @@ La ejecución de referencia debe hacerse en el equipo de desarrollo Windows 11 P
 
 > Nota: GitHub Actions puede ejecutar la validación CI en Linux; esos resultados sirven para verificar reproducibilidad y corrección, pero **no deben mezclarse** con las mediciones de rendimiento del equipo Windows de referencia.
 
+## Baselines
+
+- NestJS + Node.js LTS: versión exacta debe quedar registrada en cada ejecución.
+- ASP.NET Core + .NET 10 LTS: versión exacta del SDK/runtime debe quedar registrada.
+- PostgreSQL/PostGIS: versión exacta debe quedar registrada.
+- Docker: versión exacta debe quedar registrada.
+
 ## Requisitos
 
 - Docker Desktop funcionando.
 - Node.js LTS.
+- .NET 10 SDK.
 - PostgreSQL se ejecuta dentro de los Compose de cada PoC.
 - Puertos libres 3000 y 8081.
 
@@ -48,3 +56,5 @@ Los tiempos de build se muestran por separado. Los resultados HTTP se guardan en
 - Registrar cualquier desviación.
 - No convertir estos resultados en una decisión automática.
 - La evaluación final debe integrar evidencia experimental, documental, operativa y de mantenibilidad.
+- No mezclar resultados del PoC .NET 8 anterior con el experimento .NET 10.
+
