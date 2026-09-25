@@ -200,15 +200,13 @@ async function sheetjsProbe() {
 }
 
 async function readExcelFileProbe() {
-  const parsed = await readXlsxFile(buffer, { getSheets: true });
-  const sheets = [];
-  for (const sheet of parsed) {
-    const rows = await readXlsxFile(buffer, { sheet: sheet.name, schema: undefined });
-    sheets.push({
-      name: sheet.name,
-      summary: summarizeRows(rows, detectHeaderRow(rows))
-    });
-  }
+  // read-excel-file >= 8 returns all sheets from the default export.
+  // The historical getSheets option belonged to older API generations.
+  const parsed = await readXlsxFile(buffer);
+  const sheets = parsed.map(({ sheet, data }) => ({
+    name: sheet,
+    summary: summarizeRows(data, detectHeaderRow(data))
+  }));
   return { sheets };
 }
 
