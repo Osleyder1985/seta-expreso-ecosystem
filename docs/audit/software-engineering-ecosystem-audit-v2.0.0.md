@@ -1,3 +1,7 @@
+# Corte de auditoría
+
+Este informe es el baseline integral del corte posterior al informe histórico v1.0.0.
+
 # Auditoría integral del repositorio — corte 2026-09-25
 
 **Código:** AUD-2026-09-25-01  
