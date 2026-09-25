@@ -167,6 +167,8 @@ def t07(storage, evidence, content, root):
     try:
         storage.get(evidence, "admin")
     except HashMismatch:
+        path.write_bytes(content)
+        assert storage.get(evidence, "admin") == content
         return {"corruption_detected": True}
     raise AssertionError("corruption was not detected")
 
