@@ -24,10 +24,10 @@ const payload = JSON.stringify({
   recipientAddress: 'Benchmark address'
 });
 
-function target(index) {
+function target(index, warmupPhase = false) {
   if (operation === 'create') return { method: 'POST', url: baseUrl + '/packages', body: payload };
   if (operation === 'list') return { method: 'GET', url: baseUrl + '/packages' };
-  const idIndex = operation === 'delete' ? warmupRequests + index : index;
+  const idIndex = operation === 'delete' ? (warmupPhase ? index : warmupRequests + index) : index;
   const id = ids[idIndex % ids.length];
   if (operation === 'get') return { method: 'GET', url: baseUrl + `/packages/${id}` };
   if (operation === 'update') return {
@@ -38,7 +38,7 @@ function target(index) {
   return { method: 'DELETE', url: baseUrl + `/packages/${id}` };
 }
 
-async function load(count) {
+async function load(count, warmupPhase = false) {
   let errors = 0;
   let next = 0;
   const latencies = [];
@@ -49,7 +49,7 @@ async function load(count) {
       if (index >= count) return;
       const started = performance.now();
       try {
-        const request = target(index);
+        const request = target(index, warmupPhase);
         const response = await fetch(request.url, {
           method: request.method,
           headers: request.body ? { 'content-type': 'application/json' } : undefined,
@@ -70,7 +70,7 @@ async function load(count) {
   return { elapsed_ms: performance.now() - started, errors, latencies };
 }
 
-if (warmupRequests > 0) await load(warmupRequests);
+if (warmupRequests > 0) await load(warmupRequests, true);
 
 const result = await load(requests);
 result.latencies.sort((a,b) => a-b);
