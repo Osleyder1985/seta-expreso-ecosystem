@@ -2,9 +2,7 @@ import { readFile, writeFile, readdir } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
-import ExcelJS from 'exceljs';
-import readXlsxFile from 'read-excel-file/node';
-import * as XLSX from 'xlsx';
+
 import { evaluateFixture } from './acceptance-contract.mjs';
 
 const fixtureSets = [
@@ -19,7 +17,6 @@ for (const set of fixtureSets) {
   }
 }
 const hash = v => createHash('sha256').update(JSON.stringify(v)).digest('hex');
-const rss = () => process.memoryUsage().rss;
 const percentile = (values, p) => {
   const sorted = [...values].sort((a, b) => a - b);
   if (!sorted.length) return null;
@@ -143,7 +140,7 @@ for (const fixture of fixtureFiles) {
   const fixtureId = file.slice(0, 3);
   const isZipContainer = buffer.length >= 4 && buffer.subarray(0, 4).equals(Buffer.from([0x50, 0x4b, 0x03, 0x04]));
 
-  for (const [reader, fn] of Object.entries(readers)) {
+  for (const reader of Object.keys(readers)) {
     const samples = [];
     const snapshotHashes = [];
     const errors = [];
@@ -151,7 +148,6 @@ for (const fixture of fixtureFiles) {
 
     for (let i = 0; i < 6; i++) {
       global.gc?.();
-      const before = rss();
       const isolated = await runIsolated(reader, fileURLToPath(new URL(file, dir)));
       const durationMs = isolated.elapsedMs;
       if (isolated.timeout) {
@@ -164,7 +160,7 @@ for (const fixture of fixtureFiles) {
         lastResult = isolated.result;
         snapshotHashes.push(hash(isolated.result));
       }
-      samples.push({ durationMs, rssDelta: isolated.rss ? isolated.rss - before : rss() - before });
+      samples.push({ durationMs, rssBytes: isolated.maxRssBytes ?? null });
     }
 
     const warm = samples.slice(1).map(x => x.durationMs);
@@ -173,8 +169,8 @@ for (const fixture of fixtureFiles) {
     const malformedFixture = kind === 'stress' && /^ST0[456]-/.test(file);
     const acceptance = malformedFixture
       ? {
-          status: 'EXPECTED_REJECTION',
-          message: 'Strict XLSX container gate rejects malformed/non-XLSX input before business ingestion.',
+          status: errors.length ? 'EXPECTED_REJECTION' : 'UNEXPECTED_ACCEPTANCE',
+          message: errors.length ? 'Malformed/non-XLSX fixture was rejected by the reader.' : 'Malformed/non-XLSX fixture was accepted by the reader.',
           details: {
             strictContainerSignatureValid: isZipContainer,
             rawParserAccepted: errors.length === 0,
@@ -196,7 +192,7 @@ for (const fixture of fixtureFiles) {
       durationMedianMs: percentile(warm, 0.5),
       durationP95Ms: percentile(warm, 0.95),
       durationSamplesMs: samples.map(x => x.durationMs),
-      maxRssDelta: Math.max(...samples.map(x => x.rssDelta)),
+      maxRssBytes: Math.max(...samples.map(x => x.rssBytes ?? 0)),
       snapshotHash: stableHashes[stableHashes.length - 1] ?? null,
       snapshotHashes,
       deterministic,
@@ -227,7 +223,7 @@ const robustnessSummary = results
   }, { EXECUTED: 0, EXPECTED_REJECTION: 0, UNEXPECTED_ACCEPTANCE: 0, ERROR: 0 });
 
 const report = {
-  protocol: 'xlsx-reader-comparison-v0.7.0',
+  protocol: 'xlsx-reader-comparison-v0.8.0',
   executionTimeoutMs: EXECUTION_TIMEOUT_MS,
   node: process.version,
   platform: process.platform,
