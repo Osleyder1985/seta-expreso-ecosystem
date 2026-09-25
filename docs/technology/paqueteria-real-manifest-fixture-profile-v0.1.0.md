@@ -12,7 +12,7 @@
 - Data begins at row 7.
 - Header contains 12 operational columns.
 - Workbook therefore explicitly exercises the requirement that the reader must not assume row 1 is the header.
-- Numeric fields include decimal weights and integer counts.
+- Numeric fields include decimal weights and integer counts; the source also has a trailing total row after the 127 operational records.
 - Address, recipient, telephone and destination-code columns are textual.
 - Repeated addresses occur across multiple House records.
 - Destination codes are textual and must be preserved without interpretation.
@@ -52,6 +52,6 @@ The Library workbook was materialized and inspected without committing it to Git
 - merged-cell ranges: 0;
 - hidden worksheets: none;
 - formulas: 0;
-- cell value types across the inspected sheet: 915 strings, 521 integers, 118 floating-point values and 54 blank cells.
+- cell value types across the inspected sheet: 915 strings, 521 integers, 117 floating-point values and 54 blank cells.
 
 The workbook contains personal/operational data and therefore remains outside repository history. These measurements are structural evidence only.
