@@ -2,11 +2,11 @@
 
 **Código:** AUD-001  
 **Versión:** 1.0.0  
-**Estado:** En ejecución — auditoría integral por fases  
+**Estado:** Sustituido  
 **Fecha de auditoría:** 2026-09-25  
 **Issue:** #74  
 **Repositorio:** `Osleyder1985/seta-expreso-ecosystem`  
-**Baseline auditado:** `main` @ `ea5a8eb1d21727412c23060dcc62dac341bfd59d`
+**Baseline histórico auditado:** `main` @ `ea5a8eb1d21727412c23060dcc62dac341bfd59d`
 
 ---
 
@@ -638,3 +638,6 @@ Cada hallazgo posterior deberá indicar:
 |---|---|---|---|
 | 1.0.0 | 2026-09-25 | En ejecución | Corte inicial de auditoría integral basado en evidencia del repositorio |
 | 1.0.1 | 2026-09-25 | En ejecución | Profundización normativa, arquitectónica, de requisitos y quality gates; incorporación de H-07 a H-13 |
+
+
+> **Aviso de historicidad:** Este documento no debe utilizarse como descripción del estado actual del repositorio. El corte vigente de auditoría se encuentra en `docs/audit/software-engineering-ecosystem-audit-v2.0.0.md`.
