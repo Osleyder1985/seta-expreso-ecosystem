@@ -197,13 +197,13 @@ def t08(s, client, eid, content, tmp):
     h = digest(content)
     s.put(eid, content, h)
     backup = Path(tmp) / "backup.tar.gz"
-    export = Path(tmp) / "export"
+    export = Path(tmp) / f"export-{eid}"
     export.mkdir()
     data = client.get_object(Bucket=BUCKET, Key=f"evidence/{eid}")["Body"].read()
     (export / eid).write_bytes(data)
     with tarfile.open(backup, "w:gz") as archive:
         archive.add(export, arcname="evidence")
-    restore = Path(tmp) / "restore"
+    restore = Path(tmp) / f"restore-{eid}"
     restore.mkdir()
     with tarfile.open(backup, "r:gz") as archive:
         archive.extractall(restore, filter="data")
