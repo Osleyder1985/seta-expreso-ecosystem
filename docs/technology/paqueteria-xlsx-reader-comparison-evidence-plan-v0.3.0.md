@@ -88,3 +88,5 @@ A candidate can only be selected when every mandatory requirement is either sati
 ## Current limitation
 
 The source repository contains the executable protocol and fixture definitions, but measured CI results, dependency/security scans, lockfile evidence and real-manifest evidence must be obtained from execution/review. They must never be inferred from source code.
+
+<!-- benchmark harness hardening checkpoint -->
