@@ -91,8 +91,11 @@ async function sheetjsRead(buffer) {
 }
 
 async function readExcelFile(buffer) {
-  const rows = await readXlsxFile(buffer);
-  return { sheets: [{ name: 'first-sheet', rows }], formulas: [] };
+  const parsed = await readXlsxFile(buffer);
+  const sheets = Array.isArray(parsed) && parsed.length > 0 && parsed[0]?.sheet !== undefined
+    ? parsed.map(x => ({ name: x.sheet, rows: x.data }))
+    : [{ name: 'first-sheet', rows: parsed }];
+  return { sheets, formulas: [] };
 }
 
 const readers = {
