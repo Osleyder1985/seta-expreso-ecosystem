@@ -1,9 +1,9 @@
 # Evaluación objetiva del Backend: NestJS vs ASP.NET Core
 
-**Versión:** 0.1.0  
+**Versión:** 0.2.0  
 **Estado:** Evaluación en curso  
 **Issue:** #7  
-**Fecha:** 2026-09-24
+**Fecha:** 2026-09-25
 
 ## 1. Objetivo
 
@@ -12,7 +12,7 @@ Aplicar la matriz oficial de evaluación tecnológica al backend del Ecosistema 
 Los candidatos evaluados son:
 
 - NestJS + TypeScript + Node.js LTS
-- ASP.NET Core + .NET LTS
+- ASP.NET Core + .NET 10 LTS
 
 La evaluación no debe convertir una preferencia tecnológica en una conclusión. Se separa la evidencia documental de la evidencia experimental.
 
@@ -38,6 +38,9 @@ La documentación oficial de testing indica soporte para pruebas unitarias, inte
 Nest dispone de integración dedicada para generar especificaciones OpenAPI desde el código mediante `@nestjs/swagger`. [E1]
 
 ### 3.2 ASP.NET Core
+
+Para el experimento actualizado se utilizará .NET 10 LTS. La política oficial de Microsoft, actualizada el 8 de septiembre de 2026, identifica .NET 10.0.12 como el parche vigente, con soporte LTS activo hasta el 14 de noviembre de 2028. .NET 8 se mantiene en fase de mantenimiento y finaliza soporte el 10 de noviembre de 2026. [E1]
+
 
 La documentación oficial de ASP.NET Core documenta Dependency Injection y Minimal APIs, además de capacidades de infraestructura HTTP y binding de servicios. [E1]
 
@@ -188,15 +191,17 @@ La evidencia documental demuestra que ambas alternativas disponen de capacidades
 
 No existe todavía en el repositorio oficial evidencia experimental suficiente para emitir una decisión final sobre NestJS frente a ASP.NET Core.
 
-La siguiente acción técnica es recuperar o reconstruir los dos PoC y ejecutar el benchmark común.
+La siguiente acción técnica es completar la reconstrucción del PoC ASP.NET Core sobre .NET 10 LTS, validar sus dependencias y ejecutar el benchmark común frente a la versión de NestJS seleccionada para el mismo experimento.
 
 ## 11. Referencias de evidencia
 
-- E1 — Documentación oficial de NestJS y Microsoft Learn consultada el 2026-09-24.
+- E1 — Documentación oficial de NestJS, Microsoft Learn y política oficial de soporte de .NET consultada en septiembre de 2026.
 - E2 — Evidencia experimental: pendiente de reproducir.
 
 ## 12. Trazabilidad
 
 `#7 → PoC/Benchmark → resultados → evaluación B01–B12 → ADR → Stack Baseline → PR`
+
+**Nota de actualización:** el PoC .NET 8 queda como referencia histórica del experimento anterior. El experimento vigente deberá ejecutarse sobre .NET 10 LTS.
 
 **Fin de la evaluación preliminar.**
