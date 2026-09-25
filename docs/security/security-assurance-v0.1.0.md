@@ -16,7 +16,7 @@ La política diferencia controles **obligatorios ahora**, controles **condiciona
 | ID | Control | Ejecutor | Ámbito | Resultado requerido |
 |---|---|---|---|---|
 | SEC-01 | Secret scanning | GitHub Actions + Gitleaks | Todo el repositorio | PASS |
-| SEC-02 | Dependency review | GitHub Actions Dependency Review | PRs | PASS cuando existen dependencias modificadas |
+| SEC-02 | Dependency review | GitHub Actions Dependency Review | PRs con manifests de dependencias | PASS cuando el ámbito existe; N/A si no existe |
 | SEC-03 | Permisos mínimos del workflow | Revisión de workflows | .github/workflows | PASS |
 | SEC-04 | Configuración reproducible | Workflow versionado en Git | CI | PASS |
 
@@ -43,7 +43,7 @@ Los falsos positivos deben resolverse mediante configuración mínima y document
 
 ## 5. Dependency review
 
-Dependency Review se ejecuta en Pull Requests contra `main`.
+Dependency Review se ejecuta en Pull Requests contra `main` **solo cuando el repositorio contiene un manifiesto de dependencias**. Si no existe ningún manifiesto, el control se registra como N/A.
 
 Debe bloquear vulnerabilidades introducidas con severidad crítica. El umbral podrá elevarse cuando el riesgo del producto lo requiera.
 
@@ -105,6 +105,8 @@ La política se revisará cuando cambien:
 La evidencia primaria será:
 
 **workflow → job → step → resultado → commit/PR**
+
+Para SEC-02, la evidencia debe distinguir explícitamente PASS de N/A. No se considera fallo la ausencia de dependencia cuando el ámbito no existe.
 
 Los resultados de seguridad deben permanecer vinculados al commit evaluado.
 
