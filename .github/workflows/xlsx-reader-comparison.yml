@@ -59,4 +59,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: xlsx-reader-comparison-report
-          path: comparison-report.json
+          path: poc/benchmark/xlsx-reader/comparison-report.json
