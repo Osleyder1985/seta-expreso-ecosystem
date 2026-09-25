@@ -139,8 +139,9 @@ for (const fixture of fixtureFiles) {
   const buffer = await readFile(new URL(file, dir));
   const fixtureId = file.slice(0, 3);
   const isZipContainer = buffer.length >= 4 && buffer.subarray(0, 4).equals(Buffer.from([0x50, 0x4b, 0x03, 0x04]));
+  const readers = ['exceljs', 'sheetjs', 'read-excel-file'];
 
-  for (const reader of Object.keys(readers)) {
+  for (const reader of readers) {
     const samples = [];
     const snapshotHashes = [];
     const errors = [];
@@ -154,7 +155,7 @@ for (const fixture of fixtureFiles) {
         errors.push({ iteration: i + 1, name: isolated.error.name, message: isolated.error.message });
         snapshotHashes.push(null);
       } else if (!isolated.ok) {
-        errors.push({ iteration: i + 1, name: isolated.error.name, message: isolated.error.message });
+        errors.push({ iteration: i + 1, name: isolated.error.name, message: isolated.error.message, preflightRejected: isolated.preflightRejected === true });
         snapshotHashes.push(null);
       } else {
         lastResult = isolated.result;
@@ -167,10 +168,11 @@ for (const fixture of fixtureFiles) {
     const stableHashes = snapshotHashes.slice(1).filter(Boolean);
     const deterministic = stableHashes.length > 0 && stableHashes.every(x => x === stableHashes[0]);
     const malformedFixture = kind === 'stress' && /^ST0[456]-/.test(file);
+    const preflightRejected = errors.length > 0 && errors.every(e => e.preflightRejected === true);
     const acceptance = malformedFixture
       ? {
-          status: errors.length ? 'EXPECTED_REJECTION' : 'UNEXPECTED_ACCEPTANCE',
-          message: errors.length ? 'Malformed/non-XLSX fixture was rejected by the reader.' : 'Malformed/non-XLSX fixture was accepted by the reader.',
+          status: preflightRejected || (errors.length > 0 && /^ST0[45]-/.test(file)) ? 'EXPECTED_REJECTION' : 'UNEXPECTED_ACCEPTANCE',
+          message: preflightRejected ? 'Input rejected by the strict XLSX container preflight before parser invocation.' : errors.length ? 'Malformed XLSX container was rejected by the reader.' : 'Malformed/non-XLSX fixture was accepted by the reader.',
           details: {
             strictContainerSignatureValid: isZipContainer,
             rawParserAccepted: errors.length === 0,
@@ -197,7 +199,8 @@ for (const fixture of fixtureFiles) {
       snapshotHashes,
       deterministic,
       errors,
-      strictContainerGate: isZipContainer
+      strictContainerGate: isZipContainer,
+      preflightRejectionCount: errors.filter(e => e.preflightRejected === true).length
     });
   }
 }
@@ -223,7 +226,7 @@ const robustnessSummary = results
   }, { EXECUTED: 0, EXPECTED_REJECTION: 0, UNEXPECTED_ACCEPTANCE: 0, ERROR: 0 });
 
 const report = {
-  protocol: 'xlsx-reader-comparison-v0.8.0',
+  protocol: 'xlsx-reader-comparison-v0.9.0',
   executionTimeoutMs: EXECUTION_TIMEOUT_MS,
   node: process.version,
   platform: process.platform,
