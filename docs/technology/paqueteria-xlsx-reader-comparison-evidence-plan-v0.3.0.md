@@ -7,6 +7,7 @@ Define the reproducible evidence required before selecting an XLSX reader for th
 ## Candidate set
 
 - ExcelJS 4.4.0
+- ExcelJS Hardened 5.0.0 (security-maintained fork; non-upstream candidate)
 - SheetJS CE 0.20.3
 - read-excel-file 9.3.10
 
