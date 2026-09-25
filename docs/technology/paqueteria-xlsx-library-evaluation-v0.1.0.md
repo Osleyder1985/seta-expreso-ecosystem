@@ -33,7 +33,13 @@ Existen reportes upstream sobre:
 
 Estos hallazgos **no equivalen por sí solos a una vulnerabilidad explotable en nuestro flujo**, pero sí constituyen deuda de supply chain que debe quedar documentada y verificarse mediante el árbol real de dependencias una vez generado el lockfile.
 
-### 2.3 Riesgo adicional del parser
+### 2.3 Riesgo crítico adicional del parser
+
+La investigación de seguridad actual identifica un advisory publicado en agosto de 2026 para `exceljs` <= 4.4.0: `Workbook.xlsx.load()` puede descomprimir entradas ZIP sin límites de tamaño total, tamaño por entrada o ratio de compresión, permitiendo un consumo de memoria muy elevado mediante un archivo XLSX especialmente construido. El advisory reporta que no existe parche upstream en 4.4.0. Esto convierte la aceptación de archivos no confiables en un riesgo que debe tratarse explícitamente en la arquitectura de importación.
+
+**Consecuencia provisional:** ExcelJS 4.4.0 no debe exponerse como parser directo de archivos arbitrarios sin una barrera de seguridad/recursos. La mitigación debe definirse antes de producción: límites de tamaño, aislamiento del proceso, cuotas de memoria/CPU, validación del contenedor ZIP y/o parser alternativo endurecido.
+
+### 2.4 Riesgo adicional del parser
 
 Existe un reporte de 2026 sobre consumo descontrolado de recursos mediante `Workbook.xlsx.load()` en archivos XLSX especialmente construidos. Esto es particularmente relevante porque nuestro adapter actual utiliza `workbook.xlsx.load(buffer)`.
 
@@ -118,6 +124,8 @@ No se autoriza una decisión definitiva hasta disponer de:
 
 ## 6. Resultado
 
-**ExcelJS 4.4.0: técnicamente viable para continuar el PoC, pero NO adoptado definitivamente.**
+**ExcelJS 4.4.0: viable para continuar el PoC controlado, pero con un riesgo de seguridad de parser que impide considerarlo listo para producción sin mitigación o sustitución.**
+
+La evaluación comparativa gana ahora prioridad: una alternativa que conserve los requisitos críticos y presente un modelo de ingestión más seguro puede cambiar la decisión provisional.
 
 La arquitectura actual de aislamiento es adecuada para mantener reversible esta decisión.
