@@ -12,7 +12,7 @@ const fixtureSets = [
 
 const fixtureFiles = [];
 for (const set of fixtureSets) {
-  for (const file of (await readdir(set.dir)).filter(set.filter).sort()) {
+  for (const file of (await readdir(set.dir)).filter(name => set.filter.test(name)).sort()) {
     fixtureFiles.push({ file, dir: set.dir, kind: set.kind });
   }
 }
