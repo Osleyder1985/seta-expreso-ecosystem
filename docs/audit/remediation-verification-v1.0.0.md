@@ -1,3 +1,5 @@
+**Estado:** Vigente
+
 # Registro de verificación de remediaciones v1.0.0
 
 **Fecha:** 2026-09-25  
@@ -24,3 +26,6 @@ El catálogo normativo fue ampliado y existe una matriz explícita de aplicabili
 - Issue #10: benchmark real pendiente de ejecución sobre el hardware de referencia.
 
 Este documento no declara certificación ISO ni conformidad legal.
+
+
+**Fase/nota:** Las etiquetas históricas de fase o baseline no constituyen estados formales; el campo `Estado` se rige exclusivamente por la taxonomía de gobernanza.
