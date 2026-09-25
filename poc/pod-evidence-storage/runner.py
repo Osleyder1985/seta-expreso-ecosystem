@@ -178,7 +178,7 @@ def t08(storage, evidence, content, root):
     backup = root.parent / "backup.tar.gz"
     with tarfile.open(backup, "w:gz") as archive:
         archive.add(storage.root, arcname="evidence")
-    restore_root = root.parent / "restore"
+    restore_root = root.parent / f"restore-{evidence.evidence_id}"
     restore_root.mkdir()
     with tarfile.open(backup, "r:gz") as archive:
         archive.extractall(restore_root, filter="data")
