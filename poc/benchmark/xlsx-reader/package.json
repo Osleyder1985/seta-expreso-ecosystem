@@ -15,7 +15,6 @@
   "dependencies": {
     "exceljs": "4.4.0",
     "read-excel-file": "9.3.10",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
-    "exceljs-hardened": "5.0.0"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   }
 }
