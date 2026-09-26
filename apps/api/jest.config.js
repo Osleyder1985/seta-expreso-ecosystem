@@ -12,5 +12,6 @@ module.exports = {
       module: { type: 'es6' }
     }]
   },
+  transformIgnorePatterns: ['/node_modules/(?!@nestjs/)'],
   testEnvironment: 'node',
 };
