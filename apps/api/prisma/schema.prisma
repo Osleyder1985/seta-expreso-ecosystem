@@ -1,0 +1,239 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [postgis]
+}
+
+model Manifest {
+  id String @id @default(uuid()) @db.Uuid
+  sourceFileName String
+  sourceSha256 String @db.VarChar(64)
+  sourceImportedAt DateTime @default(now()) @db.Timestamptz(6)
+  externalReference String?
+  status String @default("IMPORTED")
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+  transportDocuments TransportDocument[]
+  houses House[]
+  @@index([sourceSha256])
+}
+model TransportDocument {
+  id String @id @default(uuid()) @db.Uuid
+  manifestId String @db.Uuid
+  documentNo String
+  documentType String
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  manifest Manifest @relation(fields: [manifestId], references: [id], onDelete: Restrict)
+  masterAwb MasterAwb?
+  @@unique([manifestId, documentType, documentNo])
+  @@index([documentNo])
+}
+model MasterAwb {
+  id String @id @default(uuid()) @db.Uuid
+  transportDocumentId String @unique @db.Uuid
+  awbNumber String @unique
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  transportDocument TransportDocument @relation(fields: [transportDocumentId], references: [id], onDelete: Restrict)
+  houses House[]
+}
+model Person {
+  id String @id @default(uuid()) @db.Uuid
+  displayName String
+  identityRef String?
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  senderHouses House[] @relation("HouseSender")
+  recipientHouses House[] @relation("HouseRecipient")
+  @@index([identityRef])
+}
+model Address {
+  id String @id @default(uuid()) @db.Uuid
+  originalText String
+  normalizedText String?
+  validationStatus String @default("UNVALIDATED")
+  countryCode String?
+  locality String?
+  province String?
+  postalCode String?
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+  houses House[]
+  geolocations Geolocation[]
+}
+model Geolocation {
+  id String @id @default(uuid()) @db.Uuid
+  addressId String @db.Uuid
+  provider String
+  providerRef String?
+  latitude Decimal @db.Decimal(9,6)
+  longitude Decimal @db.Decimal(9,6)
+  confidence Decimal? @db.Decimal(5,4)
+  resolvedAt DateTime @default(now()) @db.Timestamptz(6)
+  location Unsupported("geography(Point,4326)")?
+  address Address @relation(fields: [addressId], references: [id], onDelete: Restrict)
+  @@index([addressId, resolvedAt])
+}
+model House {
+  id String @id @default(uuid()) @db.Uuid
+  manifestId String @db.Uuid
+  masterAwbId String @db.Uuid
+  houseNumber String
+  senderPersonId String?
+  recipientPersonId String?
+  deliveryAddressId String?
+  status String @default("RECEIVED")
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+  manifest Manifest @relation(fields: [manifestId], references: [id], onDelete: Restrict)
+  masterAwb MasterAwb @relation(fields: [masterAwbId], references: [id], onDelete: Restrict)
+  sender Person? @relation("HouseSender", fields: [senderPersonId], references: [id], onDelete: Restrict)
+  recipient Person? @relation("HouseRecipient", fields: [recipientPersonId], references: [id], onDelete: Restrict)
+  deliveryAddress Address? @relation(fields: [deliveryAddressId], references: [id], onDelete: Restrict)
+  physicalUnits PhysicalUnit[]
+  deliveries DeliveryHouse[]
+  @@unique([manifestId, houseNumber])
+  @@index([masterAwbId])
+  @@index([deliveryAddressId])
+  @@index([manifestId, status])
+}
+model PhysicalUnit {
+  id String @id @default(uuid()) @db.Uuid
+  houseId String @db.Uuid
+  sequenceNo Int
+  packageRef String?
+  declaredWeightKg Decimal? @db.Decimal(10,3)
+  receivedWeightKg Decimal? @db.Decimal(10,3)
+  status String @default("MANIFESTED")
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  house House @relation(fields: [houseId], references: [id], onDelete: Restrict)
+  @@unique([houseId, sequenceNo])
+  @@index([packageRef])
+}
+model StorageLocation {
+  id String @id @default(uuid()) @db.Uuid
+  code String @unique
+  description String?
+  active Boolean @default(true)
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  fromMoves StorageMovement[] @relation("StorageMoveFrom")
+  toMoves StorageMovement[] @relation("StorageMoveTo")
+}
+model StorageMovement {
+  id String @id @default(uuid()) @db.Uuid
+  physicalUnitId String @db.Uuid
+  fromLocationId String?
+  toLocationId String?
+  movementReason String
+  referenceNo String?
+  occurredAt DateTime @default(now()) @db.Timestamptz(6)
+  actorSubject String?
+  fromLocation StorageLocation? @relation("StorageMoveFrom", fields: [fromLocationId], references: [id], onDelete: Restrict)
+  toLocation StorageLocation? @relation("StorageMoveTo", fields: [toLocationId], references: [id], onDelete: Restrict)
+  @@index([physicalUnitId, occurredAt])
+}
+model CustomsAction {
+  id String @id @default(uuid()) @db.Uuid
+  houseId String? @db.Uuid
+  actionType String
+  authorityRef String?
+  result String?
+  evidenceRef String?
+  occurredAt DateTime @default(now()) @db.Timestamptz(6)
+  actorSubject String?
+  @@index([houseId, occurredAt])
+}
+model AbandonmentRecord {
+  id String @id @default(uuid()) @db.Uuid
+  houseId String @db.Uuid
+  legalType String
+  authorityRef String
+  resolutionRef String?
+  cause String?
+  occurredAt DateTime @default(now()) @db.Timestamptz(6)
+  evidenceRef String?
+  @@index([houseId, occurredAt])
+}
+model Incident {
+  id String @id @default(uuid()) @db.Uuid
+  houseId String? @db.Uuid
+  physicalUnitId String? @db.Uuid
+  incidentType String
+  description String?
+  resolution String?
+  evidenceRef String?
+  occurredAt DateTime @default(now()) @db.Timestamptz(6)
+  actorSubject String?
+  @@index([houseId, occurredAt])
+  @@index([physicalUnitId, occurredAt])
+}
+model Route {
+  id String @id @default(uuid()) @db.Uuid
+  routeDate DateTime @db.Date
+  origin String
+  destination String
+  vehicleRef String?
+  driverRef String?
+  status String @default("PLANNED")
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  stops RouteStop[]
+}
+model RouteStop {
+  id String @id @default(uuid()) @db.Uuid
+  routeId String @db.Uuid
+  sequenceNo Int
+  addressId String? @db.Uuid
+  latitude Decimal? @db.Decimal(9,6)
+  longitude Decimal? @db.Decimal(9,6)
+  arrivedAt DateTime? @db.Timestamptz(6)
+  route Route @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  @@unique([routeId, sequenceNo])
+  @@index([addressId])
+}
+model Delivery {
+  id String @id @default(uuid()) @db.Uuid
+  routeId String?
+  status String @default("PLANNED")
+  scheduledAt DateTime? @db.Timestamptz(6)
+  completedAt DateTime? @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  houses DeliveryHouse[]
+  attempts DeliveryAttempt[]
+  @@index([routeId, status])
+}
+model DeliveryHouse {
+  deliveryId String @db.Uuid
+  houseId String @db.Uuid
+  attachedAt DateTime @default(now()) @db.Timestamptz(6)
+  delivery Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+  house House @relation(fields: [houseId], references: [id], onDelete: Restrict)
+  @@id([deliveryId, houseId])
+  @@index([houseId])
+}
+model DeliveryAttempt {
+  id String @id @default(uuid()) @db.Uuid
+  deliveryId String @db.Uuid
+  attemptNo Int
+  result String
+  reason String?
+  occurredAt DateTime @default(now()) @db.Timestamptz(6)
+  actorSubject String?
+  delivery Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+  @@unique([deliveryId, attemptNo])
+}
+model AuditRecord {
+  id String @id @default(uuid()) @db.Uuid
+  actorSubject String?
+  action String
+  resourceType String
+  resourceId String
+  outcome String
+  reason String?
+  occurredAt DateTime @default(now()) @db.Timestamptz(6)
+  metadataJson Json?
+  @@index([resourceType, resourceId, occurredAt])
+  @@index([actorSubject, occurredAt])
+}
