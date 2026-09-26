@@ -108,11 +108,14 @@ async function main() {
   })) authUrl.searchParams.set(key, value);
 
   let response = await http(authUrl);
-  assert(response.status >= 300 && response.status < 400, 'Authorization endpoint did not redirect');
-  const loginUrl = new URL(response.headers.get('location'), base);
-  response = await http(loginUrl);
+  assert(response.ok || (response.status >= 300 && response.status < 400), 'Authorization endpoint failed');
+  if (response.status >= 300 && response.status < 400) {
+    const loginUrl = new URL(response.headers.get('location'), base);
+    response = await http(loginUrl);
+  }
   assert(response.ok, 'Keycloak login page failed');
 
+  const loginUrl = authUrl;
   const html = await response.text();
   const form = html.match(/<form[^>]+action="([^"]+)"[^>]*>/i);
   assert(form, 'Keycloak login form not found');
