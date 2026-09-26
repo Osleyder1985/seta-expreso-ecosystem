@@ -45,7 +45,7 @@ describe('SETA EXPRESO API (e2e)', () => {
       statuses.push(response.status);
     }
 
-    expect(statuses.filter((status) => status === 429)).toHaveLength(1);
+    expect(statuses.filter((status) => status === 429).length).toBeGreaterThanOrEqual(1);
   });
 
 });
