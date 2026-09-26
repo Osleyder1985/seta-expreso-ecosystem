@@ -1,5 +1,4 @@
 import crypto from "node:crypto";
-import os from "node:os";
 
 export const PROVENANCE_VERSION = "0.1.0";
 
@@ -68,7 +67,7 @@ export function buildProvenance({
       node: process.version,
       platform: process.platform,
       arch: process.arch,
-      hostname: os.hostname()
+      environment: process.env.CI ? "ci" : "local"
     },
     output_sha256: sha256(outputContent)
   };
