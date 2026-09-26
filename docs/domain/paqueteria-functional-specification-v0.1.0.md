@@ -374,7 +374,7 @@ Esta especificación podrá pasar a diseño de aplicación cuando:
 - AT-01…AT-26 puedan mapearse a pruebas;
 - D01…D12 tengan estado explícito;
 - reglas aduaneras que deban convertirse en restricciones tengan evidencia;
-- D09 y D12 sean cerrados por procedimiento operativo;
+- D09 sea cerrado por procedimiento operativo;
 - permisos por rol estén definidos.
 
 ## 28. Estado actual
