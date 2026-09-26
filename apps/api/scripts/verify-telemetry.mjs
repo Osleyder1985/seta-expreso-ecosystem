@@ -8,6 +8,7 @@ const checks = [
   ['alert rules', new URL('../../../infra/observability/prometheus/alerts.yml', import.meta.url)],
   ['loki config', new URL('../../../infra/observability/loki/config.yaml', import.meta.url)],
   ['compose', new URL('../../../infra/observability/docker-compose.yml', import.meta.url)],
+  ['alloy config', new URL('../../../infra/observability/alloy/config.alloy', import.meta.url)],
 ];
 
 for (const [name, url] of checks) {
