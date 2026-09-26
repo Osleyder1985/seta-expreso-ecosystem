@@ -21,17 +21,8 @@ export class OidcTokenVerifier {
         audience: this.audience,
         algorithms: ['RS256'],
       });
-      if (process.env.OIDC_DEBUG === 'true') {
-        console.error('[OIDC_DEBUG_VERIFY_OK]', {
-          subject: payload.sub,
-          claimKeys: Object.keys(payload),
-        });
-      }
       return this.toPrincipal(payload);
-    } catch (error) {
-      if (process.env.OIDC_DEBUG === 'true') {
-        console.error('[OIDC_DEBUG]', error instanceof Error ? error.message : error);
-      }
+    } catch {
       throw new UnauthorizedException('Invalid access token');
     }
   }
