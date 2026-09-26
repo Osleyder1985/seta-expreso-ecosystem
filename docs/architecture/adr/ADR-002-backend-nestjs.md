@@ -1,6 +1,6 @@
 # ADR-002 — Backend inicial con NestJS
 
-**Estado:** Propuesto  
+**Estado:** Aprobado  
 **Fecha:** 2026-09-26  
 **Decisión:** NestJS 12.1.0 + TypeScript 6.0.3 + Node.js 24.21.0 LTS  
 **Alternativa evaluada:** ASP.NET Core + .NET 10 LTS  
@@ -109,6 +109,6 @@ La decisión deberá revisarse si aparece:
 
 ## 9. Estado de integración
 
-Este ADR queda **Propuesto**. El Stack Baseline no se modifica hasta que la decisión sea aprobada mediante el flujo de gobernanza del proyecto.
+Este ADR queda **Aprobado** mediante la integración de la decisión en el flujo de gobernanza del proyecto. El Technology Stack Baseline incorpora NestJS como backend seleccionado para la implementación inicial.
 
 **Fin del ADR.**
