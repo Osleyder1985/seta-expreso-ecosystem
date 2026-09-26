@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { openapiV31 } from '@apidevtools/openapi-schemas';
 import Ajv2020 from 'ajv/dist/2020.js';
 
-const path = new URL('../../docs/api/openapi.json', import.meta.url);
+const path = new URL('../../../docs/api/openapi.json', import.meta.url);
 const document = JSON.parse(await readFile(path, 'utf8'));
 
 if (document.openapi !== '3.1.0') {
