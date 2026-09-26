@@ -138,4 +138,77 @@ No se ejecutará DELETE como condición artificial para continuar.
 - Cierre de ronda tecnológica por estado de evidencia: PR #154.
 - Reproducibilidad PostgreSQL preparada en PR #155; no constituye nueva evidencia experimental.
 
-**Fin del dossier.**
+
+## 9. Integración criterio por criterio — corte 2026-09-26
+
+Esta sección aplica la escala 0–5 únicamente cuando existe evidencia trazable suficiente. No convierte automáticamente diferencias de benchmark en una decisión de arquitectura.
+
+### 9.1 Matriz de puntuación trazable
+
+| Criterio | Peso | NestJS | Evidencia / justificación | Confianza | ASP.NET Core | Evidencia / justificación | Confianza |
+|---|---:|---:|---|---|---:|---|---|
+| B01 Arquitectura modular/Clean/Hexagonal | 15% | 3/5 | E1/E2: soporte de módulos/DI y PoC funcional; el PoC no implementa todavía una separación Clean/Hexagonal completa | Media | 3/5 | E1/E2: DI y PoC funcional; el PoC tampoco implementa todavía una separación Clean/Hexagonal completa | Media |
+| B02 REST/OpenAPI | 10% | 4/5 | E1/E2: REST funcional, Swagger/OpenAPI generado y validado en PoC | Alta | 4/5 | E1/E2: Minimal API REST, Swagger/OpenAPI y endpoints funcionales | Alta |
+| B03 Testabilidad | 10% | 4/5 | E2: pruebas E2E/integración y CI; PoC diseñado para prueba | Alta | 4/5 | E2: proyecto de pruebas y CI; PoC diseñado para prueba | Alta |
+| B04 Seguridad | 10% | 2/5 | E1/E2: validación global y manejo uniforme de errores; no existe todavía autenticación/autorización ni hardening completo en el PoC | Media | 2/5 | E1/E2: validación y manejo uniforme de errores; no existe todavía autenticación/autorización ni hardening completo en el PoC | Media |
+| B05 Rendimiento | 10% | 4/5 | E2: LIST nativo, 5 corridas, 0% errores; 3222.98 req/s promedio, p50 5.60 ms, p95 12.67 ms | Alta | 3/5 | E2: LIST nativo, 5 corridas, 0% errores; 917.92 req/s promedio, p50 13.30 ms, p95 63.48 ms | Alta |
+| B06 Mantenibilidad | 10% | 3/5 | E2: módulos, DTOs, servicio y controlador separados; todavía no existe arquitectura Clean/Hexagonal completa en el PoC | Media | 3/5 | E2: endpoint/service/store en PoC; todavía no existe arquitectura Clean/Hexagonal completa | Media |
+| B07 Ecosistema | 10% | 4/5 | E1: ecosistema oficial amplio de módulos, testing, OpenAPI, seguridad, observabilidad y acceso a datos | Alta | 4/5 | E1: plataforma oficial amplia con DI, OpenAPI, testing, health checks y ecosistema .NET | Alta |
+| B08 Documentación/madurez | 5% | 4/5 | E1: documentación oficial amplia y versión baseline fijada | Alta | 4/5 | E1: documentación oficial de .NET/ASP.NET Core y baseline .NET 10 LTS | Alta |
+| B09 Productividad | 5% | No evaluado | No existe medición homogénea de tiempo/effort para implementar la vertical | — | No evaluado | No existe medición homogénea de tiempo/effort para implementar la vertical | — |
+| B10 Operación/despliegue | 5% | 3/5 | E2: Dockerfile, compose, health check y configuración por entorno en PoC/CI | Media | 3/5 | E2: Dockerfile, compose, health check y configuración por entorno en PoC/CI | Media |
+| B11 Costo/licencia | 5% | 4/5 | E1: framework/runtime y tooling base sin costo de licencia para el escenario; TCO operativo aún no medido | Media | 4/5 | E1: runtime/framework base sin costo de licencia para el escenario; TCO operativo aún no medido | Media |
+| B12 Evolución futura | 5% | 4/5 | E1/E2: modularidad, TypeScript, OpenAPI y extensibilidad; riesgo aún depende de arquitectura definitiva | Media | 4/5 | E1/E2: DI, Minimal APIs/OpenAPI y ecosistema .NET; riesgo aún depende de arquitectura definitiva | Media |
+
+### 9.2 Criterios que permanecen abiertos
+
+**B09 Productividad** permanece explícitamente como **No evaluado**. No se utilizará una impresión subjetiva de velocidad de desarrollo como sustituto de una medición homogénea.
+
+**B01, B04, B06, B10, B11 y B12** tienen puntuación provisional trazable, pero con confianza Media porque el PoC no representa todavía el sistema productivo completo.
+
+**B05** tiene evidencia cuantitativa suficiente para una puntuación provisional del perfil LIST concreto. Esta puntuación no representa una propiedad universal del framework.
+
+### 9.3 Resultado cuantitativo parcial
+
+No se publica un total 0–100 todavía.
+
+La razón es metodológica: B09 carece de puntuación y la matriz vigente no define una regla de renormalización de pesos para criterios No evaluado. Renormalizar ahora cambiaría el significado del 100% y podría aparentar una completitud que todavía no existe.
+
+Por tanto, el estado correcto es:
+
+- **Puntuaciones trazables:** B01–B08 y B10–B12.
+- **No evaluado:** B09.
+- **Benchmark experimental disponible:** B05, únicamente perfil LIST nativo.
+- **Decisión final:** abierta.
+
+### 9.4 Observación importante sobre B05
+
+La diferencia observada en LIST es material dentro de este experimento: NestJS registró mayor throughput y menores p50/p95, mientras ASP.NET Core registró menor startup, menor build y menor working set.
+
+Esto debe interpretarse como evidencia del PoC y de este entorno/configuración. No se transforma en una afirmación general sobre NestJS frente a ASP.NET Core.
+
+### 9.5 Criterios eliminatorios
+
+No se ha identificado, con la evidencia disponible al corte, un incumplimiento eliminatorio de ninguno de los dos candidatos respecto a los requisitos backend establecidos.
+
+Esto no equivale a una certificación de seguridad productiva: la autenticación, autorización, gestión de secretos, hardening, threat modeling y pruebas de seguridad todavía pertenecen a la fase de diseño/implementación productiva.
+
+## 10. Evidencia documental externa incorporada
+
+La documentación oficial vigente confirma que Nest organiza aplicaciones mediante módulos y ofrece validación, OpenAPI y capacidades de seguridad; además, Nest 12.1 incorpora API de security headers. Para ASP.NET Core, Microsoft documenta DI como capacidad integrada y .NET 10 incorpora soporte integrado para generación de OpenAPI 3.1. Estas fuentes respaldan B01/B02/B04/B07/B08, pero no sustituyen las pruebas del PoC.
+
+Fuentes:
+- NestJS Modules / Validation / OpenAPI / Security.
+- Microsoft Learn — ASP.NET Core dependency injection / OpenAPI .NET 10.
+
+## 11. Nuevo estado de evaluación
+
+**Estado: EVALUACIÓN CUANTITATIVA PARCIAL, DECISIÓN ABIERTA.**
+
+La evaluación ya no está en el estado anterior de «benchmark pendiente». Existe evidencia experimental histórica válida para LIST y una primera puntuación trazable para los criterios con evidencia suficiente.
+
+No se repetirán benchmarks existentes ni se ejecutará DELETE para completar artificialmente la matriz.
+
+**Siguiente condición de cierre:** resolver B09 mediante evidencia de productividad o declarar formalmente que B09 no es necesario para esta decisión y aprobar esa excepción mediante la gobernanza del proyecto. A continuación se podrá calcular el resultado ponderado sin ocultar criterios ausentes.
+
+**Fin de la actualización del dossier v0.2.0.**
