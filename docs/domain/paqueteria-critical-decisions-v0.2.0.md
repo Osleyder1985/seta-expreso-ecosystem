@@ -1,6 +1,6 @@
 # Cierre de decisiones críticas de Paquetería — v0.2.1
 
-**Estado:** En validación
+**Estado:** D12 cerrado; D09 y otras decisiones operacionales permanecen abiertas
 **Fecha:** 2026-09-24
 
 ## 1. Objetivo
