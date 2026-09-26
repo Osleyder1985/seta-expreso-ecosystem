@@ -32,13 +32,13 @@ export class OidcTokenVerifier {
       if (process.env.OIDC_DEBUG === 'true') {
         console.error('[OIDC_DEBUG]', error instanceof Error ? error.message : error);
       }
-      throw new UnauthorizedException('Invalid access token: subject missing');
+      throw new UnauthorizedException('Invalid access token');
     }
   }
 
   private toPrincipal(payload: JWTPayload): AuthPrincipal {
     if (!payload.sub) {
-      throw new UnauthorizedException('Invalid access token');
+      throw new UnauthorizedException('Invalid access token: subject missing');
     }
 
     const realmRoles = this.readRoles(payload.realm_access);
