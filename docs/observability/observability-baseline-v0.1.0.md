@@ -68,7 +68,7 @@ Services:
 - Grafana: 3001
 - Loki: 3100
 
-The stack is a development/verification environment. Production retention, access control, TLS, persistent storage, backup and alert routing remain deployment decisions.
+The stack is a development/verification environment. Grafana Alloy reads the local Docker socket to collect container logs; this is a privileged local integration and must be replaced by the deployment platform's supported log source in production. Loki runs as root only to initialize the local Docker volume; this is not a production hardening recommendation. Production retention, access control, TLS, persistent storage, backup and alert routing remain deployment decisions.
 
 ## Retention
 
