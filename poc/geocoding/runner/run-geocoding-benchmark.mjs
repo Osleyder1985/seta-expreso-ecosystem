@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import fs from "node:fs/promises";
-import { buildProvenance } from "./provenance.mjs";
+import { buildProvenance, parseNonNegativeInteger } from "./provenance.mjs";
 
 const RUNNER_VERSION = "0.1.0";
 const PROTOCOL_VERSION = "cuba-geocoding-benchmark-v0.1";
@@ -31,9 +31,9 @@ const provider = process.env.GEOCODING_PROVIDER ?? "offline-fixture";
 const adapterVersion = process.env.GEOCODING_ADAPTER_VERSION ?? "0.1.0";
 const datasetId = process.env.GEOCODING_DATASET_ID ?? datasetPath.split(/[\\/]/).pop();
 const runId = process.env.GEOCODING_RUN_ID ?? `${Date.now()}-${process.pid}`;
-const requestCount = Number(process.env.GEOCODING_REQUESTS_ATTEMPTED ?? 0);
-const cacheHits = Number(process.env.GEOCODING_CACHE_HITS ?? 0);
-const cacheMisses = Number(process.env.GEOCODING_CACHE_MISSES ?? cases.length);
+const requestCount = parseNonNegativeInteger(process.env.GEOCODING_REQUESTS_ATTEMPTED);
+const cacheHits = parseNonNegativeInteger(process.env.GEOCODING_CACHE_HITS);
+const cacheMisses = parseNonNegativeInteger(process.env.GEOCODING_CACHE_MISSES, cases.length);
 const rateLimit = process.env.GEOCODING_RATE_LIMIT
   ? JSON.parse(process.env.GEOCODING_RATE_LIMIT)
   : null;
