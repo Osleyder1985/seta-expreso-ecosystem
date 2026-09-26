@@ -151,6 +151,15 @@ async function main() {
   });
   const tokens = await json(tokenResponse, 'Authorization Code + PKCE token exchange failed');
   assert(tokens.access_token, 'Access token missing');
+  const tokenPayload = JSON.parse(Buffer.from(tokens.access_token.split('.')[1], 'base64url').toString());
+  console.log(JSON.stringify({
+    tokenIssuer: tokenPayload.iss,
+    tokenAudience: tokenPayload.aud,
+    tokenAuthorizedParty: tokenPayload.azp,
+    tokenScope: tokenPayload.scope,
+    tokenRealmRoles: tokenPayload.realm_access?.roles ?? [],
+    tokenKid: tokenPayload.sub ? 'present' : 'missing'
+  }));
 
   const api = process.env.API_BASE_URL ?? 'http://127.0.0.1:3000/api';
   const me = await fetch(api + '/auth/me', { headers: { authorization: 'Bearer ' + tokens.access_token } });
