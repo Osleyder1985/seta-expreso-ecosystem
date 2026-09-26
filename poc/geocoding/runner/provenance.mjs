@@ -9,6 +9,11 @@ export function sha256(content) {
   return crypto.createHash("sha256").update(content).digest("hex");
 }
 
+export function parseNonNegativeInteger(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : fallback;
+}
+
 export function sanitizeConfig(config = {}) {
   return Object.fromEntries(
     Object.entries(config).map(([key, value]) => [
