@@ -1,4 +1,5 @@
 import { INestApplication } from '@nestjs/common';
+import { HttpErrorFilter } from '../src/common/http/http-error.filter';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
@@ -12,6 +13,8 @@ describe('SETA EXPRESO API (e2e)', () => {
     }).compile();
 
     app = moduleRef.createNestApplication();
+    app.useSecurityHeaders();
+    app.useGlobalFilters(new HttpErrorFilter());
     app.setGlobalPrefix('api');
     await app.init();
   });
