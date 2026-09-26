@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       KEYCLOAK_ADMIN_USERNAME: admin
-      KEYCLOAK_ADMIN_PASSWORD: ${{ secrets.KEYCLOAK_TEST_ADMIN_PASSWORD }}
+      KEYCLOAK_ADMIN_PASSWORD: integration-${{ github.run_id }}-seta
       OIDC_ISSUER: http://127.0.0.1:8081/realms/seta-expreso
       OIDC_AUDIENCE: seta-expreso-api
 
@@ -37,10 +37,6 @@ jobs:
           node-version: 24.21.0
           cache: npm
           cache-dependency-path: apps/api/package.json
-
-      - name: Validate integration secret
-        shell: bash
-        run: test -n "$KEYCLOAK_ADMIN_PASSWORD"
 
       - name: Start Keycloak
         run: docker compose -f infra/keycloak/docker-compose.yml up -d
