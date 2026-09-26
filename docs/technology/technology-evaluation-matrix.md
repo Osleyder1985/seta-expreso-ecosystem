@@ -1,8 +1,8 @@
-# Matriz objetiva de evaluación tecnológica v0.1.1
+# Matriz objetiva de evaluación tecnológica v0.1.2
 
 **Ecosistema:** SETA EXPRESO SURL  
 **Issue:** #5  
-**Relacionada con:** Technology Stack Baseline v0.1.0  
+**Relacionada con:** Technology Stack Baseline v0.2.0  
 **Estado:** Vigente
 **Tipo:** Marco de evaluación
 
@@ -23,6 +23,14 @@ Esta matriz establece un método común para comparar alternativas tecnológicas
 7. Testing
 8. Infraestructura
 9. Observabilidad
+
+## Política de versiones y compatibilidad
+
+La evaluación distingue entre **última versión disponible** y **última versión estable compatible**. Para SETA EXPRESO se adopta la segunda.
+
+Cada evaluación debe registrar versión exacta, fecha, estado de release, dependencias relevantes y compatibilidad con runtime, plataformas, CI/CD y componentes del stack. Una versión alpha, beta o RC no entra al baseline productivo sin ADR específico.
+
+La compatibilidad se evalúa como propiedad del conjunto: candidato → dependencias → runtime/toolchain → plataforma → integración → CI/CD → producción.
 
 ## 3. Modelo de evaluación
 
@@ -343,4 +351,4 @@ Esta matriz establece el método oficial de evaluación, pero no sustituye las d
 
 Las decisiones concretas deberán ejecutarse como trabajos independientes y quedar documentadas mediante Issue/ADR/PR según su impacto.
 
-**Fin de la Matriz objetiva de evaluación tecnológica v0.1.1.**
+**Fin de la Matriz objetiva de evaluación tecnológica v0.1.2.**

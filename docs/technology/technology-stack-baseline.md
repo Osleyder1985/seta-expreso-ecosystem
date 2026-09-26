@@ -1,8 +1,8 @@
-# Technology Stack Baseline v0.1.0
+# Technology Stack Baseline v0.2.0
 
 **Ecosistema:** SETA EXPRESO SURL  
-**Estado:** En validación
-**Versión:** 0.1.0  
+**Estado:** Vigente con decisiones pendientes identificadas
+**Versión:** 0.2.0  
 **Issue:** #3  
 **Arquitectura de referencia:** Architecture Baseline v0.1.0 / ADR-0001  
 **Idioma del documento:** Español  
@@ -70,19 +70,19 @@ Las decisiones de producción deberán permitir obtener logs estructurados, mét
 
 | Capa | Baseline v0.1.0 | Estado |
 |---|---|---|
-| Backend | NestJS + TypeScript | Adoptado provisionalmente |
-| Runtime | Node.js LTS | Adoptado |
+| Backend | NestJS 12.1.0 + TypeScript 6.0.3 + Node.js 24.21.0 LTS | Provisional; benchmark final pendiente |
+| Runtime | Node.js 24.21.0 LTS | Adoptado |
 | API | REST + OpenAPI | Adoptado |
-| Web | React + TypeScript + Vite | Adoptado provisionalmente |
-| Mobile | Flutter + Dart | Adoptado provisionalmente |
-| DB | PostgreSQL | Adoptado |
-| Geodatos | PostGIS | Adoptado |
-| Acceso a datos | Prisma, sujeto a validación | Candidato |
-| Backend tests | Jest + Supertest | Adoptado provisionalmente |
-| Web tests | Vitest + Testing Library + Playwright | Adoptado provisionalmente |
+| Web | React 19.3 + TypeScript 6.0.3 + Vite 8.3.x | Adoptado provisionalmente |
+| Mobile | Flutter 3.47.5 + Dart 3.13.4 | Adoptado provisionalmente |
+| DB | PostgreSQL 18.6 | Adoptado |
+| Geodatos | PostGIS 3.6.0 | Adoptado |
+| Acceso a datos | Prisma ORM 7.10.0, sujeto a validación | Candidato |
+| Backend tests | Jest 30.x + Supertest 7.2.2 | Adoptado provisionalmente |
+| Web tests | Vitest 5.x + Testing Library + Playwright 1.63.0 | Adoptado provisionalmente |
 | Mobile tests | Flutter Test + integration_test | Adoptado provisionalmente |
 | CI | GitHub Actions | Adoptado |
-| Contenedores | Docker | Adoptado |
+| Contenedores | Docker Engine 29.8.1 | Adoptado |
 | API docs | OpenAPI/Swagger | Adoptado |
 | Maps | OpenStreetMap como fuente/cartografía base, sujeto a implementación concreta | Adoptado como dirección |
 | Geocoding | Provider abstraction + proveedor por evaluar | Candidato |
@@ -97,7 +97,7 @@ Nota: “Adoptado provisionalmente” significa que la tecnología puede utiliza
 ## 5. Backend
 
 ### 5.1 NestJS + TypeScript
-**Baseline provisional: NestJS + TypeScript.**
+**Baseline provisional: NestJS 12.1.0 + TypeScript 6.0.3 + Node.js 24.21.0 LTS.**
 
 Razones: estructura modular, inyección de dependencias, soporte para separación por módulos, buen encaje con Clean/Hexagonal, tipado estático de TypeScript, ecosistema adecuado para APIs, buena capacidad de pruebas y posibilidad de evolucionar un modular monolith sin exigir microservicios.
 
@@ -105,7 +105,7 @@ La decisión debe considerarse conjuntamente con la evidencia de los PoC de back
 
 ### 5.2 Node.js LTS
 **Adoptado.**
-El runtime debe utilizar una versión LTS soportada y fijada explícitamente mediante los mecanismos de versionado del proyecto. No se permitirá depender de una versión latest no controlada.
+El runtime fijado es **Node.js 24.21.0 LTS**. Node.js 26.10.0 es Current y no se adopta como baseline LTS.
 
 ## 6. API
 
@@ -121,14 +121,13 @@ La API deberá mantener un contrato documentado para documentación, generación
 ## 7. Web
 
 ### 7.1 React + TypeScript + Vite
-**Baseline provisional.**
-Se selecciona como punto de partida por ecosistema amplio, TypeScript, modularidad, facilidad para componentes reutilizables, integración con pruebas y compatibilidad con API REST.
+**Baseline provisional: React 19.3 + TypeScript 6.0.3 + Vite 8.3.x.** React 19.3 es la versión actual documentada y Vite 8.3 es la rama estable soportada. TypeScript se mantiene en 6.0.3 por compatibilidad con NestJS 12 tooling.
 Vite se utilizará como herramienta de desarrollo/build salvo que requisitos futuros justifiquen otra alternativa.
 
 ## 8. Aplicaciones móviles
 
 ### 8.1 Flutter + Dart
-**Baseline provisional para Android e iOS.**
+**Baseline provisional para Android e iOS: Flutter 3.47.5 + Dart 3.13.4.**
 La decisión busca mantener una base de código compartida cuando la funcionalidad y el comportamiento de las plataformas lo permitan.
 Esto no implica que el 100 % de las capacidades serán idénticas entre plataformas. Cuando una capacidad requiera APIs nativas, se aislará, se documentará y se utilizará integración nativa solo donde sea necesario.
 
@@ -137,18 +136,18 @@ Alternativa: desarrollo nativo independiente con Kotlin/Android y Swift/iOS. No 
 ## 9. Persistencia
 
 ### 9.1 PostgreSQL
-**Adoptado.**
+**Adoptado: PostgreSQL 18.6.**
 Se utilizará como sistema principal de persistencia relacional por su adecuación a procesos empresariales, integridad transaccional, consultas complejas, ecosistema maduro, extensibilidad y disponibilidad de capacidades geoespaciales mediante PostGIS.
 
 ### 9.2 PostGIS
-**Adoptado.**
+**Adoptado: PostGIS 3.6.0.**
 Se utilizará para representar y consultar información espacial: coordenadas de direcciones, puntos de entrega, localizaciones, consultas geográficas y preparación para cálculo/optimización de rutas.
 La utilización concreta de algoritmos de routing será una decisión posterior.
 
 ### 9.3 Acceso a datos
-**Candidato: Prisma.**
+**Candidato: Prisma ORM 7.10.0.**
 Prisma se establece como candidato inicial por integración con TypeScript, tipado, productividad y migraciones.
-Antes de congelar la decisión se evaluará frente a TypeORM, acceso SQL controlado y otras alternativas justificadas.
+Prisma ORM 8 permanece fuera del baseline porque continúa en Release Candidate. Prisma ORM 7.10.0 se mantiene como línea estable candidata. Antes de congelar la decisión se evaluará frente a TypeORM, acceso SQL controlado y otras alternativas justificadas.
 La existencia de consultas espaciales/PostGIS deberá formar parte explícita de la evaluación.
 Criterio crítico: la herramienta de acceso a datos no debe impedir aprovechar capacidades SQL/PostGIS necesarias para el dominio.
 
@@ -259,6 +258,35 @@ Toda sustitución relevante deberá quedar documentada.
 ## 22. Criterios de aceptación del Stack Baseline
 El baseline se considera técnicamente válido cuando todas las tecnologías adoptadas tienen una justificación; las tecnologías críticas pendientes están identificadas; existe una ruta de validación; no existen dependencias externas no documentadas; el stack es compatible con la arquitectura baseline; puede ejecutarse en el entorno de desarrollo objetivo; permite pruebas automatizadas; permite CI; permite evolución; y no introduce complejidad operacional injustificada.
 
+
+## Política de versiones y compatibilidad
+
+La regla oficial del Ecosistema es **Latest Stable Compatible**: seleccionar la versión estable más reciente que sea compatible con el conjunto completo, no simplemente la versión con el número mayor.
+
+No se incorporan automáticamente versiones alpha, beta, RC, nightly, canary, next o dev. Una prerelease requiere ADR específico.
+
+### Matriz vigente — 2026-09-25
+
+| Componente | Última considerada | Versión fijada | Motivo |
+|---|---|---|---|
+| Node.js | 26.10.0 Current | **24.21.0 LTS** | LTS y compatibilidad operacional |
+| NestJS | 12.1.0 | **12.1.0** | Compatible con Node 24 |
+| TypeScript | 7.x | **6.0.3** | Compatibilidad con tooling NestJS 12 |
+| React | 19.3 | **19.3** | Última versión estable documentada |
+| Vite | 8.3.x | **8.3.x** | Rama estable soportada |
+| Flutter | 3.47.5 | **3.47.5** | Stable para Android/iOS |
+| Dart | 3.13.4 | **3.13.4** | Incluido con Flutter 3.47.5 |
+| PostgreSQL | 19 Beta 4 | **18.6** | 19 continúa en beta |
+| PostGIS | 3.7 prerelease | **3.6.0** | Línea estable compatible con PostgreSQL 18 |
+| Prisma ORM | 8.0.0-rc.x | **7.10.0** | Prisma 8 continúa en RC |
+| Docker Engine | 29.8.1 | **29.8.1** | Stable |
+| Playwright | 1.63.0 | **1.63.0** | Stable |
+| Supertest | 7.2.2 | **7.2.2** | Stable |
+| ESLint | 10.11.0 | **10.11.0** | Stable |
+| Prettier | 3.9.0 | **3.9.0** | Stable |
+
+Las versiones críticas deberán quedar fijadas en manifests/lockfiles y reproducirse en CI/CD.
+
 ## 23. Estrategia de evolución
 La versión 0.1.0 representa un baseline, no el stack final del Ecosistema.
 
@@ -309,6 +337,6 @@ Las decisiones de alto impacto deberán quedar registradas mediante ADR.
 Debe existir evidencia suficiente y una decisión documentada.
 Cuando la decisión tenga impacto arquitectónico significativo, se deberá crear un ADR.
 
-**Fin del Technology Stack Baseline v0.1.0.**
+**Fin del Technology Stack Baseline v0.2.0.**
 
 **Fase/nota:** Las etiquetas históricas de fase o baseline no constituyen estados formales; el campo `Estado` se rige exclusivamente por la taxonomía de gobernanza.
