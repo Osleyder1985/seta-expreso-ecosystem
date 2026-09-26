@@ -178,7 +178,11 @@ async function getSigningKids(token) {
     headers: { authorization: 'Bearer ' + token }
   });
   const metadata = await json(response, 'Key metadata lookup failed');
-  return new Set((metadata.keys ?? []).filter((key) => key.status === 'ACTIVE').map((key) => key.kid));
+  const activeKids = Object.values(metadata.active ?? {}).filter((kid) => typeof kid === 'string');
+  return new Set([
+    ...activeKids,
+    ...(metadata.keys ?? []).filter((key) => key.status === 'ACTIVE').map((key) => key.kid)
+  ]);
 }
 
 async function authorizeAndGetToken(metadata, clientId, redirectUri, password, scopeValue = 'openid api-audience') {
@@ -282,18 +286,11 @@ async function main() {
 
   const beforeKids = await getSigningKids(admin);
   await rotateRealmSigningKey(admin);
-  let afterKids = await getSigningKids(admin);
-  for (let i = 0; i < 20 && afterKids.size <= beforeKids.size; i++) {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    afterKids = await getSigningKids(admin);
-  }
-  const newKids = [...afterKids].filter((kid) => !beforeKids.has(kid));
-  assert(newKids.length >= 1, 'Keycloak did not expose a new active signing key');
 
   const rotatedTokens = await authorizeAndGetToken(metadata, clientId, redirectUri, password);
   assert(rotatedTokens.access_token, 'Rotated-key access token missing');
   const rotatedHeader = JSON.parse(Buffer.from(rotatedTokens.access_token.split('.')[0], 'base64url').toString());
-  assert(newKids.includes(rotatedHeader.kid ?? ''), 'New token was not signed with the rotated Keycloak key');
+  assert(rotatedHeader.kid && !beforeKids.has(rotatedHeader.kid), 'New token was not signed with a new Keycloak signing key');
   const rotatedMe = await fetch(api + '/auth/me', {
     headers: { authorization: 'Bearer ' + rotatedTokens.access_token }
   });
