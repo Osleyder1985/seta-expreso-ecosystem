@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '.',
   testRegex: 'test/.*\\.e2e-spec\\.ts$',
@@ -9,7 +9,7 @@ module.exports = {
         target: 'es2023',
         transform: { legacyDecorator: true, decoratorMetadata: true }
       },
-      module: { type: 'commonjs' }
+      module: { type: 'es6' }
     }]
   },
   testEnvironment: 'node',
