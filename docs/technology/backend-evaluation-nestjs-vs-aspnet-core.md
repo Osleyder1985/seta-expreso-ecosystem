@@ -1,7 +1,7 @@
 # Evaluación objetiva del Backend: NestJS vs ASP.NET Core
 
-**Versión:** 0.3.1  
-**Estado:** En validación
+**Versión:** 0.3.2  
+**Estado:** Evaluación cuantitativa parcial — decisión abierta
 **Issue:** #7  
 **Actualización de versión:** #20  
 **Entorno de referencia:** `docs/technology/backend-benchmark-environment-2026-09-25.md`  
@@ -36,30 +36,87 @@ Node.js 24.21.0 es además la versión disponible en el entorno Windows de refer
 
 ## 3. Evidencia disponible
 
-El repositorio contiene la arquitectura baseline, la matriz de evaluación, el protocolo de benchmark y los PoC reconstruidos.
+La evaluación incorpora ahora evidencia histórica real del benchmark nativo Windows del 2026-09-25, consolidada en el dossier:
 
-No se inventan resultados:
+`docs/technology/backend-evidence-dossier-2026-09-26.md`
 
-- no se asignan puntuaciones experimentales sin medición;
-- los criterios que dependan de benchmark permanecen pendientes;
-- la decisión final queda abierta hasta completar la evidencia requerida.
+No se repetirán benchmarks existentes ni se ejecutará DELETE en esta ronda.
 
-## 4. Evaluación preliminar
+Evidencia funcional recuperada:
+- CREATE: válido.
+- LIST: válido y cuantificado.
+- GET: válido.
+- UPDATE: válido.
+- DELETE: excluido de la evidencia final de esta ronda; la corrección posterior del harness queda registrada como corrección histórica.
+- CI/PoC: health check, validación, PostgreSQL, transacción explícita, manejo de errores, OpenAPI, pruebas de integración y build.
 
-| Criterio | Peso | NestJS | Evidencia | ASP.NET Core | Evidencia |
-|---|---:|---|---|---|---|
-| B01 Adecuación Modular/Clean/Hexagonal | 15% | Pendiente de evaluación estructural | E1/E2 | Pendiente de evaluación estructural | E1/E2 |
-| B02 REST/OpenAPI | 10% | Evidencia favorable | E1/E2 | Evidencia favorable | E1/E2 |
-| B03 Testabilidad | 10% | Evidencia favorable | E1/E2 | Evidencia favorable | E1/E2 |
-| B04 Seguridad | 10% | Evidencia disponible | E1 | Evidencia disponible | E1 |
-| B05 Rendimiento | 10% | Pendiente benchmark | E2 | Pendiente benchmark | E2 |
-| B06 Mantenibilidad | 10% | Pendiente de PoC/estructura | E1/E2 | Pendiente de PoC/estructura | E1/E2 |
-| B07 Ecosistema | 10% | Evidencia documental | E1/E4 | Evidencia documental | E1/E4 |
-| B08 Documentación/madurez | 5% | Evidencia documental | E1 | Evidencia documental | E1 |
-| B09 Productividad | 5% | Pendiente de PoC | E2 | Pendiente de PoC | E2 |
-| B10 Operación/despliegue | 5% | Pendiente de experimento | E2 | Pendiente de experimento | E2 |
-| B11 Costo/licencia | 5% | Analizar TCO | E1/E4 | Analizar TCO | E1/E4 |
-| B12 Evolución futura | 5% | Pendiente de análisis contextual | E1/E2 | Pendiente de análisis contextual | E1/E2 |
+### 3.1 LIST nativo Windows — 2026-09-25
+
+Configuración: 1000 requests, concurrencia 20, 20 warm-up, 5 corridas, candidatos aislados, error_rate 0%.
+
+| Métrica | NestJS | ASP.NET Core |
+|---|---:|---:|
+| Throughput promedio | 3222.98 req/s | 917.92 req/s |
+| p50 promedio | 5.60 ms | 13.30 ms |
+| p95 promedio | 12.67 ms | 63.48 ms |
+| Startup promedio | 1701.58 ms | 682.06 ms |
+| CPU promedio | 0.456 s | 2.581 s |
+| Working Set promedio | 115.81 MB | 77.70 MB |
+| Build | 3163.19 ms | 1583.57 ms |
+| Error rate | 0% | 0% |
+
+Estas cifras son evidencia del PoC y perfil nativo concreto. No representan propiedades universales de los frameworks.
+
+### 3.2 Limitaciones
+
+Issue #145 conserva una discrepancia histórica de otro conjunto de medición (~138 req/s frente a ~762 req/s). Ese dataset no se mezcla ni se utiliza para sustituir el de cinco corridas. La causalidad de la discrepancia histórica permanece como incertidumbre documental, no como motivo para repetir pruebas.
+
+La CPU y memoria nativas no deben compararse directamente con snapshots Docker.
+
+## 4. Evaluación criterio por criterio
+
+| Criterio | Peso | NestJS | ASP.NET Core |
+|---|---:|---:|---:|
+| B01 Arquitectura modular/Clean/Hexagonal | 15% | 3/5 | 3/5 |
+| B02 REST/OpenAPI | 10% | 4/5 | 4/5 |
+| B03 Testabilidad | 10% | 4/5 | 4/5 |
+| B04 Seguridad | 10% | 2/5 | 2/5 |
+| B05 Rendimiento | 10% | 4/5 | 3/5 |
+| B06 Mantenibilidad | 10% | 3/5 | 3/5 |
+| B07 Ecosistema | 10% | 4/5 | 4/5 |
+| B08 Documentación/madurez | 5% | 4/5 | 4/5 |
+| B09 Productividad | 5% | No evaluado | No evaluado |
+| B10 Operación/despliegue | 5% | 3/5 | 3/5 |
+| B11 Costo/licencia | 5% | 4/5 | 4/5 |
+| B12 Evolución futura | 5% | 4/5 | 4/5 |
+
+Las puntuaciones son provisionales y trazables; B09 permanece explícitamente sin evaluar. El detalle de evidencia, confianza, riesgos y límites está en el dossier de evidencia.
+
+### 4.1 Resultado cuantitativo parcial
+
+Cobertura evaluada: 95% del peso.
+
+- Puntaje ponderado observado: NestJS **66.00**, ASP.NET Core **64.00**.
+- Índice normalizado de cobertura: NestJS **69.47/100**, ASP.NET Core **67.37/100**.
+
+Estos índices **no son puntuaciones finales** de la matriz y no constituyen un ranking automático. No se redistribuye el 5% de B09.
+
+### 4.2 Criterios eliminatorios
+
+Con la evidencia disponible no se ha identificado un incumplimiento eliminatorio para ninguno de los candidatos respecto de entorno Windows, PostgreSQL/PostGIS, integración REST con Web/Mobile, licencia o capacidad funcional crítica.
+
+La ausencia actual de autenticación/autorización y hardening productivo en ambos PoC es una brecha de implementación, no un bloqueador demostrado del framework.
+
+### 4.3 Riesgos principales
+
+- Seguridad productiva: **Medio** para ambos.
+- Disciplina Clean/Hexagonal: **Medio** para ambos.
+- Incertidumbre causal del benchmark histórico: **Medio** para ambos; no afecta la validez del dataset de cinco corridas.
+- Rendimiento fuera de LIST: **Medio** para ambos por cobertura experimental limitada.
+- Complejidad operacional: **Bajo/Medio** para ambos.
+- Lock-in: **Bajo** para ambos bajo REST/OpenAPI + PostgreSQL + puertos/adaptadores.
+- Obsolescencia: **Bajo** para ambos con el baseline actual.
+- Costo/licencia: **Bajo** como riesgo de licencia; TCO completo aún no medido.
 
 ## 5. Hipótesis
 

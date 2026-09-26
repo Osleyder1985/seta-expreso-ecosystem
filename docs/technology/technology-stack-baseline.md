@@ -1,8 +1,8 @@
-# Technology Stack Baseline v0.2.0
+# Technology Stack Baseline v0.3.0
 
 **Ecosistema:** SETA EXPRESO SURL  
 **Estado:** Vigente con decisiones pendientes identificadas
-**Versión:** 0.2.0  
+**Versión:** 0.3.0  
 **Issue:** #3  
 **Arquitectura de referencia:** Architecture Baseline v0.1.0 / ADR-0001  
 **Idioma del documento:** Español  
@@ -70,7 +70,7 @@ Las decisiones de producción deberán permitir obtener logs estructurados, mét
 
 | Capa | Baseline v0.1.0 | Estado |
 |---|---|---|
-| Backend | NestJS 12.1.0 + TypeScript 6.0.3 + Node.js 24.21.0 LTS | Provisional; benchmark final pendiente |
+| Backend | NestJS 12.1.0 + TypeScript 6.0.3 + Node.js 24.21.0 LTS | **Adoptado** |
 | Runtime | Node.js 24.21.0 LTS | Adoptado |
 | API | REST + OpenAPI | Adoptado |
 | Web | React 19.3 + TypeScript 6.0.3 + Vite 8.3.x | Adoptado provisionalmente |
@@ -97,11 +97,11 @@ Nota: “Adoptado provisionalmente” significa que la tecnología puede utiliza
 ## 5. Backend
 
 ### 5.1 NestJS + TypeScript
-**Baseline provisional: NestJS 12.1.0 + TypeScript 6.0.3 + Node.js 24.21.0 LTS.**
+**Baseline adoptado: NestJS 12.1.0 + TypeScript 6.0.3 + Node.js 24.21.0 LTS.**
 
 Razones: estructura modular, inyección de dependencias, soporte para separación por módulos, buen encaje con Clean/Hexagonal, tipado estático de TypeScript, ecosistema adecuado para APIs, buena capacidad de pruebas y posibilidad de evolucionar un modular monolith sin exigir microservicios.
 
-La decisión debe considerarse conjuntamente con la evidencia de los PoC de backend existentes en el repositorio, incluyendo el PoC de ASP.NET Core. La existencia de un PoC alternativo no se descarta: forma parte de la evidencia utilizada para la decisión final.
+La decisión queda respaldada por el ADR-002 y por la evidencia consolidada de los PoC de backend, incluido el benchmark LIST nativo de Windows del 2026-09-25. ASP.NET Core + .NET 10 LTS permanece como alternativa técnicamente viable y no seleccionada para el backend inicial.
 
 ### 5.2 Node.js LTS
 **Adoptado.**
@@ -235,25 +235,24 @@ Toda sustitución relevante deberá quedar documentada.
 
 ## 21. PoC y decisiones pendientes
 ### P0 — Alta prioridad
-1. NestJS vs ASP.NET Core.
+1. Prisma vs alternativa de acceso a PostgreSQL/PostGIS.
 2. Flutter vs desarrollo nativo.
-3. Prisma vs alternativa de acceso a PostgreSQL/PostGIS.
-4. Geocoder compatible con los requisitos reales de Cuba.
-5. Estrategia de autenticación/identidad.
+3. Geocoder compatible con los requisitos reales de Cuba.
+4. Estrategia de autenticación/identidad.
 
 ### P1 — Prioridad media
-6. Solución concreta de mapas.
-7. Routing engine.
-8. almacenamiento de documentos.
-9. plataforma de notificaciones.
-10. observabilidad concreta.
-11. reverse proxy.
+1. Solución concreta de mapas.
+2. Routing engine.
+3. almacenamiento de documentos.
+4. plataforma de notificaciones.
+5. observabilidad concreta.
+6. reverse proxy.
 
 ### P2 — Evolutivas
-12. capacidades de IA;
-13. optimización de rutas;
-14. event-driven architecture avanzada;
-15. extracción de módulos a servicios independientes.
+1. capacidades de IA;
+2. optimización de rutas;
+3. event-driven architecture avanzada;
+4. extracción de módulos a servicios independientes.
 
 ## 22. Criterios de aceptación del Stack Baseline
 El baseline se considera técnicamente válido cuando todas las tecnologías adoptadas tienen una justificación; las tecnologías críticas pendientes están identificadas; existe una ruta de validación; no existen dependencias externas no documentadas; el stack es compatible con la arquitectura baseline; puede ejecutarse en el entorno de desarrollo objetivo; permite pruebas automatizadas; permite CI; permite evolución; y no introduce complejidad operacional injustificada.
@@ -295,16 +294,13 @@ Necesidad → Requisito → Criterios técnicos → Candidatos → PoC / Benchma
 Las decisiones de alto impacto deberán quedar registradas mediante ADR.
 
 ## 24. Próximos pasos
-1. evaluar objetivamente NestJS vs ASP.NET Core utilizando los PoC existentes;
-2. validar Flutter;
-3. validar Prisma/PostGIS;
-4. investigar y probar geocodificación;
-5. definir identidad/autorización;
-6. preparar la estructura inicial de proyectos;
-7. establecer quality gates;
-8. definir CI;
-9. actualizar el baseline según evidencia;
-10. comenzar la implementación de la primera capacidad de negocio mediante Issue → diseño → implementación → pruebas → PR.
+1. validar Prisma/PostGIS;
+2. investigar y probar geocodificación;
+3. definir identidad/autorización;
+4. preparar la estructura inicial de proyectos;
+5. establecer quality gates;
+6. definir CI;
+7. comenzar la implementación de la primera capacidad de negocio mediante Issue → diseño → implementación → pruebas → PR.
 
 ## 25. Estado de decisiones
 | Decisión | Estado |
@@ -318,7 +314,7 @@ Las decisiones de alto impacto deberán quedar registradas mediante ADR.
 | Docker | Adoptado |
 | Git/GitHub | Adoptado |
 | Node.js LTS | Adoptado |
-| NestJS | Provisional |
+| NestJS | Adoptado |
 | React/Vite | Provisional |
 | Flutter | Provisional |
 | Jest/Supertest | Provisional |
@@ -337,6 +333,6 @@ Las decisiones de alto impacto deberán quedar registradas mediante ADR.
 Debe existir evidencia suficiente y una decisión documentada.
 Cuando la decisión tenga impacto arquitectónico significativo, se deberá crear un ADR.
 
-**Fin del Technology Stack Baseline v0.2.0.**
+**Fin del Technology Stack Baseline v0.3.0.**
 
 **Fase/nota:** Las etiquetas históricas de fase o baseline no constituyen estados formales; el campo `Estado` se rige exclusivamente por la taxonomía de gobernanza.
