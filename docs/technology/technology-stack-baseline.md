@@ -92,7 +92,7 @@ Las decisiones de producción deberán permitir obtener logs estructurados, mét
 | Reverse proxy | Caddy | **Adoptado** |
 | AI/ML | No obligatorio en baseline | No adoptado como requisito tecnológico |
 
-Nota: “Adoptado provisionalmente” significa que la tecnología puede utilizarse como baseline de implementación, pero permanece sujeta a validación técnica mediante evidencia.
+Nota: las decisiones adoptadas permanecen gobernadas por la regla Latest Stable Compatible; una sustitución futura requiere evidencia y ADR cuando corresponda.
 
 ## 5. Backend
 
@@ -121,13 +121,13 @@ La API deberá mantener un contrato documentado para documentación, generación
 ## 7. Web
 
 ### 7.1 React + TypeScript + Vite
-**Baseline provisional: React 19.3 + TypeScript 6.0.3 + Vite 8.3.x.** React 19.3 es la versión actual documentada y Vite 8.3 es la rama estable soportada. TypeScript se mantiene en 6.0.3 por compatibilidad con NestJS 12 tooling.
+**Adoptado: React 19.3 + TypeScript 6.0.3 + Vite 8.3.x.** React 19.3 es la versión actual documentada y Vite 8.3 es la rama estable soportada. TypeScript se mantiene en 6.0.3 por compatibilidad con NestJS 12 tooling.
 Vite se utilizará como herramienta de desarrollo/build salvo que requisitos futuros justifiquen otra alternativa.
 
 ## 8. Aplicaciones móviles
 
 ### 8.1 Flutter + Dart
-**Baseline provisional para Android e iOS: Flutter 3.47.5 + Dart 3.13.4.**
+**Adoptado para Android e iOS: Flutter 3.47.5 + Dart 3.13.4.**
 La decisión busca mantener una base de código compartida cuando la funcionalidad y el comportamiento de las plataformas lo permitan.
 Esto no implica que el 100 % de las capacidades serán idénticas entre plataformas. Cuando una capacidad requiera APIs nativas, se aislará, se documentará y se utilizará integración nativa solo donde sea necesario.
 
@@ -145,11 +145,8 @@ Se utilizará para representar y consultar información espacial: coordenadas de
 La utilización concreta de algoritmos de routing será una decisión posterior.
 
 ### 9.3 Acceso a datos
-**Candidato: Prisma ORM 7.10.0.**
-Prisma se establece como candidato inicial por integración con TypeScript, tipado, productividad y migraciones.
-Prisma ORM 8 permanece fuera del baseline porque continúa en Release Candidate. Prisma ORM 7.10.0 se mantiene como línea estable candidata. Antes de congelar la decisión se evaluará frente a TypeORM, acceso SQL controlado y otras alternativas justificadas.
-La existencia de consultas espaciales/PostGIS deberá formar parte explícita de la evaluación.
-Criterio crítico: la herramienta de acceso a datos no debe impedir aprovechar capacidades SQL/PostGIS necesarias para el dominio.
+**Adoptado: Prisma ORM 7.10.0.**
+Prisma ORM 8 permanece fuera del baseline porque continúa en Release Candidate. Prisma 7 se utilizará con SQL/TypedSQL controlado cuando PostGIS u otras capacidades no estén expresadas por el cliente ORM. El dominio permanece independiente de Prisma.
 
 ## 10. Geocodificación y mapas
 
@@ -175,15 +172,15 @@ Se requiere cumplir cuota, atribución y condiciones vigentes del proveedor ante
 ## 11. Testing
 
 ### 11.1 Backend
-Baseline provisional: Jest y Supertest.
+Adoptado: Jest y Supertest.
 Cobertura esperada: unit tests, integration tests, API tests y contract-related tests cuando sean útiles.
 
 ### 11.2 Web
-Baseline provisional: Vitest, Testing Library y Playwright.
+Adoptado: Vitest, Testing Library y Playwright.
 Capas: unit, component, integration y end-to-end.
 
 ### 11.3 Mobile
-Baseline provisional: Flutter Test e integration_test.
+Adoptado: Flutter Test e integration_test.
 Se deberá probar lógica, widgets, integración con API, flujos críticos y comportamiento relevante por plataforma.
 
 ## 12. Calidad estática
@@ -218,13 +215,12 @@ La autenticación y autorización deberán ser componentes explícitos de la arq
 Se deberán separar identidad, autenticación, autorización, roles, permisos, sesiones/tokens y auditoría.
 
 ### 16.2 OAuth/OIDC
-**Candidato**, no decisión irreversible.
-Se utilizará un proveedor/servidor compatible con estándares cuando los requisitos lo justifiquen.
-Antes de seleccionar una solución concreta se evaluará costo, posibilidad de operación propia, compatibilidad Web/Mobile, refresh tokens, revocación, MFA, gestión de roles, integración con clientes y dependencia del proveedor.
+**Adoptado: Keycloak 26.7.x autogestionado.**
+Keycloak será el Identity Provider OIDC. NestJS será Resource Server y conservará la autorización de negocio. Para clientes públicos se utilizará Authorization Code + PKCE.
 
 ## 17. Reverse proxy
-**Candidato: Caddy o Nginx.**
-No se congela uno de los dos en v0.1.0. La selección dependerá de arquitectura de despliegue, TLS, routing, facilidad operacional, recursos disponibles, necesidades de caching o headers y simplicidad.
+**Adoptado: Caddy.**
+Se utilizará como reverse proxy/TLS inicial. Nginx permanece como alternativa si aparecen requisitos específicos de infraestructura.
 
 ## 18. Dependencias externas
 Toda dependencia externa crítica deberá evaluarse según licencia, actividad/mantenimiento, seguridad, compatibilidad, costo, límites, lock-in, facilidad de sustitución y disponibilidad.
@@ -312,13 +308,13 @@ Necesidad → Requisito → Criterios técnicos → Candidatos → PoC / Benchma
 Las decisiones de alto impacto deberán quedar registradas mediante ADR.
 
 ## 24. Próximos pasos
-1. validar Prisma/PostGIS;
-2. integrar Geoapify mediante `GeocodingProvider` y ejecutar posteriormente la validación empírica Cuba v0.1 cuando exista un entorno de ejecución observable;
-3. definir identidad/autorización;
-4. preparar la estructura inicial de proyectos;
-5. establecer quality gates;
-6. definir CI;
-7. comenzar la implementación de la primera capacidad de negocio mediante Issue → diseño → implementación → pruebas → PR.
+1. implementar Prisma/PostGIS según ADR-004;
+2. integrar Geoapify mediante `GeocodingProvider`;
+3. implementar Keycloak/OIDC y RBAC;
+4. implementar MapLibre/OpenFreeMap y `RoutingProvider`;
+5. establecer offline móvil con Riverpod + Drift;
+6. implementar quality gates y CI/CD;
+7. comenzar la primera capacidad de negocio mediante Issue → diseño → implementación → pruebas → PR.
 
 ## 25. Estado de decisiones
 | Decisión | Estado |
