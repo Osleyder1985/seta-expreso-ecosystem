@@ -1,11 +1,11 @@
 # Evaluación objetiva del Backend: NestJS vs ASP.NET Core
 
-**Versión:** 0.3.0  
+**Versión:** 0.3.1  
 **Estado:** En validación
 **Issue:** #7  
 **Actualización de versión:** #20  
 **Entorno de referencia:** `docs/technology/backend-benchmark-environment-2026-09-25.md`  
-**Fecha:** 2026-09-24
+**Fecha:** 2026-09-25
 
 ## 1. Objetivo
 
@@ -29,6 +29,7 @@ Las versiones fueron verificadas contra fuentes actuales antes de actualizar el 
 - @nestjs/cli 12.0.5.
 - Node.js 24.21.0 — LTS.
 - Node.js 26.10.0 — Current; no se utiliza como baseline LTS del experimento.
+- TypeScript 6.0.3 — fijado para el candidato NestJS por compatibilidad del tooling.
 - .NET 10 — LTS.
 
 Node.js 24.21.0 es además la versión disponible en el entorno Windows de referencia del proyecto. El PoC NestJS utiliza Vitest 5.0.1, alineado con el flujo ESM recomendado para NestJS 12.
@@ -148,7 +149,7 @@ Un resultado experimental será válido solamente si:
 
 **PENDIENTE.**
 
-La actualización de versiones no constituye una selección de backend.
+La actualización de versiones no constituye una selección de backend. El candidato NestJS queda fijado para el experimento como NestJS 12.1.0 + TypeScript 6.0.3 + Node.js 24.21.0 LTS. La alternativa ASP.NET Core permanece en .NET 10 LTS.
 
 La siguiente etapa es validar CI, ejecutar las pruebas locales disponibles y posteriormente ejecutar el benchmark común sobre el mismo entorno de referencia.
 
@@ -164,7 +165,7 @@ La siguiente etapa es validar CI, ejecutar las pruebas locales disponibles y pos
 
 El PoC .NET 8 queda únicamente como referencia histórica. El experimento vigente utiliza .NET 10 LTS.
 
-**Fin de la evaluación preliminar.**
+**Fin de la evaluación preliminar v0.3.1.**
 
 
 **Fase/nota:** Las etiquetas históricas de fase o baseline no constituyen estados formales; el campo `Estado` se rige exclusivamente por la taxonomía de gobernanza.
