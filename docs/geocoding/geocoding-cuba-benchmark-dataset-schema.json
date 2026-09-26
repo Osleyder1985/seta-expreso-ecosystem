@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://seta-expreso.example/schemas/geocoding-cuba-benchmark-dataset.schema.json",
+  "title": "SETA EXPRESO Cuba Geocoding Benchmark Case",
+  "type": "object",
+  "required": ["case_id","dataset_version","province","municipality","input","case_type","reference"],
+  "properties": {
+    "case_id": {"type":"string","pattern":"^CU-GEO-[0-9]{4}$"},
+    "dataset_version": {"type":"string"},
+    "province": {"type":"object","required":["name"],"properties":{"code":{"type":["string","null"]},"name":{"type":"string"}},"additionalProperties":false},
+    "municipality": {"type":"object","required":["name"],"properties":{"code":{"type":["string","null"]},"name":{"type":"string"}},"additionalProperties":false},
+    "settlement": {"type":["object","null"],"properties":{"name":{"type":"string"},"type":{"type":["string","null"]}},"additionalProperties":false},
+    "input": {
+      "type":"object",
+      "required":["raw","mode"],
+      "properties":{
+        "raw":{"type":"string"},
+        "mode":{"enum":["free_form","structured","both"]},
+        "street":{"type":["string","null"]},
+        "house_number":{"type":["string","null"]},
+        "locality":{"type":["string","null"]},
+        "municipality":{"type":["string","null"]},
+        "province":{"type":["string","null"]},
+        "country":{"type":["string","null"]}
+      },
+      "additionalProperties":false
+    },
+    "case_type": {
+      "type":"array",
+      "items":{"enum":["complete","no_house_number","municipality_province","locality_reference","intersection","road","kilometer","neighborhood","abbreviation","no_accents","spelling_variant","historical_name","duplicate","multi_package","rural","urban","ambiguous_name","control"]}
+    },
+    "reference": {
+      "type":"object",
+      "required":["status","source"],
+      "properties":{
+        "status":{"enum":["territorial_only","coordinate_control","not_yet_verified"]},
+        "latitude":{"type":["number","null"],"minimum":-90,"maximum":90},
+        "longitude":{"type":["number","null"],"minimum":-180,"maximum":180},
+        "expected_precision":{"enum":["settlement","municipality","street","building","unknown"]},
+        "source":{"type":"string"},
+        "source_date":{"type":["string","null"]},
+        "notes":{"type":["string","null"]}
+      },
+      "additionalProperties":false
+    },
+    "expected":{"type":"object","properties":{"country":{"type":["string","null"]},"province":{"type":["string","null"]},"municipality":{"type":["string","null"]},"settlement":{"type":["string","null"]}},"additionalProperties":false}
+  },
+  "additionalProperties": false
+}
