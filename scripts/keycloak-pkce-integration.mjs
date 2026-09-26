@@ -166,6 +166,11 @@ async function main() {
   const principal = await json(me, 'API rejected a valid Keycloak access token');
   assert(principal.subject && principal.roles.includes('operator'), 'API did not map principal/realm role');
 
+  const insufficient = await fetch(api + '/auth/admin-probe', {
+    headers: { authorization: 'Bearer ' + tokens.access_token }
+  });
+  assert(insufficient.status === 403, 'Insufficient role was not rejected');
+
   const malformed = await fetch(api + '/auth/me', { headers: { authorization: 'Bearer ' + tokens.access_token + 'x' } });
   assert(malformed.status === 401, 'Malformed token was not rejected');
 
