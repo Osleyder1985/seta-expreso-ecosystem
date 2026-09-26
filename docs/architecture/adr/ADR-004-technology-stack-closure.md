@@ -1,6 +1,6 @@
 # ADR-004 — Cierre del stack tecnológico transversal
 
-- **Estado:** Propuesto para integración
+- **Estado:** Aprobado
 - **Fecha:** 2026-09-26
 - **Alcance:** decisiones tecnológicas pendientes del baseline v0.3.0
 - **Regla:** Latest Stable Compatible
@@ -8,7 +8,7 @@
 ## Contexto
 El baseline ya había cerrado arquitectura, backend, PostgreSQL/PostGIS, REST/OpenAPI, Docker, GitHub Actions y geocodificación. Permanecían abiertas decisiones sobre acceso a datos, identidad, mapas, routing, móvil, almacenamiento, trabajos asíncronos, notificaciones, observabilidad, reverse proxy y quality gates.
 
-Las decisiones se cierran aplicando requisitos del Ecosistema, costo cero/minimización de costo, simplicidad operacional, sustituibilidad, seguridad, compatibilidad Web/Android/iOS y evidencia técnica actual.
+Las decisiones se aprobaron aplicando requisitos del Ecosistema, costo cero/minimización de costo, simplicidad operacional, sustituibilidad, seguridad, compatibilidad Web/Android/iOS y evidencia técnica actual.
 
 ## Decisiones
 
