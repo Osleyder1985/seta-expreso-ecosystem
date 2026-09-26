@@ -6,5 +6,5 @@ scrape_configs:
     static_configs:
       - targets: ["otel-collector:8889"]
 
-rules:
+rule_files:
   - /etc/prometheus/alerts.yml
