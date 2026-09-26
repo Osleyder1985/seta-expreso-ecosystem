@@ -1,7 +1,7 @@
 # Technology Stack Baseline v0.4.0
 
 **Ecosistema:** SETA EXPRESO SURL  
-**Estado:** Vigente — decisiones tecnológicas transversales cerradas
+**Estado:** Vigente — fuente de verdad tecnológica
 **Versión:** 0.4.0  
 **Issue:** #3  
 **Arquitectura de referencia:** Architecture Baseline v0.1.0 / ADR-0001  
@@ -70,7 +70,7 @@ Las decisiones de producción deberán permitir obtener logs estructurados, mét
 
 | Capa | Baseline v0.1.0 | Estado |
 |---|---|---|
-| Backend | NestJS 12.1.0 + TypeScript 6.0.3 + Node.js 24.21.0 LTS | **Adoptado** |
+| Backend framework | NestJS 12.1.0 + TypeScript 6.0.3 + Node.js 24.21.0 LTS | **Adoptado** |
 | Runtime | Node.js 24.21.0 LTS | Adoptado |
 | API | REST + OpenAPI | Adoptado |
 | Web | React 19.3 + TypeScript 6.0.3 + Vite 8.3.x | **Adoptado** |
@@ -97,7 +97,9 @@ Nota: las decisiones adoptadas permanecen gobernadas por la regla Latest Stable 
 ## 5. Backend
 
 ### 5.1 NestJS + TypeScript
-**Baseline adoptado: NestJS 12.1.0 + TypeScript 6.0.3 + Node.js 24.21.0 LTS.**
+**Framework baseline adoptado: NestJS 12.1.0 + TypeScript 6.0.3 + Node.js 24.21.0 LTS.**
+
+**Tooling:** `@nestjs/cli` 12.0.7 y `@nestjs/schematics` 12.0.5 se gestionan de forma independiente; no se exige que el tooling comparta exactamente la versión del framework.
 
 Razones: estructura modular, inyección de dependencias, soporte para separación por módulos, buen encaje con Clean/Hexagonal, tipado estático de TypeScript, ecosistema adecuado para APIs, buena capacidad de pruebas y posibilidad de evolucionar un modular monolith sin exigir microservicios.
 
@@ -283,7 +285,7 @@ No se incorporan automáticamente versiones alpha, beta, RC, nightly, canary, ne
 | Componente | Última considerada | Versión fijada | Motivo |
 |---|---|---|---|
 | Node.js | 26.10.0 Current | **24.21.0 LTS** | LTS y compatibilidad operacional |
-| NestJS | 12.1.0 | **12.1.0** | Compatible con Node 24 |
+| NestJS framework | 12.1.0 | **12.1.0** | Framework estable compatible con Node 24 |\n| Nest CLI | 12.0.7 | **12.0.7** | Última versión publicada compatible; versión independiente del framework |\n| Nest Schematics | 12.0.5 | **12.0.5** | Versión publicada compatible con CLI/framework |
 | TypeScript | 7.x | **6.0.3** | Compatibilidad con tooling NestJS 12 |
 | React | 19.3 | **19.3** | Última versión estable documentada |
 | Vite | 8.3.x | **8.3.x** | Rama estable soportada |
@@ -329,11 +331,11 @@ Las decisiones de alto impacto deberán quedar registradas mediante ADR.
 | Git/GitHub | Adoptado |
 | Node.js LTS | Adoptado |
 | NestJS | Adoptado |
-| React/Vite | Provisional |
-| Flutter | Provisional |
-| Jest/Supertest | Provisional |
-| Vitest/Testing Library/Playwright | Provisional |
-| Flutter Test/integration_test | Provisional |
+| React/Vite | Adoptado |
+| Flutter | Adoptado |
+| Jest/Supertest | Adoptado |
+| Vitest/Testing Library/Playwright | Adoptado |
+| Flutter Test/integration_test | Adoptado |
 | Prisma | Adoptado: 7.10.0 |
 | Geocoder | Adoptado: Geoapify + fallback Nominatim autogestionado |
 | Routing engine | Adoptado: Valhalla autogestionado |
@@ -350,3 +352,8 @@ Cuando la decisión tenga impacto arquitectónico significativo, se deberá crea
 **Fin del Technology Stack Baseline v0.4.0.**
 
 **Fase/nota:** Las etiquetas históricas de fase o baseline no constituyen estados formales; el campo `Estado` se rige exclusivamente por la taxonomía de gobernanza.
+
+
+## 27. Gobernanza de estados
+
+Los estados oficiales son: **Decidido**, **Documentado**, **Implementado**, **Verificado** y **Operacional**. Una tecnología puede estar Adoptada/Decidida sin estar todavía Implementada o Verificada. La documentación histórica no debe utilizar etiquetas ambiguas como “provisional” si una ADR posterior ya la adoptó; debe marcarse como superseded cuando corresponda.
