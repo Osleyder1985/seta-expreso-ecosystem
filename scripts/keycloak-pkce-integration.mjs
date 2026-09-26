@@ -193,12 +193,13 @@ async function authorizeAndGetToken(metadata, clientId, redirectUri, password, s
   })) authUrl.searchParams.set(key, value);
 
   let response = await http(authUrl);
-  assert(response.ok || (response.status >= 300 && response.status < 400), 'Authorization endpoint failed');
-  if (response.status >= 300 && response.status < 400) {
-    const loginUrl = new URL(response.headers.get('location'), base);
-    response = await http(loginUrl);
+  assert(response.ok || (response.status >= 300 && response.status < 400), 'Authorization endpoint failed: ' + response.status);
+  for (let redirects = 0; response.status >= 300 && response.status < 400 && redirects < 10; redirects++) {
+    const location = response.headers.get('location');
+    assert(location, 'Keycloak redirect missing Location header: ' + response.status);
+    response = await http(new URL(location, response.url));
   }
-  assert(response.ok, 'Keycloak login page failed');
+  assert(response.ok, 'Keycloak login page failed: ' + response.status + ' ' + response.statusText + ' ' + (response.url ?? ''));
   const html = await response.text();
   const form = html.match(/<form[^>]+action="([^"]+)"[^>]*>/i);
   assert(form, 'Keycloak login form not found');
