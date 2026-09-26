@@ -54,7 +54,6 @@
     "typescript": "6.0.3",
     "dotenv": "17.2.2",
     "prisma": "7.10.0",
-    "@apidevtools/openapi-schemas": "2.1.0",
-    "ajv": "8.17.1"
+    "@scalar/openapi-validator": "0.1.1"
   }
 }
