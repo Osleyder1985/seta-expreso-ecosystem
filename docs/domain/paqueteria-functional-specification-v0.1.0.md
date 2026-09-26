@@ -211,7 +211,7 @@ El sistema debe permitir diferentes tipos de evidencia:
 - referencia documental;
 - observaciones.
 
-Los campos obligatorios definitivos permanecen pendientes de procedimiento operativo.
+Para una entrega exitosa, la evidencia mínima obligatoria es la fotografía del documento de identidad del receptor asociada al paquete/operación. Firma, fotografía del bulto, OTP y geolocalización no son obligatorios por esta regla; su uso puede depender de otros procedimientos o decisiones.
 
 ## 15. Fallos y reintentos
 
