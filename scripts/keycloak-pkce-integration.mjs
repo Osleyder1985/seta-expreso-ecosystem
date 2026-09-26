@@ -103,7 +103,7 @@ async function main() {
   const authUrl = new URL(metadata.authorization_endpoint);
   for (const [key, value] of Object.entries({
     client_id: clientId, redirect_uri: redirectUri, response_type: 'code',
-    scope: 'openid profile', state, code_challenge: challenge,
+    scope: 'openid api-audience', state, code_challenge: challenge,
     code_challenge_method: 'S256'
   })) authUrl.searchParams.set(key, value);
 
