@@ -34,4 +34,12 @@ describe('SETA EXPRESO API (e2e)', () => {
     expect(response.headers['referrer-policy']).toBe('no-referrer');
 
   });
+
+  it('rate limits repeated requests', async () => {
+    for (let i = 0; i < 100; i += 1) {
+      await request(app.getHttpServer()).get('/api/health').expect(200);
+    }
+
+    await request(app.getHttpServer()).get('/api/health').expect(429);
+  });
 });
