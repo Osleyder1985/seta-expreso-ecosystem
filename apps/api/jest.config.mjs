@@ -1,4 +1,5 @@
 export default {
+  extensionsToTreatAsEsm: ['.ts'],
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '.',
   testRegex: 'test/.*\\.e2e-spec\\.ts$',
