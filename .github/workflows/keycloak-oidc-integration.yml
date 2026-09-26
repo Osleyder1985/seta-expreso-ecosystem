@@ -1,0 +1,80 @@
+name: keycloak-oidc-integration
+
+on:
+  pull_request:
+    paths:
+      - 'apps/api/**'
+      - 'infra/keycloak/**'
+      - 'scripts/keycloak-pkce-integration.mjs'
+      - '.github/workflows/keycloak-oidc-integration.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/api/**'
+      - 'infra/keycloak/**'
+      - 'scripts/keycloak-pkce-integration.mjs'
+      - '.github/workflows/keycloak-oidc-integration.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    env:
+      KEYCLOAK_ADMIN_USERNAME: admin
+      KEYCLOAK_ADMIN_PASSWORD: integration-${{ github.run_id }}-seta
+      OIDC_ISSUER: http://127.0.0.1:8081/realms/seta-expreso
+      OIDC_AUDIENCE: seta-expreso-api
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24.21.0
+          cache: npm
+          cache-dependency-path: apps/api/package.json
+
+      - name: Start Keycloak
+        run: docker compose -f infra/keycloak/docker-compose.yml up -d
+
+      - name: Wait for Keycloak
+        shell: bash
+        run: |
+          for i in {1..60}; do
+            if curl --fail --silent "$OIDC_ISSUER/.well-known/openid-configuration" >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          docker compose -f infra/keycloak/docker-compose.yml logs
+          exit 1
+
+      - name: Install API dependencies
+        working-directory: apps/api
+        run: npm install
+
+      - name: Build API
+        working-directory: apps/api
+        run: npm run build
+
+      - name: Start API
+        working-directory: apps/api
+        run: |
+          nohup env OIDC_ISSUER="$OIDC_ISSUER" OIDC_AUDIENCE="$OIDC_AUDIENCE" node dist/main.js > /tmp/seta-api.log 2>&1 &
+          for i in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:3000/api/health >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/seta-api.log
+          exit 1
+
+      - name: Execute real OIDC Authorization Code + PKCE flow
+        run: node scripts/keycloak-pkce-integration.mjs
+
+      - name: Dump service logs on failure
+        if: failure()
+        run: |
+          cat /tmp/seta-api.log || true
+          docker compose -f infra/keycloak/docker-compose.yml logs || true
