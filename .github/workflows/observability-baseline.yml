@@ -65,10 +65,37 @@ jobs:
       - name: Verify observability readiness
         working-directory: .
         run: |
-          curl -4 --retry 40 --retry-delay 2 -sS -o /dev/null -w '%{http_code}\n' http://localhost:4318/ | grep -Eq '^(404|405)          curl --fail --retry 20 --retry-delay 2 http://localhost:9090/-/ready
+          curl -4 --retry 40 --retry-delay 2 -sS -o /dev/null -w '%{http_code}\n' http://localhost:4318/ | grep -Eq '^(404|405)
+
+      - name: Dump observability logs on failure
+        if: failure()
+        working-directory: .
+        run: docker compose -f infra/observability/docker-compose.yml logs --no-color
+
+      - name: Stop observability stack
+        if: always()
+        working-directory: .
+        run: docker compose -f infra/observability/docker-compose.yml down -v
+
+          curl --fail --retry 20 --retry-delay 2 http://localhost:9090/-/ready
           curl --fail --retry 20 --retry-delay 2 http://localhost:3001/api/health
           curl --fail --retry 20 --retry-delay 2 http://localhost:3100/ready
           curl --fail --retry 20 --retry-delay 2 http://localhost:12345/-/ready
+
+      - name: Dump observability logs on failure
+        if: failure()
+        working-directory: .
+        run: docker compose -f infra/observability/docker-compose.yml logs --no-color
+
+      - name: Stop observability stack
+        if: always()
+        working-directory: .
+        run: docker compose -f infra/observability/docker-compose.yml down -v
+
+          curl -4 --fail --retry 40 --retry-delay 2 http://localhost:9090/-/ready
+          curl -4 --fail --retry 40 --retry-delay 2 http://localhost:3001/api/health
+          curl -4 --fail --retry 40 --retry-delay 2 http://localhost:3100/ready
+          curl -4 --fail --retry 40 --retry-delay 2 http://localhost:12345/-/ready
 
       - name: Dump observability logs on failure
         if: failure()
