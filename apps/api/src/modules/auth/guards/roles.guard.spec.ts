@@ -1,4 +1,5 @@
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
+import { jest } from '@jest/globals';
 import { Reflector } from '@nestjs/core';
 import { RolesGuard } from './roles.guard';
 import { REQUIRED_ROLES_KEY } from './roles.decorator';
