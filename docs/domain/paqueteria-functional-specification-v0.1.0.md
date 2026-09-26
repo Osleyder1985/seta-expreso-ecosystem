@@ -385,7 +385,7 @@ Especificación funcional: v0.1.0.
 
 Modelo lógico PostgreSQL: todavía bloqueado.
 
-Motivo: permanecen decisiones operacionales sobre agrupación de entregas, POD, jerarquía documental exacta y catálogos operativos.
+Motivo: permanece la decisión operacional sobre agrupación de entregas, además de jerarquía documental exacta y catálogos operativos.
 
 Siguiente artefacto: matriz completa Requisito → Caso de Uso → Regla → Evento → Prueba → futura API, seguida por el diseño lógico PostgreSQL/PostGIS cuando los bloqueadores estén cerrados.
 
