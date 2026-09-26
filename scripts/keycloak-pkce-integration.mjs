@@ -254,7 +254,7 @@ async function main() {
   const malformed = await fetch(api + '/auth/me', { headers: { authorization: 'Bearer ' + tokens.access_token + 'x' } });
   assert(malformed.status === 401, 'Malformed token was not rejected');
 
-  const wrongClientId = await createWrongAudienceClient(admin);
+  await createWrongAudienceClient(admin);
   const wrongTokens = await authorizeAndGetToken(
     metadata,
     'seta-expreso-integration-wrong-aud',
@@ -279,8 +279,8 @@ async function main() {
 
   const rotatedTokens = await authorizeAndGetToken(metadata, clientId, redirectUri, password);
   assert(rotatedTokens.access_token, 'Rotated-key access token missing');
-  const rotatedPayload = JSON.parse(Buffer.from(rotatedTokens.access_token.split('.')[1], 'base64url').toString());
-  assert(newKids.includes(rotatedPayload.kid ?? ''), 'New token was not signed with the rotated Keycloak key');
+  const rotatedHeader = JSON.parse(Buffer.from(rotatedTokens.access_token.split('.')[0], 'base64url').toString());
+  assert(newKids.includes(rotatedHeader.kid ?? ''), 'New token was not signed with the rotated Keycloak key');
   const rotatedMe = await fetch(api + '/auth/me', {
     headers: { authorization: 'Bearer ' + rotatedTokens.access_token }
   });
