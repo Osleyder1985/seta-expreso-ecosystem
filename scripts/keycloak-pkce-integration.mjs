@@ -40,7 +40,10 @@ async function createIntegrationUser() {
     body: JSON.stringify({
       username: 'operator',
       enabled: true,
+      email: 'operator@example.invalid',
       emailVerified: true,
+      firstName: 'Integration',
+      lastName: 'Operator',
       credentials: [{ type: 'password', value: testPassword, temporary: false }]
     })
   });
