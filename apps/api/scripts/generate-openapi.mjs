@@ -9,6 +9,7 @@ const { AppModule } = await import('../dist/app.module.js');
 const { createOpenApiDocument } = await import('../dist/openapi.js');
 
 const app = await NestFactory.create(AppModule, { logger: false });
+app.setGlobalPrefix('api');
 const document = createOpenApiDocument(app);
 
 const output = resolve(dirname(fileURLToPath(import.meta.url)), '../../../docs/api/openapi.json');
