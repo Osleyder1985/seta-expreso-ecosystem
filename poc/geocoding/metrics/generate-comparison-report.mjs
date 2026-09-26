@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import { compareProviders, compareByCaseType, compareByProvince } from "./provider-comparison.mjs";
+import { compareProviders, compareByCaseType, compareByProvince, compareByPrecision } from "./provider-comparison.mjs";
 
 const [,, inputPath, outputPath = "geocoding-comparison-report.json"] = process.argv;
 
@@ -20,6 +20,7 @@ const report = {
   providers: compareProviders(records),
   by_case_type: compareByCaseType(records),
   by_province: compareByProvince(records),
+  by_precision: compareByPrecision(records),
   interpretation_rules: {
     no_provider_ranking: true,
     false_positive_is_separate_from_no_result: true,
