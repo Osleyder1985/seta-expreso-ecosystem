@@ -39,11 +39,13 @@ describe('SETA EXPRESO API (e2e)', () => {
 
 
   it('GET /api/health is rate limited', async () => {
-    const responses = await Promise.all(
-      Array.from({ length: 21 }, () => request(app.getHttpServer()).get('/api/health')),
-    );
+    const statuses: number[] = [];
+    for (let index = 0; index < 21; index += 1) {
+      const response = await request(app.getHttpServer()).get('/api/health');
+      statuses.push(response.status);
+    }
 
-    expect(responses.some((item) => item.status === 429)).toBe(true);
+    expect(statuses.filter((status) => status === 429)).toHaveLength(1);
   });
 
 });
