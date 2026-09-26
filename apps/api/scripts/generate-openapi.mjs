@@ -13,7 +13,7 @@ const document = createOpenApiDocument(app);
 
 const output = resolve(dirname(fileURLToPath(import.meta.url)), '../../../docs/api/openapi.json');
 await mkdir(dirname(output), { recursive: true });
-await writeFile(output, JSON.stringify(document, null, 2) + '\\n', 'utf8');
+await writeFile(output, JSON.stringify(document, null, 2) + String.fromCharCode(10), 'utf8');
 
 await app.close();
 console.log(JSON.stringify({ protocol: 'openapi-generation-v1', openapi: document.openapi, paths: Object.keys(document.paths).length, output }));
