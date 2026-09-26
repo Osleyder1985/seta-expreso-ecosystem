@@ -194,3 +194,13 @@ No se seleccionará proveedor definitivo hasta disponer de evidencia suficiente 
 Si ningún proveedor externo alcanza calidad operacional suficiente, se evaluará una estrategia híbrida:
 
 normalización SETA + catálogo territorial ONEI + proveedor externo + fallback/autogestionado.
+
+## 16. Estrategia de infraestructura controlable
+
+La evaluación distinguirá entre API pública de terceros, servicio de terceros con cuota gratuita y geocodificador autogestionado. Una API pública puede servir para PoC, pero sus límites y política de uso no están bajo control de SETA. Un servicio gratuito puede ser candidato operativo solo si la evidencia cubana demuestra calidad suficiente y sus condiciones permiten el uso previsto. Un geocodificador autogestionado permite controlar endpoint, capacidad, caché y política de ejecución; su calidad seguirá dependiendo de los datos OSM importados y de su cobertura.
+
+Nominatim autogestionado es técnicamente viable con PostgreSQL/PostGIS y osm2pgsql. La documentación oficial indica PostgreSQL 13+, PostGIS 3.0+ y osm2pgsql como componentes de ejecución. La política restrictiva del servidor público de Nominatim no se aplica a una instancia propia.
+
+Para Cuba existe además un extracto OSM específico de Geofabrik en formato PBF, de aproximadamente 58 MB en la edición consultada, con datos hasta septiembre de 2026. Esto demuestra viabilidad de datos e infraestructura para estudiar una instancia autogestionada de alcance nacional sin descargar el planeta completo. No demuestra por sí mismo la calidad de geocodificación de las direcciones cubanas.
+
+El benchmark mantendrá separadas estas preguntas: qué implementación resuelve mejor las direcciones cubanas del corpus, y qué opción puede operar SETA de forma sostenible y sustituible sin depender de un servicio externo. La segunda requerirá una PoC autogestionada si las alternativas externas no proporcionan evidencia suficiente.
