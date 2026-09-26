@@ -78,3 +78,35 @@ jobs:
         run: node scripts/verify-database-foundation.mjs
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/seta_expreso
+
+      - name: Provision runtime roles
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f ../../infra/postgres/bootstrap/verify-least-privilege.sql
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/seta_expreso
+
+      - name: Verify runtime least privilege
+        run: node scripts/verify-least-privilege.mjs
+        env:
+          APP_DATABASE_URL: postgresql://seta_exp_app:ci-app-password@localhost:5432/seta_expreso
+
+      - name: Seed backup/restore probe
+        run: node scripts/verify-backup-restore.mjs
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/seta_expreso
+
+      - name: Dump database
+        run: pg_dump --format=custom --file=/tmp/seta-expreso.dump "$DATABASE_URL"
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/seta_expreso
+
+      - name: Create clean restore database
+        run: psql postgresql://postgres:postgres@localhost:5432/postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE seta_expreso_restore"
+
+      - name: Restore database
+        run: pg_restore --exit-on-error --dbname=postgresql://postgres:postgres@localhost:5432/seta_expreso_restore /tmp/seta-expreso.dump
+
+      - name: Verify restored database
+        run: |
+          node scripts/verify-backup-restore.mjs
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/seta_expreso_restore
