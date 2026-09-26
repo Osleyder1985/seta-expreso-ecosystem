@@ -20,7 +20,7 @@ discovery.relabel "seta_expresso_logs" {
 
 loki.source.docker "seta_expreso" {
   host          = "unix:///var/run/docker.sock"
-  targets       = discovery.docker.seta_expreso.targets
+  targets       = discovery.docker.seta_expresso.targets
   labels        = { job = "docker" }
   relabel_rules = discovery.relabel.seta_expresso_logs.rules
   forward_to    = [loki.write.local.receiver]
