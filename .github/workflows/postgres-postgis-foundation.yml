@@ -93,6 +93,8 @@ jobs:
         run: node scripts/verify-backup-restore.mjs
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/seta_expreso
+          BACKUP_RESTORE_SEED: "true"
+          BACKUP_RESTORE_MARKER: "backup-restore-ci-probe"
 
       - name: Dump database
         run: pg_dump --format=custom --file=/tmp/seta-expreso.dump "$DATABASE_URL"
@@ -110,3 +112,4 @@ jobs:
           node scripts/verify-backup-restore.mjs
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/seta_expreso_restore
+          BACKUP_RESTORE_MARKER: "backup-restore-ci-probe"
