@@ -1,4 +1,5 @@
 import { ArgumentsHost } from '@nestjs/common';
+import { jest } from '@jest/globals';
 import { HttpErrorFilter } from './http-error.filter';
 
 describe('HttpErrorFilter', () => {
