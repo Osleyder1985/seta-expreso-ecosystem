@@ -92,7 +92,7 @@ Los contratos de aplicación indicados aquí son **candidatos**. No constituyen 
 | AT-10 | RF-PQ-007 | UC-09 | fallo de geocodificación no elimina dirección |
 | AT-11 | RF-PQ-012 | UC-16 | intento fallido permanece después de programar reintento |
 | AT-12 | RF-PQ-012 | UC-16 | segundo intento crea nuevo registro |
-| AT-13 | RF-PQ-013 | UC-15 | entrega exitosa genera POD conforme al mínimo vigente; condicionado por D12 |
+| AT-13 | RF-PQ-013 | UC-15 | entrega exitosa exige fotografía del documento de identidad del receptor asociada al paquete/operación |
 | AT-14 | RF-PQ-014 | UC-16, UC-17 | fallo de entrega no genera abandono |
 | AT-15 | RF-PQ-010, 011, 017, 018 | UC-20 | transición válida aceptada y auditada |
 | AT-16 | RF-PQ-017, 018 | UC-20 | transición prohibida rechazada sin mutar estado previo |
