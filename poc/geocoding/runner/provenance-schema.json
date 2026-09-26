@@ -108,8 +108,7 @@
       "required": [
         "node",
         "platform",
-        "arch",
-        "hostname"
+        "arch"
       ],
       "properties": {
         "node": {
@@ -121,7 +120,7 @@
         "arch": {
           "type": "string"
         },
-        "hostname": {
+        "environment": {
           "type": "string"
         }
       },
