@@ -110,7 +110,7 @@ jobs:
       - name: Dump database
         run: |
           docker exec "${{ steps.postgres-container.outputs.container_id }}" \
-            pg_dump --format=custom --file=- postgresql://postgres:postgres@localhost:5432/seta_expreso \
+            pg_dump --format=custom postgresql://postgres:postgres@localhost:5432/seta_expreso \
             > /tmp/seta-expreso.dump
 
       - name: Create clean restore database
