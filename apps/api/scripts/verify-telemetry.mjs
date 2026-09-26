@@ -3,11 +3,11 @@ import { readFile } from 'node:fs/promises';
 const checks = [
   ['instrumentation source', new URL('../src/instrumentation.ts', import.meta.url)],
   ['observability middleware', new URL('../src/modules/observability/observability.middleware.ts', import.meta.url)],
-  ['collector config', new URL('../../infra/observability/otel-collector/config.yaml', import.meta.url)],
-  ['prometheus config', new URL('../../infra/observability/prometheus/prometheus.yml', import.meta.url)],
-  ['alert rules', new URL('../../infra/observability/prometheus/alerts.yml', import.meta.url)],
-  ['loki config', new URL('../../infra/observability/loki/config.yaml', import.meta.url)],
-  ['compose', new URL('../../infra/observability/docker-compose.yml', import.meta.url)],
+  ['collector config', new URL('../../../infra/observability/otel-collector/config.yaml', import.meta.url)],
+  ['prometheus config', new URL('../../../infra/observability/prometheus/prometheus.yml', import.meta.url)],
+  ['alert rules', new URL('../../../infra/observability/prometheus/alerts.yml', import.meta.url)],
+  ['loki config', new URL('../../../infra/observability/loki/config.yaml', import.meta.url)],
+  ['compose', new URL('../../../infra/observability/docker-compose.yml', import.meta.url)],
 ];
 
 for (const [name, url] of checks) {
