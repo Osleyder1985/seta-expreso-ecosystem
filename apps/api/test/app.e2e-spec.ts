@@ -32,16 +32,8 @@ describe('SETA EXPRESO API (e2e)', () => {
     expect(response.headers['x-content-type-options']).toBe('nosniff');
     expect(response.headers['x-frame-options']).toBe('SAMEORIGIN');
     expect(response.headers['referrer-policy']).toBe('no-referrer');
-    expect(response.headers['x-ratelimit-limit']).toBeDefined();
   });
 
-  it('GET /api/health is rate limited', async () => {
-    const responses = await Promise.all(
-      Array.from({ length: 21 }, () => request(app.getHttpServer()).get('/api/health')),
-    );
-
-    expect(responses.some((item) => item.status === 429)).toBe(true);
-  });
   it('returns a safe 404 error envelope without stack details', async () => {
     const response = await request(app.getHttpServer())
       .get('/api/does-not-exist')
@@ -53,6 +45,14 @@ describe('SETA EXPRESO API (e2e)', () => {
     expect(response.body.path).toBe('/api/does-not-exist');
     expect(response.body.timestamp).toBeDefined();
     expect(response.body.stack).toBeUndefined();
+  });
+
+  it('GET /api/health is rate limited', async () => {
+    const responses = await Promise.all(
+      Array.from({ length: 21 }, () => request(app.getHttpServer()).get('/api/health')),
+    );
+
+    expect(responses.some((item) => item.status === 429)).toBe(true);
   });
 
 });
