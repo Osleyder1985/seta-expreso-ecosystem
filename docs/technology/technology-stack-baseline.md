@@ -237,22 +237,22 @@ Toda sustitución relevante deberá quedar documentada.
 ### P0 — Alta prioridad
 1. Prisma vs alternativa de acceso a PostgreSQL/PostGIS.
 2. Flutter vs desarrollo nativo.
-2. Geocoder compatible con los requisitos reales de Cuba.
-3. Estrategia de autenticación/identidad.
+3. Geocoder compatible con los requisitos reales de Cuba.
+4. Estrategia de autenticación/identidad.
 
 ### P1 — Prioridad media
-6. Solución concreta de mapas.
-7. Routing engine.
-8. almacenamiento de documentos.
-9. plataforma de notificaciones.
-10. observabilidad concreta.
-11. reverse proxy.
+1. Solución concreta de mapas.
+2. Routing engine.
+3. almacenamiento de documentos.
+4. plataforma de notificaciones.
+5. observabilidad concreta.
+6. reverse proxy.
 
 ### P2 — Evolutivas
-12. capacidades de IA;
-13. optimización de rutas;
-14. event-driven architecture avanzada;
-15. extracción de módulos a servicios independientes.
+1. capacidades de IA;
+2. optimización de rutas;
+3. event-driven architecture avanzada;
+4. extracción de módulos a servicios independientes.
 
 ## 22. Criterios de aceptación del Stack Baseline
 El baseline se considera técnicamente válido cuando todas las tecnologías adoptadas tienen una justificación; las tecnologías críticas pendientes están identificadas; existe una ruta de validación; no existen dependencias externas no documentadas; el stack es compatible con la arquitectura baseline; puede ejecutarse en el entorno de desarrollo objetivo; permite pruebas automatizadas; permite CI; permite evolución; y no introduce complejidad operacional injustificada.
