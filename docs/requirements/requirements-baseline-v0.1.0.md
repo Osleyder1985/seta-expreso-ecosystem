@@ -1,5 +1,7 @@
 # Requirements Baseline — SETA EXPRESO SURL / Zpress Ecosystem
 
+**Revision:** 0.1.1 — D12 closed; D09 remains open
+
 **Version:** 0.1.0
 **Status:** Baseline for engineering traceability
 **Date:** 2026-09-26
