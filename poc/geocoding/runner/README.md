@@ -24,7 +24,7 @@ interface GeocodingProvider {
 }
 ```
 
-El runner no conoce URLs, tokens ni detalles propietarios del proveedor.
+El runner no conoce URLs, tokens ni detalles propietarios del proveedor. Selecciona únicamente un adapter por nombre (`geoapify`, `locationiq`, `nominatim`) y le entrega el caso de entrada.
 
 ## Estados de validación
 
@@ -48,7 +48,7 @@ Puede ejecutarse sin credenciales para validar dataset, parser, schema y cálcul
 
 ### Fase B — proveedor
 
-Se ejecuta un adapter por proveedor con el mismo corpus y los mismos parámetros comparables.
+Se ejecuta un adapter por proveedor con el mismo corpus y los mismos parámetros comparables. El runner captura cada request, HTTP 429 y error/timeout y genera el manifiesto de provenance automáticamente. `GEOCODING_INTERVAL_MS` permite espaciar solicitudes; para Nominatim público debe usarse ejecución secuencial y una cadencia compatible con su política.
 
 ### Fase C — comparación
 
