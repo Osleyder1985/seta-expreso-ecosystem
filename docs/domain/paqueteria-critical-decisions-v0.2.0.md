@@ -77,13 +77,18 @@ No debe crearse una FK única delivery.house_id como diseño definitivo.
 
 ## 5. D12 — mínimo de POD
 
-### Estado: ABIERTO
+### Estado: CERRADO — regla de negocio operativa; obligaciones legales de retención separadas
 
-La evidencia disponible no permite imponer todavía firma, foto, documento de identidad, geolocalización, OTP u otro elemento como requisito legal de POD.
+La evidencia empresarial registrada en las Issues #52 y #62 establece como evidencia obligatoria para una entrega exitosa la **fotografía del documento de identidad del receptor asociada al paquete/operación**.
 
-Regla provisional:
+El mínimo operativo de POD queda definido por:
+- resultado de entrega exitoso;
+- fotografía del documento de identidad del receptor asociada inequívocamente al paquete/operación;
+- fecha/hora y actor de la operación, conservados como hechos de sistema y auditoría.
 
-DeliveryCompleted debe tener un resultado y una evidencia mínima definida por el procedimiento operativo de SETA.
+Esta decisión no hace obligatorios firma, fotografía del bulto, OTP o geolocalización.
+
+La retención, legal hold y eliminación de la evidencia permanecen sujetas a política y verificación normativa independiente.
 
 ## 6. Modelo refinado de recepción
 
