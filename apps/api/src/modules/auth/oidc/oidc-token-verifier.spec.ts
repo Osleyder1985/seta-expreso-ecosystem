@@ -53,8 +53,7 @@ describe('OidcTokenVerifier', () => {
   });
 
   it('rejects a token with an unexpected audience', async () => {
-    const { privateKey } = await generateKeyPair('RS256');
-    const { publicKey } = await generateKeyPair('RS256');
+    const { privateKey, publicKey } = await generateKeyPair('RS256');
     const jwk = await exportJWK(publicKey);
     jwk.kid = 'unused';
     const previousFetch = globalThis.fetch;
