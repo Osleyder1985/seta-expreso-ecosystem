@@ -65,11 +65,16 @@ jobs:
       - name: Verify observability readiness
         working-directory: .
         run: |
-          curl --fail --retry 20 --retry-delay 2 http://localhost:13133/
+          curl --fail --retry 40 --retry-delay 2 http://localhost:13133/
           curl --fail --retry 20 --retry-delay 2 http://localhost:9090/-/ready
           curl --fail --retry 20 --retry-delay 2 http://localhost:3001/api/health
           curl --fail --retry 20 --retry-delay 2 http://localhost:3100/ready
           curl --fail --retry 20 --retry-delay 2 http://localhost:12345/-/ready
+
+      - name: Dump observability logs on failure
+        if: failure()
+        working-directory: .
+        run: docker compose -f infra/observability/docker-compose.yml logs --no-color
 
       - name: Stop observability stack
         if: always()
