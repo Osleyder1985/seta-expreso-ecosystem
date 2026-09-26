@@ -1,0 +1,64 @@
+{
+  "realm": "seta-expreso",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "seta-expreso-api",
+      "name": "SETA EXPRESO API",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "bearerOnly": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false
+    },
+    {
+      "clientId": "seta-expreso-web",
+      "name": "SETA EXPRESO Web",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["http://127.0.0.1:3000/callback"],
+      "webOrigins": ["http://127.0.0.1:3000"],
+      "attributes": { "pkce.code.challenge.method": "S256" }
+    },
+    {
+      "clientId": "seta-expreso-mobile",
+      "name": "SETA EXPRESO Mobile",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["http://127.0.0.1:8765/callback"],
+      "attributes": { "pkce.code.challenge.method": "S256" }
+    }
+  ],
+  "clientScopes": [
+    {
+      "name": "api-audience",
+      "protocol": "openid-connect",
+      "protocolMappers": [
+        {
+          "name": "seta-expreso-api audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.client.audience": "seta-expreso-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ]
+    }
+  ],
+  "defaultDefaultClientScopes": ["api-audience"],
+  "roles": {
+    "realm": [
+      { "name": "operator", "description": "Operational API operator" },
+      { "name": "admin", "description": "Administrative API operator" }
+    ]
+  }
+}
