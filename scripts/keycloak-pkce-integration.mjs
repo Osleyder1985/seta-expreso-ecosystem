@@ -151,6 +151,14 @@ async function createWrongAudienceClient(token) {
 }
 
 async function rotateRealmSigningKey(token) {
+  const realm = await json(
+    await fetch(base + '/admin/realms/seta-expreso', {
+      headers: { authorization: 'Bearer ' + token }
+    }),
+    'Realm lookup for signing-key rotation failed'
+  );
+  assert(realm.id, 'Realm internal ID missing');
+
   const response = await fetch(base + '/admin/realms/seta-expreso/components', {
     method: 'POST',
     headers: {
@@ -161,7 +169,7 @@ async function rotateRealmSigningKey(token) {
       name: 'integration-rsa-rotation',
       providerId: 'rsa-generated',
       providerType: 'org.keycloak.keys.KeyProvider',
-      parentId: 'seta-expreso',
+      parentId: realm.id,
       config: {
         priority: ['200'],
         enabled: ['true'],
