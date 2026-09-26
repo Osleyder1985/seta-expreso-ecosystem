@@ -1,4 +1,5 @@
 name: postgres-postgis-foundation
+# Backup verification uses the PostgreSQL 18 tools from the service container.
 
 on:
   pull_request:
