@@ -62,7 +62,7 @@ jobs:
       - name: Start API
         working-directory: apps/api
         run: |
-          nohup env OIDC_ISSUER="$OIDC_ISSUER" OIDC_AUDIENCE="$OIDC_AUDIENCE" node dist/main.js > /tmp/seta-api.log 2>&1 &
+          nohup env NODE_ENV=test OIDC_ISSUER="$OIDC_ISSUER" OIDC_AUDIENCE="$OIDC_AUDIENCE" node dist/main.js > /tmp/seta-api.log 2>&1 &
           for i in {1..30}; do
             if curl --fail --silent http://127.0.0.1:3000/api/health >/dev/null; then exit 0; fi
             sleep 2
