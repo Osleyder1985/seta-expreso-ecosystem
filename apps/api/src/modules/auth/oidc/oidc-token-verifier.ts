@@ -7,7 +7,9 @@ export class OidcTokenVerifier {
   private readonly issuer = process.env.OIDC_ISSUER;
   private readonly audience = process.env.OIDC_AUDIENCE;
   private readonly jwks = this.issuer
-    ? createRemoteJWKSet(new URL(this.issuer + '/protocol/openid-connect/certs'))
+    ? createRemoteJWKSet(new URL(this.issuer + '/protocol/openid-connect/certs'), {
+        cooldownDuration: Number(process.env.OIDC_JWKS_COOLDOWN_MS ?? 5000),
+      })
     : undefined;
 
   async verify(accessToken: string): Promise<AuthPrincipal> {
