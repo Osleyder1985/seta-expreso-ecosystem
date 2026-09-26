@@ -7,6 +7,9 @@ import { HealthModule } from './modules/health/health.module';
   imports: [
     ThrottlerModule.forRoot({
       throttlers: [{ name: 'default', ttl: 60000, limit: 100 }],
-    }),HealthModule],
+    }),
+    HealthModule,
+  ],
+  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}
