@@ -27,7 +27,9 @@ const evaluated = records.map((record) => {
   }
 
   const validationDetail = validateTerritorialMatch(record.expected ?? {}, record.result);
-  const reference = record.expected?.reference_coordinates;
+  const reference = record.reference?.latitude != null && record.reference?.longitude != null
+    ? { latitude: record.reference.latitude, longitude: record.reference.longitude }
+    : null;
   const coordinates = record.result?.coordinates;
   const spatialValidation = reference && coordinates
     ? validateSpatialMatch(reference, coordinates)
