@@ -98,22 +98,27 @@ jobs:
           BACKUP_RESTORE_SEED: "true"
           BACKUP_RESTORE_MARKER: "backup-restore-ci-probe"
 
-      - name: Install PostgreSQL 18 client
+      - name: Resolve PostgreSQL 18 service container
+        id: postgres-container
         run: |
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client-18
-          /usr/lib/postgresql/18/bin/pg_dump --version
+          container_id="$(docker ps -q --filter 'ancestor=postgis/postgis:18-3.6' | head -n 1)"
+          test -n "$container_id"
+          echo "container_id=$container_id" >> "$GITHUB_OUTPUT"
+          docker exec "$container_id" pg_dump --version
 
       - name: Dump database
-        run: /usr/lib/postgresql/18/bin/pg_dump --format=custom --file=/tmp/seta-expreso.dump "$DATABASE_URL"
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/seta_expreso
+        run: |
+          docker exec "${{ steps.postgres-container.outputs.container_id }}" \
+            pg_dump --format=custom --file=- postgresql://postgres:postgres@localhost:5432/seta_expreso \
+            > /tmp/seta-expreso.dump
 
       - name: Create clean restore database
         run: psql postgresql://postgres:postgres@localhost:5432/postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE seta_expreso_restore"
 
       - name: Restore database
-        run: /usr/lib/postgresql/18/bin/pg_restore --exit-on-error --dbname=postgresql://postgres:postgres@localhost:5432/seta_expreso_restore /tmp/seta-expreso.dump
+        run: |
+          cat /tmp/seta-expreso.dump | docker exec -i "${{ steps.postgres-container.outputs.container_id }}" \
+            pg_restore --exit-on-error --dbname=postgresql://postgres:postgres@localhost:5432/seta_expreso_restore
 
       - name: Verify restored database
         run: |
