@@ -22,7 +22,10 @@ export class OidcTokenVerifier {
         algorithms: ['RS256'],
       });
       return this.toPrincipal(payload);
-    } catch {
+    } catch (error) {
+      if (process.env.OIDC_DEBUG === 'true') {
+        console.error('[OIDC_DEBUG]', error instanceof Error ? error.message : error);
+      }
       throw new UnauthorizedException('Invalid access token');
     }
   }
