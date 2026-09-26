@@ -132,6 +132,7 @@ async function main() {
   assert(response.status >= 300 && response.status < 400, 'Keycloak login did not redirect');
 
   const callback = new URL(response.headers.get('location'));
+  console.log(JSON.stringify({ callbackOrigin: callback.origin, callbackPath: callback.pathname }));
   assert(callback.origin === new URL(redirectUri).origin, 'Unexpected callback origin');
   assert(callback.searchParams.get('state') === state, 'OIDC state mismatch');
   const code = callback.searchParams.get('code');
