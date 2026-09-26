@@ -194,27 +194,39 @@ async function authorizeAndGetToken(metadata, clientId, redirectUri, password, s
 
   let response = await http(authUrl);
   assert(response.ok || (response.status >= 300 && response.status < 400), 'Authorization endpoint failed: ' + response.status);
+  let callback;
   for (let redirects = 0; response.status >= 300 && response.status < 400 && redirects < 10; redirects++) {
     const location = response.headers.get('location');
     assert(location, 'Keycloak redirect missing Location header: ' + response.status);
-    response = await http(new URL(location, response.url));
+    const nextUrl = new URL(location, response.url);
+    if (nextUrl.origin === new URL(redirectUri).origin &&
+        nextUrl.searchParams.get('state') === state &&
+        nextUrl.searchParams.get('code')) {
+      callback = nextUrl;
+      break;
+    }
+    response = await http(nextUrl);
   }
-  assert(response.ok, 'Keycloak login page failed: ' + response.status + ' ' + response.statusText + ' ' + (response.url ?? ''));
-  const html = await response.text();
-  const form = html.match(/<form[^>]+action="([^"]+)"[^>]*>/i);
-  assert(form, 'Keycloak login form not found');
-  const body = new URLSearchParams();
-  for (const [, name, value] of html.matchAll(/<input[^>]+type="hidden"[^>]+name="([^"]+)"[^>]+value="([^"]*)"[^>]*>/gi)) body.set(name, value);
-  body.set('username', 'operator');
-  body.set('password', password);
 
-  response = await http(new URL(form[1].replaceAll('&amp;', '&'), authUrl), {
-    method: 'POST',
-    headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    body
-  });
-  assert(response.status >= 300 && response.status < 400, 'Keycloak login did not redirect');
-  const callback = new URL(response.headers.get('location'));
+  if (!callback) {
+    assert(response.ok, 'Keycloak login page failed: ' + response.status + ' ' + response.statusText + ' ' + (response.url ?? ''));
+    const html = await response.text();
+    const form = html.match(/<form[^>]+action="([^"]+)"[^>]*>/i);
+    assert(form, 'Keycloak login form not found');
+    const body = new URLSearchParams();
+    for (const [, name, value] of html.matchAll(/<input[^>]+type="hidden"[^>]+name="([^"]+)"[^>]+value="([^"]*)"[^>]*>/gi)) body.set(name, value);
+    body.set('username', 'operator');
+    body.set('password', password);
+
+    response = await http(new URL(form[1].replaceAll('&amp;', '&'), response.url), {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body
+    });
+    assert(response.status >= 300 && response.status < 400, 'Keycloak login did not redirect');
+    callback = new URL(response.headers.get('location'));
+  }
+
   assert(callback.origin === new URL(redirectUri).origin, 'Unexpected callback origin');
   assert(callback.searchParams.get('state') === state, 'OIDC state mismatch');
   const code = callback.searchParams.get('code');
