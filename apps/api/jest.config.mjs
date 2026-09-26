@@ -3,6 +3,9 @@ export default {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '.',
   testRegex: 'test/.*\\.e2e-spec\\.ts$',
+  transformIgnorePatterns: [
+    'node_modules/(?!(@nestjs|rxjs|reflect-metadata)/)',
+  ],
   transform: {
     '^.+\\.(t|j)s$': ['@swc/jest', {
       jsc: {
