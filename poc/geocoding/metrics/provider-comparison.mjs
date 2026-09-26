@@ -66,6 +66,19 @@ export function compareByCaseType(records) {
   }));
 }
 
+export function compareByPrecision(records) {
+  const groups = groupBy(records, r =>
+    r.result?.precision ??
+    r.result?.raw?.result_type ??
+    r.result?.raw?.type ??
+    "unknown"
+  );
+  return [...groups.entries()].map(([precision, precisionRecords]) => ({
+    precision,
+    ...compareProviders(precisionRecords)
+  }));
+}
+
 export function compareByProvince(records) {
   const groups = groupBy(records, r => r.expected?.province?.name);
   return [...groups.entries()].map(([province, provinceRecords]) => ({
