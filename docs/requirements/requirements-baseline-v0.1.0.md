@@ -132,12 +132,12 @@ A test is PASS only with executable evidence.
 | Area | Issue | State |
 |---|---:|---|
 | OIDC/RBAC | #165 | Core authentication/RBAC on main; authorization audit remains |
-| PostgreSQL/PostGIS | #179 | Production persistence foundation pending |
-| OpenAPI 3.1 | #189 | Controlled API contract pending |
+| PostgreSQL/PostGIS | #179 | Foundation implemented and merged; production rollout/backup policy remains environment-specific |
+| OpenAPI 3.1 | #189 | Controlled contract implementation/validation integrated; domain endpoints remain subject to domain readiness |
 | Offline sync | #183 | Architecture/POC; production enforcement pending |
 | Object storage | #187 | Architecture/POC; production adapter pending |
 | Async jobs | #188 | Architecture/POC; production baseline pending |
-| Observability | #184 | Implementation pending |
+| Observability | #184 | Operational baseline integrated; subsystem-specific instrumentation remains incremental |
 | Testing strategy | #185 | Work ongoing |
 | Threat model | #191 | Integrated on main |
 | Dependency Review | #198 | Blocked by GitHub repository capability |
@@ -149,9 +149,8 @@ A test is PASS only with executable evidence.
 3. Exact operational confirmation of House versus child air waybill.
 4. Operational/customs catalogs requiring enforcement.
 5. Final authorization scope/object ownership model.
-6. PostgreSQL/PostGIS persistence foundation.
-7. Controlled OpenAPI contract.
-8. Executable end-to-end Paquetería acceptance suite.
+6. Remaining operational/customs catalogs and authorization ownership model.
+7. Executable end-to-end Paquetería acceptance suite.
 
 ## Definition of Ready
 
