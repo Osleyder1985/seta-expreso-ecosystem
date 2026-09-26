@@ -109,4 +109,52 @@ describe('OidcTokenVerifier', () => {
     }
   });
 
+
+  it('refreshes JWKS when a token uses a newly rotated key', async () => {
+    const first = await generateKeyPair('RS256');
+    const second = await generateKeyPair('RS256');
+    const firstJwk = await exportJWK(first.publicKey);
+    const secondJwk = await exportJWK(second.publicKey);
+    firstJwk.kid = 'rotation-key-1';
+    secondJwk.kid = 'rotation-key-2';
+
+    let fetchCount = 0;
+    const previousFetch = globalThis.fetch;
+    globalThis.fetch = (async () => {
+      fetchCount += 1;
+      const keys = fetchCount === 1 ? [firstJwk] : [firstJwk, secondJwk];
+      return new Response(JSON.stringify({ keys }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      });
+    }) as typeof fetch;
+
+    try {
+      const verifier = new OidcTokenVerifier();
+      const token1 = await new SignJWT({})
+        .setProtectedHeader({ alg: 'RS256', kid: 'rotation-key-1' })
+        .setIssuer(issuer)
+        .setAudience(audience)
+        .setSubject('rotation-1')
+        .setIssuedAt()
+        .setExpirationTime('5m')
+        .sign(first.privateKey);
+
+      const token2 = await new SignJWT({})
+        .setProtectedHeader({ alg: 'RS256', kid: 'rotation-key-2' })
+        .setIssuer(issuer)
+        .setAudience(audience)
+        .setSubject('rotation-2')
+        .setIssuedAt()
+        .setExpirationTime('5m')
+        .sign(second.privateKey);
+
+      await expect(verifier.verify(token1)).resolves.toMatchObject({ subject: 'rotation-1' });
+      await expect(verifier.verify(token2)).resolves.toMatchObject({ subject: 'rotation-2' });
+      expect(fetchCount).toBeGreaterThanOrEqual(2);
+    } finally {
+      globalThis.fetch = previousFetch;
+    }
+  });
+
 });
