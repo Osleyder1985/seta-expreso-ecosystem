@@ -1,0 +1,58 @@
+name: observability-baseline
+
+on:
+  pull_request:
+    paths:
+      - 'apps/api/src/instrumentation.ts'
+      - 'apps/api/src/modules/observability/**'
+      - 'apps/api/scripts/verify-telemetry.mjs'
+      - 'apps/api/package.json'
+      - 'infra/observability/**'
+      - 'docs/observability/**'
+      - '.github/workflows/observability-baseline.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/api/src/instrumentation.ts'
+      - 'apps/api/src/modules/observability/**'
+      - 'apps/api/scripts/verify-telemetry.mjs'
+      - 'apps/api/package.json'
+      - 'infra/observability/**'
+      - 'docs/observability/**'
+      - '.github/workflows/observability-baseline.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24.21.0
+          cache: npm
+          cache-dependency-path: apps/api/package.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build API
+        run: npm run build
+
+      - name: Run telemetry verification
+        run: npm run telemetry:test
+
+      - name: Run observability unit test
+        run: npm test -- --runTestsByPath src/modules/observability/observability.test.ts
+
+      - name: Validate observability Compose
+        working-directory: .
+        run: docker compose -f infra/observability/docker-compose.yml config
