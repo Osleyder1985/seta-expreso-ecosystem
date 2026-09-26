@@ -48,7 +48,7 @@ Documentation alone never establishes implementation.
 | RF-PQ-010 | Evaluate distribution eligibility and explain blocking conditions. | UC-11 | AT-15,16,25 | PARTIAL |
 | RF-PQ-011 | Plan and execute routes with ordered stops, vehicle and driver. | UC-12,13 | AT-15,16 | BASELINED |
 | RF-PQ-012 | Preserve each delivery attempt independently and support retries. | UC-14,16 | AT-11,12 | BASELINED |
-| RF-PQ-013 | Record delivery completion and operational POD. | UC-15 | AT-13 | PARTIAL |
+| RF-PQ-013 | Record delivery completion and operational POD, including the established mandatory recipient-ID photograph. | UC-15 | AT-13 | BASELINED |
 | RF-PQ-014 | Manage returns separately from delivery failure and abandonment. | UC-17 | AT-23 | BASELINED |
 | RF-PQ-015 | Register incidents with actor, time, evidence and resolution. | UC-18 | AT-18…21 | BASELINED |
 | RF-PQ-016 | Provide authorized end-to-end traceability. | UC-19 | AT-17 | BASELINED |
