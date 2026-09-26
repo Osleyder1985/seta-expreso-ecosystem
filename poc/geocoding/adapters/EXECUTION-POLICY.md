@@ -15,3 +15,8 @@ Los adapters mantienen la misma interfaz si posteriormente se despliega Nominati
 ## Importante
 
 El benchmark final debe ejecutar cada proveedor en campañas separadas o con controles equivalentes. No se mezclan latencias de proveedores ejecutados bajo políticas de concurrencia diferentes sin documentarlo.
+
+
+## Telemetría obligatoria de campaña
+
+Cada campaña debe conservar los contadores reales del adapter: requests intentados, cache hits/misses, 429 y errores. No se permite inferir requests consumidos a partir del número de casos cuando exista cache, reintentos o respuestas rate-limited.
