@@ -295,6 +295,7 @@ async function main() {
   const beforeKids = await getSigningKids(admin);
   await rotateRealmSigningKey(admin);
 
+  await new Promise((resolve) => setTimeout(resolve, 6000));
   const rotatedTokens = await authorizeAndGetToken(metadata, clientId, redirectUri, password);
   assert(rotatedTokens.access_token, 'Rotated-key access token missing');
   const rotatedHeader = JSON.parse(Buffer.from(rotatedTokens.access_token.split('.')[0], 'base64url').toString());
