@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildProvenance, sanitizeConfig, sha256 } from "./provenance.mjs";
+import { buildProvenance, sanitizeConfig, sha256, parseNonNegativeInteger } from "./provenance.mjs";
 
 test("sha256 is deterministic", () => {
   assert.equal(
@@ -50,4 +50,11 @@ test("buildProvenance records dataset and output hashes", () => {
   assert.equal(manifest.config.API_KEY, "[REDACTED]");
   assert.equal(manifest.requests.cache_hits, 1);
   assert.equal(manifest.requests.cache_misses, 3);
+});
+
+
+test("parseNonNegativeInteger rejects invalid counters", () => {
+  assert.equal(parseNonNegativeInteger("4"), 4);
+  assert.equal(parseNonNegativeInteger("-1"), 0);
+  assert.equal(parseNonNegativeInteger("NaN"), 0);
 });
