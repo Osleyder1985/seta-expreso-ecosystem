@@ -7,6 +7,7 @@ describe('OpenAPI contract', () => {
   it('generates an OpenAPI 3.1 document for every implemented route', async () => {
     process.env.NODE_ENV = 'test';
     const app = await NestFactory.create(AppModule, { logger: false });
+    app.setGlobalPrefix('api');
     const document = SwaggerModule.createDocument(app, buildOpenApiConfig());
 
     expect(document.openapi).toBe('3.1.0');
