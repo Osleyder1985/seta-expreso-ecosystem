@@ -37,7 +37,7 @@ Los contratos de aplicación indicados aquí son **candidatos**. No constituyen 
 | RF-PQ-010 | UC-11 | elegibilidad depende de recepción, custodia, situación aduanera, destino e incidencias | DistributionEligibilityGranted | AT-15, AT-16, AT-25 | POST /distribution-eligibility/evaluate | PARCIAL |
 | RF-PQ-011 | UC-12, UC-13 | Route contiene fecha, origen, destino, vehículo, conductor y Stop ordenados | RoutePlanned, RouteStarted, StopArrived | AT-15, AT-16 | POST /routes; POST /routes/{id}/start | CUBIERTO |
 | RF-PQ-012 | UC-14, UC-16 | cada intento es independiente y conserva su resultado; retry crea nuevo intento | DeliveryAttemptRecorded, DeliveryFailed, RetryScheduled | AT-11, AT-12 | POST /deliveries/{id}/attempts | CUBIERTO |
-| RF-PQ-013 | UC-15 | POD mínimo aún no cerrado; no inventar requisitos legales | DeliveryCompleted | AT-13 | POST /deliveries/{id}/complete | PARCIAL |
+| RF-PQ-013 | UC-15 | D12; entrega exitosa requiere fotografía del documento de identidad del receptor asociada al paquete/operación | DeliveryCompleted | AT-13 | POST /deliveries/{id}/complete | CUBIERTO |
 | RF-PQ-014 | UC-17 | DeliveryFailed ≠ abandono; devolución es flujo operacional separado | ReturnInitiated, ReturnCompleted | AT-23 | POST /deliveries/{id}/return | CUBIERTO |
 | RF-PQ-015 | UC-18 | incidencia conserva tipo, actor, fecha, evidencia y resolución | IncidentRegistered | AT-18, AT-20, AT-21 | POST /incidents | CUBIERTO |
 | RF-PQ-016 | UC-19 | trazabilidad no depende solo del estado actual | AuditRecordCreated | AT-17 | GET /houses/{id}/traceability | CUBIERTO |
