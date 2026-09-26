@@ -10,9 +10,9 @@ The API now has a reproducible OpenTelemetry baseline for HTTP telemetry:
 - OTLP export to a local OpenTelemetry Collector;
 - Prometheus-compatible metrics from the Collector;
 - local Prometheus and Grafana services;
-- local Loki service reserved for the structured-log pipeline.
+- local Loki service receiving the structured Docker log pipeline through Grafana Alloy.
 
-OpenTelemetry JavaScript currently marks traces and metrics as stable while logs are still in development. Therefore the API does not claim a production-grade OpenTelemetry Logs SDK pipeline yet; its HTTP logs are correlation-ready JSON on stdout. The Loki backend is provisioned locally so log ingestion can be introduced without changing the observability topology.
+OpenTelemetry JavaScript currently marks traces and metrics as stable while logs remain in development. The API therefore uses correlation-ready structured JSON on stdout rather than claiming an OpenTelemetry Logs SDK implementation. Grafana Alloy collects Docker stdout/stderr and forwards those entries to Loki. The log correlation payload includes trace_id/span_id when the request is inside an active HTTP span.
 
 ## Metrics
 
