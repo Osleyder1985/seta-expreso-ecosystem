@@ -1,10 +1,10 @@
 import fs from "node:fs";
 import { compareProviders, compareByCaseType, compareByProvince, compareByPrecision } from "./provider-comparison.mjs";
 
-const [,, inputPath, outputPath = "geocoding-comparison-report.json"] = process.argv;
+const [,, inputPath, outputPath = "geocoding-comparison-report.json", manifestPath] = process.argv;
 
 if (!inputPath) {
-  console.error("Usage: node generate-comparison-report.mjs <evaluated.jsonl> [report.json]");
+  console.error("Usage: node generate-comparison-report.mjs <evaluated.jsonl> [report.json] [manifest.json]");
   process.exit(2);
 }
 
@@ -13,9 +13,14 @@ const records = fs.readFileSync(inputPath, "utf8")
   .filter(Boolean)
   .map(line => JSON.parse(line));
 
+const provenance = manifestPath
+  ? JSON.parse(fs.readFileSync(manifestPath, "utf8"))
+  : null;
+
 const report = {
   protocol_version: "cuba-geocoding-benchmark-v0.1",
   generated_at: new Date().toISOString(),
+  provenance,
   cases: records.length,
   providers: compareProviders(records),
   by_case_type: compareByCaseType(records),
