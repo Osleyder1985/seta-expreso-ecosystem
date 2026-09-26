@@ -98,8 +98,14 @@ jobs:
           BACKUP_RESTORE_SEED: "true"
           BACKUP_RESTORE_MARKER: "backup-restore-ci-probe"
 
+      - name: Install PostgreSQL 18 client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-18
+          /usr/lib/postgresql/18/bin/pg_dump --version
+
       - name: Dump database
-        run: pg_dump --format=custom --file=/tmp/seta-expreso.dump "$DATABASE_URL"
+        run: /usr/lib/postgresql/18/bin/pg_dump --format=custom --file=/tmp/seta-expreso.dump "$DATABASE_URL"
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/seta_expreso
 
@@ -107,7 +113,7 @@ jobs:
         run: psql postgresql://postgres:postgres@localhost:5432/postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE seta_expreso_restore"
 
       - name: Restore database
-        run: pg_restore --exit-on-error --dbname=postgresql://postgres:postgres@localhost:5432/seta_expreso_restore /tmp/seta-expreso.dump
+        run: /usr/lib/postgresql/18/bin/pg_restore --exit-on-error --dbname=postgresql://postgres:postgres@localhost:5432/seta_expreso_restore /tmp/seta-expreso.dump
 
       - name: Verify restored database
         run: |
