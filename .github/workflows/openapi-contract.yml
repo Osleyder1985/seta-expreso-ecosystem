@@ -1,5 +1,5 @@
 name: openapi-contract
-# Contract gate: generate from executable NestJS routes, then validate OAS 3.1.
+# Contract gate: generate from executable NestJS routes, then validate OAS 3.1; JSON artifact serialization is validated.
 
 on:
   pull_request:
