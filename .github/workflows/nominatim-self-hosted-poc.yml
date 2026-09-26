@@ -1,0 +1,81 @@
+name: Nominatim Cuba self-hosted PoC
+
+on:
+  push:
+    branches:
+      - poc/nominatim-cuba-self-hosted-clean
+  pull_request:
+    paths:
+      - "poc/geocoding/self-hosted-nominatim/**"
+  workflow_dispatch:
+
+jobs:
+  infrastructure-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Cuba PBF
+        shell: pwsh
+        working-directory: poc/geocoding/self-hosted-nominatim
+        run: ./download-cuba-pbf.ps1
+
+      - name: Record PBF evidence
+        working-directory: poc/geocoding/self-hosted-nominatim
+        run: |
+          sha256sum data/cuba-latest.osm.pbf | tee pbf-sha256.txt
+          ls -lh data/cuba-latest.osm.pbf
+
+      - name: Pull Nominatim image
+        working-directory: poc/geocoding/self-hosted-nominatim
+        run: docker compose pull
+
+      - name: Start Nominatim
+        working-directory: poc/geocoding/self-hosted-nominatim
+        run: docker compose up -d
+
+      - name: Wait for import and API
+        working-directory: poc/geocoding/self-hosted-nominatim
+        shell: bash
+        run: |
+          for i in {1..90}; do
+            if curl -fsS "http://127.0.0.1:8080/status.php" >/dev/null 2>&1; then
+              echo "Nominatim API is ready after $i checks."
+              exit 0
+            fi
+            docker compose ps
+            sleep 20
+          done
+          echo "Nominatim did not become ready."
+          docker compose logs --tail=300
+          exit 1
+
+      - name: Forward smoke test
+        run: |
+          curl --fail-with-body --get             --data-urlencode "q=Camagüey, Cuba"             --data-urlencode "format=jsonv2"             --data-urlencode "addressdetails=1"             --data-urlencode "limit=5"             "http://127.0.0.1:8080/search" | tee poc/geocoding/self-hosted-nominatim/forward-smoke.json
+
+      - name: Reverse smoke test
+        run: |
+          curl --fail-with-body --get             --data-urlencode "lat=21.3808"             --data-urlencode "lon=-77.9169"             --data-urlencode "format=jsonv2"             --data-urlencode "addressdetails=1"             "http://127.0.0.1:8080/reverse" | tee poc/geocoding/self-hosted-nominatim/reverse-smoke.json
+
+      - name: Capture resource evidence
+        if: always()
+        working-directory: poc/geocoding/self-hosted-nominatim
+        run: |
+          docker compose ps -a
+          docker stats --no-stream --all
+          docker compose logs --tail=500 > nominatim.log || true
+          docker system df > docker-disk-usage.txt
+
+      - name: Upload PoC evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nominatim-cuba-infrastructure-evidence
+          path: |
+            poc/geocoding/self-hosted-nominatim/pbf-sha256.txt
+            poc/geocoding/self-hosted-nominatim/forward-smoke.json
+            poc/geocoding/self-hosted-nominatim/reverse-smoke.json
+            poc/geocoding/self-hosted-nominatim/nominatim.log
+            poc/geocoding/self-hosted-nominatim/docker-disk-usage.txt
