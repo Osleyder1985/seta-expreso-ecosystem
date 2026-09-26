@@ -146,11 +146,10 @@ A test is PASS only with executable evidence.
 ## Current blockers to the first production vertical
 
 1. D09 — multiple House per Delivery operational semantics.
-3. Exact operational confirmation of House versus child air waybill.
-4. Operational/customs catalogs requiring enforcement.
-5. Final authorization scope/object ownership model.
-6. Remaining operational/customs catalogs and authorization ownership model.
-7. Executable end-to-end Paquetería acceptance suite.
+2. Exact operational confirmation of House versus child air waybill.
+3. Operational/customs catalogs requiring enforcement.
+4. Final authorization scope/object ownership model.
+5. Executable end-to-end Paquetería acceptance suite.
 
 ## Definition of Ready
 
