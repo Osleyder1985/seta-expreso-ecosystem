@@ -30,6 +30,29 @@ export function httpStatusToBenchmarkStatus(status) {
   return "http_error";
 }
 
+export function createRequestTelemetry() {
+  return {
+    attempted: 0,
+    cache_hits: 0,
+    cache_misses: 0,
+    rate_limited: 0,
+    errors: 0
+  };
+}
+
+export function recordRequest(telemetry, { cacheHit = false, status = null, error = false } = {}) {
+  if (cacheHit) {
+    telemetry.cache_hits += 1;
+    return telemetry;
+  }
+
+  telemetry.cache_misses += 1;
+  telemetry.attempted += 1;
+  if (status === 429) telemetry.rate_limited += 1;
+  if (error) telemetry.errors += 1;
+  return telemetry;
+}
+
 export async function fetchJson(url, options = {}, timeoutMs = 15000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
