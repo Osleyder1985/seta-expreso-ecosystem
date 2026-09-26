@@ -1,4 +1,4 @@
-# Matriz de trazabilidad de Paquetería — v0.1.0
+# Matriz de trazabilidad de Paquetería — v0.1.1
 
 **Estado:** baseline de trazabilidad para validación de dominio y diseño de aplicación  
 **Ámbito:** Servicio de Paquetería de SETA EXPRESO SURL  
