@@ -192,7 +192,7 @@ Debe conservar tipo legal, autoridad, resolución/referencia, fecha, causal, mer
 | D09 | Abierta; soporte técnico N:M |
 | D10 | Cerrada conceptualmente |
 | D11 | Arquitectura cerrada; detalle jurídico/operacional pendiente |
-| D12 | Abierta |
+| D12 | Cerrada: POD mínimo operativo = fotografía del documento de identidad del receptor asociada al paquete/operación; retención legal separada |
 
 ## 12. Nuevos criterios de aceptación
 
