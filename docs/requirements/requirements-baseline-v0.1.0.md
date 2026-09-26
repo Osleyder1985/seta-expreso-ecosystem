@@ -171,4 +171,4 @@ No implementation may silently reinterpret a baselined requirement.
 
 This baseline separates business objectives, Paquetería requirements, cross-cutting system requirements, quality requirements, security requirements, acceptance criteria, implementation issues and explicit blockers.
 
-The first vertical is not production-complete. The next engineering step is the PostgreSQL/PostGIS logical model and controlled API contract, while D09/D12 remain explicit constraints.
+The first vertical is not production-complete. D12 is now a closed operational POD rule; D09 remains an explicit domain constraint. The next engineering step is to close D09 and the remaining operational/catalog decisions before freezing irreversible physical domain rules.
