@@ -12,4 +12,10 @@ export class AuthController {
   me(@Req() request: AuthenticatedRequest): AuthPrincipal {
     return request.user!;
   }
+
+  @Get('admin-probe')
+  @Roles('admin')
+  adminProbe(): { status: 'ok' } {
+    return { status: 'ok' };
+  }
 }
