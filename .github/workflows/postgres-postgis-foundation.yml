@@ -6,6 +6,8 @@ on:
       - 'apps/api/prisma/**'
       - 'apps/api/src/modules/database/**'
       - 'apps/api/scripts/verify-database-foundation.mjs'
+      - 'apps/api/scripts/verify-least-privilege.mjs'
+      - 'apps/api/scripts/verify-backup-restore.mjs'
       - 'apps/api/package.json'
       - 'apps/api/.env.example'
       - 'infra/postgres/**'
