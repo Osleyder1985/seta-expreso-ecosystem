@@ -19,16 +19,18 @@ Objetivo: evaluar Nominatim autogestionado con el extracto OSM de Cuba como alte
 - Runner común del benchmark Cuba.
 
 ## Datos
-URL por defecto: https://download.geofabrik.de/central-america/cuba-latest.osm.pbf
+URL por defecto: https://download.geofabrik.de/central-america/cuba-latest.osm.pbf. La importación se realiza desde archivo local mediante PBF_PATH para que el artefacto exacto quede bajo control de la PoC.
 
 Antes de importar se descarga el PBF y se calcula SHA-256. Si se dispone de un hash publicado por la fuente, debe verificarse; si no, el hash local se conserva como identificación del artefacto, no como prueba independiente de autenticidad.
 
 ## Ejecución
 1. Copiar .env.example a .env.
-2. Ejecutar docker compose pull.
-3. Ejecutar docker compose up -d.
-4. Observar logs hasta finalizar importación/indexación.
-5. Ejecutar health check.
+2. Ejecutar .\download-cuba-pbf.ps1.
+3. Verificar que .\data\cuba-latest.osm.pbf exista y conservar su SHA-256.
+4. Ejecutar docker compose pull.
+5. Ejecutar docker compose up -d.
+6. Observar logs hasta finalizar importación/indexación.
+7. Ejecutar health check.
 
 Prueba forward: http://localhost:8080/search?q=Camagüey%2C%20Cuba&format=jsonv2&addressdetails=1&limit=5
 
