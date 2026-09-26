@@ -7,6 +7,7 @@ on:
   pull_request:
     paths:
       - "poc/geocoding/self-hosted-nominatim/**"
+      - ".github/workflows/nominatim-self-hosted-poc.yml"
   workflow_dispatch:
 
 jobs:
