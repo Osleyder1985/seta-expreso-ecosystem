@@ -26,7 +26,6 @@ jobs:
       KEYCLOAK_ADMIN_PASSWORD: integration-${{ github.run_id }}-seta
       OIDC_ISSUER: http://127.0.0.1:8081/realms/seta-expreso
       OIDC_AUDIENCE: seta-expreso-api
-      OIDC_DEBUG: 'true'
 
     steps:
       - name: Checkout
