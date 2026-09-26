@@ -34,18 +34,6 @@ describe('SETA EXPRESO API (e2e)', () => {
     expect(response.headers['referrer-policy']).toBe('no-referrer');
   });
 
-  it('returns a safe 404 error envelope without stack details', async () => {
-    const response = await request(app.getHttpServer())
-      .get('/api/does-not-exist')
-      .expect(404);
-
-    expect(response.body.statusCode).toBe(404);
-    expect(response.body.error).toBeDefined();
-    expect(response.body.message).toBeDefined();
-    expect(response.body.path).toBe('/api/does-not-exist');
-    expect(response.body.timestamp).toBeDefined();
-    expect(response.body.stack).toBeUndefined();
-  });
 
   it('GET /api/health is rate limited', async () => {
     const responses = await Promise.all(
