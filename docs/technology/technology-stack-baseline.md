@@ -1,8 +1,8 @@
-# Technology Stack Baseline v0.3.0
+# Technology Stack Baseline v0.4.0
 
 **Ecosistema:** SETA EXPRESO SURL  
-**Estado:** Vigente con decisiones pendientes identificadas
-**Versión:** 0.3.0  
+**Estado:** Vigente — decisiones tecnológicas transversales cerradas
+**Versión:** 0.4.0  
 **Issue:** #3  
 **Arquitectura de referencia:** Architecture Baseline v0.1.0 / ADR-0001  
 **Idioma del documento:** Español  
@@ -73,23 +73,23 @@ Las decisiones de producción deberán permitir obtener logs estructurados, mét
 | Backend | NestJS 12.1.0 + TypeScript 6.0.3 + Node.js 24.21.0 LTS | **Adoptado** |
 | Runtime | Node.js 24.21.0 LTS | Adoptado |
 | API | REST + OpenAPI | Adoptado |
-| Web | React 19.3 + TypeScript 6.0.3 + Vite 8.3.x | Adoptado provisionalmente |
-| Mobile | Flutter 3.47.5 + Dart 3.13.4 | Adoptado provisionalmente |
+| Web | React 19.3 + TypeScript 6.0.3 + Vite 8.3.x | **Adoptado** |
+| Mobile | Flutter 3.47.5 + Dart 3.13.4 | **Adoptado** |
 | DB | PostgreSQL 18.6 | Adoptado |
 | Geodatos | PostGIS 3.6.0 | Adoptado |
-| Acceso a datos | Prisma ORM 7.10.0, sujeto a validación | Candidato |
-| Backend tests | Jest 30.x + Supertest 7.2.2 | Adoptado provisionalmente |
-| Web tests | Vitest 5.x + Testing Library + Playwright 1.63.0 | Adoptado provisionalmente |
-| Mobile tests | Flutter Test + integration_test | Adoptado provisionalmente |
+| Acceso a datos | Prisma ORM 7.10.0 + SQL/TypedSQL controlado para PostGIS | **Adoptado** |
+| Backend tests | Jest 30.x + Supertest 7.2.2 | **Adoptado** |
+| Web tests | Vitest 5.x + Testing Library + Playwright 1.63.0 | **Adoptado** |
+| Mobile tests | Flutter Test + integration_test | **Adoptado** |
 | CI | GitHub Actions | Adoptado |
 | Contenedores | Docker Engine 29.8.1 | Adoptado |
 | API docs | OpenAPI/Swagger | Adoptado |
-| Maps | OpenStreetMap como fuente/cartografía base, sujeto a implementación concreta | Adoptado como dirección |
+| Maps | MapLibre GL JS/Native + OpenFreeMap; OSM como fuente de datos | **Adoptado** |
 | Geocoding | Geoapify como proveedor externo primario + `GeocodingProvider`; Nominatim autogestionado como fallback | **Adoptado** |
-| Observabilidad | OpenTelemetry + backend compatible | Dirección adoptada |
+| Observabilidad | OpenTelemetry + Collector + Prometheus + Grafana + Loki | **Adoptado** |
 | Version control | Git + GitHub | Adoptado |
-| Auth | OAuth/OIDC compatible, sujeto a diseño de identidad | Candidato |
-| Reverse proxy | Caddy/Nginx si el despliegue lo requiere | Candidato |
+| Auth | Keycloak 26.7.x + OAuth 2.0/OIDC | **Adoptado** |
+| Reverse proxy | Caddy | **Adoptado** |
 | AI/ML | No obligatorio en baseline | No adoptado como requisito tecnológico |
 
 Nota: “Adoptado provisionalmente” significa que la tecnología puede utilizarse como baseline de implementación, pero permanece sujeta a validación técnica mediante evidencia.
@@ -230,6 +230,21 @@ No se congela uno de los dos en v0.1.0. La selección dependerá de arquitectura
 Toda dependencia externa crítica deberá evaluarse según licencia, actividad/mantenimiento, seguridad, compatibilidad, costo, límites, lock-in, facilidad de sustitución y disponibilidad.
 Para proveedores externos se deberá identificar proveedor, servicio, API, límite, SLA/expectativa de disponibilidad cuando exista, fallback y estrategia de sustitución.
 
+## 18.3 Routing
+**Adoptado: Valhalla autogestionado sobre OSM de Cuba**, detrás de un puerto `RoutingProvider`. Se utilizará para rutas, matrices tiempo/distancia y optimización básica de paradas. La optimización empresarial completa (VRP, capacidad, ventanas, prioridades y tiempos de servicio) pertenece al dominio.
+
+## 18.4 Trabajos asíncronos
+**Adoptado: pg-boss sobre PostgreSQL.** Se utilizará solo para trabajos que realmente requieran procesamiento asíncrono, reintentos, programación o backpressure. Redis, RabbitMQ y Kafka no forman parte del baseline.
+
+## 18.5 Almacenamiento de archivos
+**Adoptado: `ObjectStorage` port con filesystem persistente como implementación inicial.** PostgreSQL conserva metadatos e integridad. El port queda preparado para S3-compatible si la evolución lo requiere. MinIO no forma parte del baseline inicial.
+
+## 18.6 Notificaciones
+**Adoptado: Firebase Cloud Messaging** como canal push inicial para Android/iOS/Web. Email, SMS y WhatsApp quedan fuera hasta que exista requisito.
+
+## 18.7 Mobile state/offline
+**Adoptado: Riverpod + Drift/SQLite + flutter_secure_storage.** Offline es selectivo: la operación móvil crítica puede trabajar con datos sincronizados y cola local; la web administrativa permanece online-first.
+
 ## 19. Tecnologías no adoptadas inicialmente
 No forman parte del baseline inicial: microservicios, Kubernetes, service mesh, serverless como arquitectura general, Kafka u otro event streaming distribuido, múltiples bases de datos sin necesidad, blockchain, GraphQL, AI/ML como dependencia obligatoria del núcleo, multi-cloud e infraestructura excesivamente distribuida.
 Esto no significa que estén prohibidas. Significa que requieren una decisión específica basada en requisitos y evidencia.
@@ -239,19 +254,17 @@ Una tecnología podrá sustituirse cuando no satisfaga requisitos, introduzca ri
 Toda sustitución relevante deberá quedar documentada.
 
 ## 21. PoC y decisiones pendientes
-### P0 — Alta prioridad
-1. Prisma vs alternativa de acceso a PostgreSQL/PostGIS.
-2. Flutter vs desarrollo nativo.
-3. Geocoder compatible con los requisitos reales de Cuba.
-4. Estrategia de autenticación/identidad.
+### P0 — Cerrado por ADR-004
+Las decisiones tecnológicas transversales pendientes de v0.3.0 quedaron cerradas por ADR-004: Prisma, identidad, Web, Mobile, mapas, routing, almacenamiento, asincronía, notificaciones, observabilidad y reverse proxy.
 
-### P1 — Prioridad media
-1. Solución concreta de mapas.
-2. Routing engine.
-3. almacenamiento de documentos.
-4. plataforma de notificaciones.
-5. observabilidad concreta.
-6. reverse proxy.
+### P1 — Detalle de implementación
+1. Modelo de roles/permisos.
+2. Contrato de sincronización offline.
+3. Contrato RoutingProvider.
+4. Contrato ObjectStorage.
+5. Parámetros y dataset de Valhalla para Cuba.
+6. Dashboards, retención y alertas.
+7. políticas concretas de deployment y backup.
 
 ### P2 — Evolutivas
 1. capacidades de IA;
@@ -325,12 +338,12 @@ Las decisiones de alto impacto deberán quedar registradas mediante ADR.
 | Jest/Supertest | Provisional |
 | Vitest/Testing Library/Playwright | Provisional |
 | Flutter Test/integration_test | Provisional |
-| Prisma | Candidato |
+| Prisma | Adoptado: 7.10.0 |
 | Geocoder | Adoptado: Geoapify + fallback Nominatim autogestionado |
-| Routing engine | Pendiente |
-| Identity provider | Pendiente |
-| Observability backend | Pendiente |
-| Reverse proxy | Pendiente |
+| Routing engine | Adoptado: Valhalla autogestionado |
+| Identity provider | Adoptado: Keycloak 26.7.x |
+| Observability backend | Adoptado: OTel + Collector + Prometheus + Grafana + Loki |
+| Reverse proxy | Adoptado: Caddy |
 | AI/ML | No requerido por baseline |
 
 ## 26. Regla de gobierno
@@ -338,6 +351,6 @@ Las decisiones de alto impacto deberán quedar registradas mediante ADR.
 Debe existir evidencia suficiente y una decisión documentada.
 Cuando la decisión tenga impacto arquitectónico significativo, se deberá crear un ADR.
 
-**Fin del Technology Stack Baseline v0.3.0.**
+**Fin del Technology Stack Baseline v0.4.0.**
 
 **Fase/nota:** Las etiquetas históricas de fase o baseline no constituyen estados formales; el campo `Estado` se rige exclusivamente por la taxonomía de gobernanza.
