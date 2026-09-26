@@ -1,12 +1,16 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { HttpErrorFilter } from './common/http/http-error.filter';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
 
+  app.useSecurityHeaders();
+
   app.setGlobalPrefix('api');
   app.enableShutdownHooks();
+  app.useGlobalFilters(new HttpErrorFilter());
 
   app.useGlobalPipes(
     new ValidationPipe({
