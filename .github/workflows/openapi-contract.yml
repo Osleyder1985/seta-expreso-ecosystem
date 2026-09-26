@@ -1,0 +1,55 @@
+name: openapi-contract
+
+on:
+  pull_request:
+    paths:
+      - 'apps/api/src/**'
+      - 'apps/api/scripts/generate-openapi.mjs'
+      - 'apps/api/scripts/validate-openapi.mjs'
+      - 'apps/api/scripts/openapi-ci.mjs'
+      - 'apps/api/test/**'
+      - 'apps/api/package.json'
+      - 'apps/api/.env.example'
+      - 'docs/api/**'
+      - '.github/workflows/openapi-contract.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/api/src/**'
+      - 'apps/api/scripts/generate-openapi.mjs'
+      - 'apps/api/scripts/validate-openapi.mjs'
+      - 'apps/api/scripts/openapi-ci.mjs'
+      - 'apps/api/test/**'
+      - 'apps/api/package.json'
+      - 'apps/api/.env.example'
+      - 'docs/api/**'
+      - '.github/workflows/openapi-contract.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24.21.0
+          cache: npm
+          cache-dependency-path: apps/api/package.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate and validate OpenAPI
+        run: node scripts/openapi-ci.mjs
+
+      - name: Run OpenAPI contract test
+        run: npm test -- --runTestsByPath test/openapi.e2e-spec.ts
