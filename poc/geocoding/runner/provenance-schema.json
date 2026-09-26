@@ -1,43 +1,136 @@
 {
-  "$schema":"https://json-schema.org/draft/2020-12/schema",
-  "$id":"https://seta-expreso.example/schemas/geocoding-benchmark-provenance.schema.json",
-  "title":"SETA Geocoding Benchmark Provenance",
-  "type":"object",
-  "required":["provenance_version","protocol_version","run_id","dataset","provider","adapter_version","runner_version","started_at","finished_at","requests","runtime","output_sha256"],
-  "properties":{
-    "provenance_version":{"type":"string"},
-    "protocol_version":{"type":"string"},
-    "run_id":{"type":"string"},
-    "dataset":{
-      "type":"object",
-      "required":["id","version","sha256"],
-      "properties":{
-        "id":{"type":"string"},
-        "version":{"type":"string"},
-        "sha256":{"type":"string","pattern":"^[a-f0-9]{64}$"}
-      },
-      "additionalProperties":false
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://seta-expreso.example/schemas/geocoding-benchmark-provenance.schema.json",
+  "title": "SETA Geocoding Benchmark Provenance",
+  "type": "object",
+  "required": [
+    "provenance_version",
+    "protocol_version",
+    "run_id",
+    "dataset",
+    "provider",
+    "adapter_version",
+    "runner_version",
+    "started_at",
+    "finished_at",
+    "requests",
+    "runtime",
+    "output_sha256"
+  ],
+  "properties": {
+    "provenance_version": {
+      "type": "string"
     },
-    "provider":{"type":"string"},
-    "adapter_version":{"type":"string"},
-    "runner_version":{"type":"string"},
-    "started_at":{"type":"string","format":"date-time"},
-    "finished_at":{"type":"string","format":"date-time"},
-    "requests":{
-      "type":"object",
-      "required":["attempted","cache_hits","cache_misses"],
-      "properties":{
-        "attempted":{"type":"integer","minimum":0},
-        "cache_hits":{"type":"integer","minimum":0},
-        "cache_misses":{"type":"integer","minimum":0},
-        "rate_limit":{"type":["object","null"]}
-      },
-      "additionalProperties":false
+    "protocol_version": {
+      "type": "string"
     },
-    "user_agent":{"type":["string","null"]},
-    "config":{"type":"object"},
-    "runtime":{"type":"object","required":["node","platform","arch","hostname"]},
-    "output_sha256":{"type":"string","pattern":"^[a-f0-9]{64}$"}
+    "run_id": {
+      "type": "string"
+    },
+    "dataset": {
+      "type": "object",
+      "required": [
+        "id",
+        "version",
+        "sha256"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "provider": {
+      "type": "string"
+    },
+    "adapter_version": {
+      "type": "string"
+    },
+    "runner_version": {
+      "type": "string"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "finished_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "requests": {
+      "type": "object",
+      "required": [
+        "attempted",
+        "cache_hits",
+        "cache_misses"
+      ],
+      "properties": {
+        "attempted": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cache_hits": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cache_misses": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rate_limit": {
+          "type": [
+            "object",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "user_agent": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "config": {
+      "type": "object"
+    },
+    "runtime": {
+      "type": "object",
+      "required": [
+        "node",
+        "platform",
+        "arch",
+        "hostname"
+      ],
+      "properties": {
+        "node": {
+          "type": "string"
+        },
+        "platform": {
+          "type": "string"
+        },
+        "arch": {
+          "type": "string"
+        },
+        "hostname": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "output_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
   },
-  "additionalProperties":false
+  "additionalProperties": false
 }
