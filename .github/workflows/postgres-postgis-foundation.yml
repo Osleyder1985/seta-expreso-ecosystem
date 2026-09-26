@@ -1,0 +1,129 @@
+name: postgres-postgis-foundation
+# Backup verification uses the PostgreSQL 18 tools from the service container.
+
+on:
+  pull_request:
+    paths:
+      - 'apps/api/prisma/**'
+      - 'apps/api/src/modules/database/**'
+      - 'apps/api/scripts/verify-database-foundation.mjs'
+      - 'apps/api/scripts/verify-least-privilege.mjs'
+      - 'apps/api/scripts/verify-backup-restore.mjs'
+      - 'apps/api/package.json'
+      - 'apps/api/.env.example'
+      - 'infra/postgres/**'
+      - '.github/workflows/postgres-postgis-foundation.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/api/prisma/**'
+      - 'apps/api/src/modules/database/**'
+      - 'apps/api/scripts/verify-database-foundation.mjs'
+      - 'apps/api/package.json'
+      - 'apps/api/.env.example'
+      - 'infra/postgres/**'
+      - '.github/workflows/postgres-postgis-foundation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:18-3.6
+        env:
+          POSTGRES_DB: seta_expreso
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d seta_expreso"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    defaults:
+      run:
+        working-directory: apps/api
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24.21.0
+          cache: npm
+          cache-dependency-path: apps/api/package.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Validate Prisma schema
+        run: npm run prisma:validate
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/seta_expreso
+
+      - name: Generate Prisma client
+        run: npm run prisma:generate
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/seta_expreso
+
+      - name: Deploy migrations
+        run: npm run prisma:migrate:deploy
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/seta_expreso
+
+      - name: Verify PostGIS foundation
+        run: node scripts/verify-database-foundation.mjs
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/seta_expreso
+
+      - name: Provision runtime roles
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f ../../infra/postgres/bootstrap/verify-least-privilege.sql
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/seta_expreso
+
+      - name: Verify runtime least privilege
+        run: node scripts/verify-least-privilege.mjs
+        env:
+          APP_DATABASE_URL: postgresql://seta_exp_app:ci-app-password@localhost:5432/seta_expreso
+
+      - name: Seed backup/restore probe
+        run: node scripts/verify-backup-restore.mjs
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/seta_expreso
+          BACKUP_RESTORE_SEED: "true"
+          BACKUP_RESTORE_MARKER: "backup-restore-ci-probe"
+
+      - name: Resolve PostgreSQL 18 service container
+        id: postgres-container
+        run: |
+          container_id="$(docker ps -q --filter 'ancestor=postgis/postgis:18-3.6' | head -n 1)"
+          test -n "$container_id"
+          echo "container_id=$container_id" >> "$GITHUB_OUTPUT"
+          docker exec "$container_id" pg_dump --version
+
+      - name: Dump database
+        run: |
+          docker exec "${{ steps.postgres-container.outputs.container_id }}" \
+            pg_dump --format=custom postgresql://postgres:postgres@localhost:5432/seta_expreso \
+            > /tmp/seta-expreso.dump
+
+      - name: Create clean restore database
+        run: psql postgresql://postgres:postgres@localhost:5432/postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE seta_expreso_restore"
+
+      - name: Restore database
+        run: |
+          cat /tmp/seta-expreso.dump | docker exec -i "${{ steps.postgres-container.outputs.container_id }}" \
+            pg_restore --exit-on-error --dbname=postgresql://postgres:postgres@localhost:5432/seta_expreso_restore
+
+      - name: Verify restored database
+        run: |
+          node scripts/verify-backup-restore.mjs
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/seta_expreso_restore
+          BACKUP_RESTORE_MARKER: "backup-restore-ci-probe"

@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgis/postgis:18-3.6
+    container_name: seta-expreso-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: seta_expreso
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: change-me-local-only
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d seta_expreso"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+volumes:
+  postgres_data:
