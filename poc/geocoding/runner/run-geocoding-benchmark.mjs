@@ -32,7 +32,10 @@ function normalizeResult(item, response, adapterVersion) {
     latency_ms: Number(response.latency_ms ?? 0),
     validation: "REVIEW",
     result: response.result ?? null,
-    error: response.error ?? null
+    error: response.error ?? null,
+    expected: item.expected ?? null,
+    reference: item.reference ?? null,
+    case_type: item.case_type ?? null
   };
 }
 
@@ -73,7 +76,10 @@ if (provider === "offline-fixture") {
       latency_ms: 0,
       validation: "REVIEW",
       result: null,
-      error: "Offline runner: no provider adapter configured."
+      error: "Offline runner: no provider adapter configured.",
+      expected: item.expected ?? null,
+      reference: item.reference ?? null,
+      case_type: item.case_type ?? null
     });
   }
 } else {
@@ -96,7 +102,10 @@ if (provider === "offline-fixture") {
         latency_ms: latency,
         validation: "REVIEW",
         result: null,
-        error: error.message
+        error: error.message,
+        expected: item.expected ?? null,
+        reference: item.reference ?? null,
+        case_type: item.case_type ?? null
       });
       await sleep(intervalMs);
       continue;
