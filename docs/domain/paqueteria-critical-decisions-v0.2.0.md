@@ -1,4 +1,4 @@
-# Cierre de decisiones críticas de Paquetería — v0.2.0
+# Cierre de decisiones críticas de Paquetería — v0.2.1
 
 **Estado:** En validación
 **Fecha:** 2026-09-24
