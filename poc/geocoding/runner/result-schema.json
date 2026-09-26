@@ -1,0 +1,19 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://seta-expreso.example/schemas/geocoding-benchmark-result.schema.json",
+  "title":"SETA Geocoding Benchmark Result",
+  "type":"object",
+  "required":["case_id","provider","status","latency_ms","validation"],
+  "properties":{
+    "case_id":{"type":"string"},
+    "provider":{"type":"string"},
+    "adapter_version":{"type":["string","null"]},
+    "status":{"enum":["ok","no_result","http_error","rate_limited","timeout","error"]},
+    "http_status":{"type":["integer","null"]},
+    "latency_ms":{"type":"number","minimum":0},
+    "validation":{"enum":["ACCEPTED","REVIEW","REJECTED"]},
+    "result":{"type":["object","null"]},
+    "error":{"type":["string","null"]}
+  },
+  "additionalProperties":false
+}
