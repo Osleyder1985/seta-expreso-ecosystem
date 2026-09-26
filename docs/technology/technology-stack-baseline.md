@@ -85,7 +85,7 @@ Las decisiones de producción deberán permitir obtener logs estructurados, mét
 | Contenedores | Docker Engine 29.8.1 | Adoptado |
 | API docs | OpenAPI/Swagger | Adoptado |
 | Maps | OpenStreetMap como fuente/cartografía base, sujeto a implementación concreta | Adoptado como dirección |
-| Geocoding | Provider abstraction + proveedor por evaluar | Candidato |
+| Geocoding | Geoapify como proveedor externo primario + `GeocodingProvider`; Nominatim autogestionado como fallback | **Adoptado** |
 | Observabilidad | OpenTelemetry + backend compatible | Dirección adoptada |
 | Version control | Git + GitHub | Adoptado |
 | Auth | OAuth/OIDC compatible, sujeto a diseño de identidad | Candidato |
@@ -163,9 +163,14 @@ La utilización concreta de servicios derivados de OpenStreetMap debe respetar s
 OpenStreetMap no implica que cualquier servicio público asociado sea ilimitado o apropiado para producción.
 
 ### 10.3 Geocoding
-**No se congela todavía un proveedor específico.**
-Se requiere evaluar cobertura geográfica, calidad de resultados en Cuba, normalización de direcciones, límites de solicitudes, política de uso, disponibilidad, latencia, capacidad de batch, precisión, costo, términos de uso y posibilidad de sustitución.
-La aplicación deberá utilizar una abstracción equivalente a GeocodingProvider. El dominio no deberá conocer la implementación concreta del proveedor.
+**Proveedor primario inicial adoptado: Geoapify.**
+La integración deberá permanecer detrás de `GeocodingProvider`. Geoapify se adopta como proveedor externo primario por su soporte forward/reverse, entrada libre y estructurada, filtros territoriales y exposición de confidence/quality para permitir quality gates propios.
+
+**Fallback técnico: Nominatim autogestionado sobre OSM de Cuba.** No se utilizará Nominatim público como dependencia operativa de producción.
+
+La decisión está documentada en ADR-003. La evidencia disponible no demuestra superioridad empírica de Geoapify sobre Cuba; por ello el sistema debe validar cada resultado contra el catálogo territorial, conservar caché/auditoría y permitir sustitución del proveedor.
+
+Se requiere cumplir cuota, atribución y condiciones vigentes del proveedor antes de producción.
 
 ## 11. Testing
 
@@ -295,7 +300,7 @@ Las decisiones de alto impacto deberán quedar registradas mediante ADR.
 
 ## 24. Próximos pasos
 1. validar Prisma/PostGIS;
-2. investigar y probar geocodificación;
+2. integrar Geoapify mediante `GeocodingProvider` y ejecutar posteriormente la validación empírica Cuba v0.1 cuando exista un entorno de ejecución observable;
 3. definir identidad/autorización;
 4. preparar la estructura inicial de proyectos;
 5. establecer quality gates;
@@ -321,7 +326,7 @@ Las decisiones de alto impacto deberán quedar registradas mediante ADR.
 | Vitest/Testing Library/Playwright | Provisional |
 | Flutter Test/integration_test | Provisional |
 | Prisma | Candidato |
-| Geocoder | Pendiente |
+| Geocoder | Adoptado: Geoapify + fallback Nominatim autogestionado |
 | Routing engine | Pendiente |
 | Identity provider | Pendiente |
 | Observability backend | Pendiente |
