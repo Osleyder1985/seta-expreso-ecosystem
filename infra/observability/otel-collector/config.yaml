@@ -11,6 +11,10 @@ processors:
     timeout: 5s
     send_batch_size: 512
 
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+
 exporters:
   prometheus:
     endpoint: 0.0.0.0:8889
@@ -19,6 +23,7 @@ exporters:
     verbosity: basic
 
 service:
+  extensions: [health_check]
   pipelines:
     traces:
       receivers: [otlp]
