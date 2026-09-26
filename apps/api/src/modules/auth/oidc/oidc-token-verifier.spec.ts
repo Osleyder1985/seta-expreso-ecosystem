@@ -80,4 +80,33 @@ describe('OidcTokenVerifier', () => {
       globalThis.fetch = previousFetch;
     }
   });
+  it('rejects an expired RS256 token', async () => {
+    const { privateKey, publicKey } = await generateKeyPair('RS256');
+    const jwk = await exportJWK(publicKey);
+    jwk.kid = 'expired-key';
+    const previousFetch = globalThis.fetch;
+    globalThis.fetch = (async () =>
+      new Response(JSON.stringify({ keys: [jwk] }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      })) as typeof fetch;
+
+    try {
+      const token = await new SignJWT({})
+        .setProtectedHeader({ alg: 'RS256', kid: 'expired-key' })
+        .setIssuer(issuer)
+        .setAudience(audience)
+        .setSubject('user-expired')
+        .setIssuedAt(Math.floor(Date.now() / 1000) - 120)
+        .setExpirationTime(Math.floor(Date.now() / 1000) - 60)
+        .sign(privateKey);
+
+      await expect(new OidcTokenVerifier().verify(token)).rejects.toThrow(
+        'Invalid access token',
+      );
+    } finally {
+      globalThis.fetch = previousFetch;
+    }
+  });
+
 });
