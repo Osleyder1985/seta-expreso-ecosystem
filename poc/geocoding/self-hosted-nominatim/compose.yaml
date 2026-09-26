@@ -2,18 +2,26 @@ services:
   nominatim:
     image: ${NOMINATIM_IMAGE:-mediagis/nominatim:5.3}
     container_name: seta-expreso-nominatim-cuba
-    restart: no
+    restart: "no"
+    shm_size: "1g"
     environment:
-      PBF_URL: ${PBF_URL:-https://download.geofabrik.de/central-america/cuba-latest.osm.pbf}
+      PBF_PATH: /nominatim/data/cuba-latest.osm.pbf
+      IMPORT_STYLE: address
+      FREEZE: "false"
+      NOMINATIM_PASSWORD: ${NOMINATIM_PASSWORD:-seta-expreso-poc}
     ports:
       - "${NOMINATIM_PORT:-8080}:8080"
     volumes:
-      - nominatim-data:/var/lib/postgresql
+      - ./data:/nominatim/data:ro
+      - nominatim-postgres:/var/lib/postgresql/16/main
+      - nominatim-flatnode:/nominatim/flatnode
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/status.php', timeout=5)\""]
       interval: 30s
       timeout: 10s
       retries: 20
       start_period: 60s
+
 volumes:
-  nominatim-data:
+  nominatim-postgres:
+  nominatim-flatnode:
