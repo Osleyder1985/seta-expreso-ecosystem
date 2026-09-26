@@ -300,3 +300,132 @@ Queda establecida para esta ronda:
 - no mezclar el dataset de cinco corridas con el dataset histórico descrito en Issue #145;
 - no presentar los índices parciales 69.47/100 y 67.37/100 como puntuaciones finales;
 - no declarar un ganador por diferencia numérica aislada.
+
+
+## 12. Comparación de adecuación al Ecosistema SETA EXPRESO
+
+Esta sección cambia el foco desde la capacidad genérica del framework hacia la adecuación concreta al backend definido para SETA EXPRESO.
+
+### 12.1 Requisitos arquitectónicos de referencia
+
+El backend debe soportar, como mínimo:
+
+- Modular Monolith como estrategia inicial.
+- separación Domain / Application / Infrastructure.
+- puertos y adaptadores para persistencia y proveedores externos.
+- API REST/OpenAPI como frontera para Web, Android e iOS.
+- PostgreSQL/PostGIS.
+- importación y procesamiento de manifiestos XLSX.
+- gestión de manifiestos y paquetes.
+- normalización y geocodificación de direcciones.
+- rutas y entregas.
+- operación con conectividad limitada en los clientes.
+- autenticación/autorización.
+- auditoría.
+- observabilidad.
+- evolución progresiva sin introducir microservicios prematuramente.
+
+### 12.2 Comparación arquitectónica
+
+| Dimensión | NestJS | ASP.NET Core | Lectura para SETA |
+|---|---|---|---|
+| Modular Monolith | Compatible | Compatible | Empate técnico |
+| Domain/Application/Infrastructure | Compatible | Compatible | Depende de disciplina arquitectónica, no del framework |
+| Puertos/adaptadores | Compatible mediante interfaces/providers | Compatible mediante interfaces/DI | Empate técnico |
+| REST/OpenAPI | Evidencia PoC favorable | Evidencia PoC favorable | Empate técnico |
+| PostgreSQL | Evidencia PoC | Evidencia PoC | Empate técnico |
+| PostGIS | Acceso SQL disponible; ORM no debe ocultar capacidades espaciales | Acceso SQL disponible; ORM no debe ocultar capacidades espaciales | Empate técnico |
+| XLSX/importación | No existe bloqueo técnico demostrado | No existe bloqueo técnico demostrado | Debe desacoplarse como caso de uso + adaptador |
+| Geocoding/routing | Integrable mediante puertos/adaptadores | Integrable mediante puertos/adaptadores | Empate técnico |
+| Web + Android + iOS | REST/OpenAPI | REST/OpenAPI | Empate técnico |
+| Auditoría/observabilidad | Integrable | Integrable | Empate técnico |
+| Evolución a servicios independientes | Posible si aparece necesidad | Posible si aparece necesidad | No requiere microservicios hoy |
+| Rendimiento LIST medido | 3222.98 req/s; p50 5.60 ms; p95 12.67 ms | 917.92 req/s; p50 13.30 ms; p95 63.48 ms | Evidencia favorable a NestJS en este perfil |
+| Startup | 1701.58 ms | 682.06 ms | Evidencia favorable a ASP.NET Core |
+| Build | 3163.19 ms | 1583.57 ms | Evidencia favorable a ASP.NET Core |
+| Working Set | 115.81 MB | 77.70 MB | Evidencia favorable a ASP.NET Core |
+| Integración con stack Web TypeScript | Directa | Requiere frontera HTTP y separación de lenguajes | NestJS reduce heterogeneidad del stack |
+| Coherencia con TypeScript end-to-end | Alta | Menor; backend .NET + frontend TypeScript | Ventaja contextual de NestJS, sin convertirla en puntuación automática |
+| Complejidad inicial | Adecuada | Adecuada | Ninguno exige arquitectura distribuida |
+
+### 12.3 Interpretación
+
+La comparación revela que **la diferencia decisiva no está en la capacidad arquitectónica fundamental**: ambos candidatos pueden implementar el baseline arquitectónico.
+
+La diferencia contextual aparece en la combinación de:
+
+1. **stack homogéneo con TypeScript** para Web y backend;
+2. **PoC ya construido y validado** sobre la vertical mínima;
+3. **evidencia LIST favorable a NestJS** en throughput y latencia;
+4. ausencia de un requisito del Ecosistema que obligue específicamente a .NET;
+5. ausencia de un criterio eliminatorio para NestJS;
+6. menor heterogeneidad tecnológica si el backend permanece en TypeScript.
+
+Las ventajas medidas de ASP.NET Core —startup, build y working set— son reales y deben conservarse como parte de la evidencia. Sin embargo, ninguna de ellas aparece, con los requisitos actuales, como una restricción que el Ecosistema necesite optimizar por encima del comportamiento de las APIs de negocio.
+
+### 12.4 Requisitos que todavía pueden cambiar la decisión
+
+La decisión debe permanecer reversible hasta que se validen estos puntos del backend productivo:
+
+- seguridad e identidad;
+- arquitectura Clean/Hexagonal real, no solo el PoC;
+- importación XLSX integrada con el modelo de dominio;
+- geocodificación real sobre direcciones cubanas;
+- routing;
+- PostGIS;
+- auditoría;
+- observabilidad;
+- operación con los recursos reales disponibles.
+
+Si alguno de estos experimentos revela una incompatibilidad crítica o una diferencia operacional material, deberá abrirse un ADR de revisión.
+
+## 13. Determinación técnica de esta ronda
+
+Con la evidencia disponible y sin repetir experimentos:
+
+**La alternativa que presenta mejor adecuación contextual al baseline actual es NestJS 12.1.0 + TypeScript 6.0.3 + Node.js 24.21.0 LTS.**
+
+La determinación se fundamenta en la combinación de evidencia, no en un único benchmark:
+
+- no existe criterio eliminatorio;
+- B01/B02/B03/B06/B07/B08/B10/B11/B12 son equivalentes o prácticamente equivalentes en la evidencia disponible;
+- B05 aporta evidencia experimental favorable a NestJS en el perfil LIST;
+- el stack del ecosistema ya utiliza TypeScript en Web y Flutter/Dart en Mobile, por lo que el backend TypeScript reduce la heterogeneidad del lado Web/backend;
+- el baseline arquitectónico es compatible con NestJS sin introducir microservicios, serverless ni infraestructura distribuida;
+- ASP.NET Core conserva ventajas objetivas en startup, build y memoria, pero no se ha demostrado que sean requisitos críticos del Ecosistema.
+
+**Importante:** esta determinación es una decisión técnica contextual de esta ronda, no una afirmación universal de que NestJS sea superior a ASP.NET Core.
+
+### 13.1 B09 y gobernanza
+
+B09 Productividad permanece **No evaluado**.
+
+No se utilizará como cero ni se inventará una estimación. Para cerrar la decisión, se propone registrar explícitamente una excepción de gobernanza:
+
+> B09 no es necesario para discriminar la decisión actual porque la determinación se sostiene con los demás criterios evaluados y evidencia E1/E2, incluyendo un benchmark real y la adecuación arquitectónica al Ecosistema. La ausencia de B09 debe quedar visible en el ADR.
+
+Esta excepción no debe reutilizarse automáticamente para futuras comparaciones tecnológicas.
+
+### 13.2 Condición de reversibilidad
+
+La adopción de NestJS no elimina ASP.NET Core como alternativa tecnológica válida. Queda registrado como alternativa descartada para el backend inicial por adecuación contextual, no por incompatibilidad.
+
+La decisión podrá revisarse si aparece evidencia que cambie alguno de estos supuestos:
+
+- requisito funcional no cubierto;
+- incompatibilidad PostgreSQL/PostGIS;
+- problema crítico de seguridad;
+- limitación operacional material;
+- necesidad de despliegue o escalabilidad que no pueda resolverse razonablemente con el Modular Monolith;
+- evidencia integrada de rendimiento significativamente diferente en cargas críticas reales;
+- cambio sustancial del stack o de las restricciones operativas.
+
+## 14. Estado de cierre propuesto
+
+**Backend inicial propuesto: NestJS 12.1.0 + TypeScript 6.0.3 + Node.js 24.21.0 LTS.**
+
+Estado de la evaluación:
+
+**DECISIÓN TÉCNICA PROPUESTA — PENDIENTE DE ADR Y APROBACIÓN/INTEGRACIÓN EN STACK BASELINE.**
+
+No se requiere repetir LIST ni ejecutar DELETE para producir esta determinación.
