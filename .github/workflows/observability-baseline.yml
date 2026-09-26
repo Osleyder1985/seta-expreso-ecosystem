@@ -1,4 +1,5 @@
 name: observability-baseline
+# Reproducible OpenTelemetry/Prometheus/Loki baseline gate.
 
 on:
   pull_request:
