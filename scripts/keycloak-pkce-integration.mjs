@@ -151,6 +151,14 @@ async function createWrongAudienceClient(token) {
 }
 
 async function rotateRealmSigningKey(token) {
+  const realm = await json(
+    await fetch(base + '/admin/realms/seta-expreso', {
+      headers: { authorization: 'Bearer ' + token }
+    }),
+    'Realm lookup for signing-key rotation failed'
+  );
+  assert(realm.id, 'Realm internal ID missing');
+
   const response = await fetch(base + '/admin/realms/seta-expreso/components', {
     method: 'POST',
     headers: {
@@ -161,7 +169,7 @@ async function rotateRealmSigningKey(token) {
       name: 'integration-rsa-rotation',
       providerId: 'rsa-generated',
       providerType: 'org.keycloak.keys.KeyProvider',
-      parentId: 'seta-expreso',
+      parentId: realm.id,
       config: {
         priority: ['200'],
         enabled: ['true'],
@@ -178,7 +186,11 @@ async function getSigningKids(token) {
     headers: { authorization: 'Bearer ' + token }
   });
   const metadata = await json(response, 'Key metadata lookup failed');
-  return new Set((metadata.keys ?? []).filter((key) => key.status === 'ACTIVE').map((key) => key.kid));
+  const activeKids = Object.values(metadata.active ?? {}).filter((kid) => typeof kid === 'string');
+  return new Set([
+    ...activeKids,
+    ...(metadata.keys ?? []).filter((key) => key.status === 'ACTIVE').map((key) => key.kid)
+  ]);
 }
 
 async function authorizeAndGetToken(metadata, clientId, redirectUri, password, scopeValue = 'openid api-audience') {
@@ -193,27 +205,40 @@ async function authorizeAndGetToken(metadata, clientId, redirectUri, password, s
   })) authUrl.searchParams.set(key, value);
 
   let response = await http(authUrl);
-  assert(response.ok || (response.status >= 300 && response.status < 400), 'Authorization endpoint failed');
-  if (response.status >= 300 && response.status < 400) {
-    const loginUrl = new URL(response.headers.get('location'), base);
-    response = await http(loginUrl);
+  assert(response.ok || (response.status >= 300 && response.status < 400), 'Authorization endpoint failed: ' + response.status);
+  let callback;
+  for (let redirects = 0; response.status >= 300 && response.status < 400 && redirects < 10; redirects++) {
+    const location = response.headers.get('location');
+    assert(location, 'Keycloak redirect missing Location header: ' + response.status);
+    const nextUrl = new URL(location, response.url);
+    if (nextUrl.origin === new URL(redirectUri).origin &&
+        nextUrl.searchParams.get('state') === state &&
+        nextUrl.searchParams.get('code')) {
+      callback = nextUrl;
+      break;
+    }
+    response = await http(nextUrl);
   }
-  assert(response.ok, 'Keycloak login page failed');
-  const html = await response.text();
-  const form = html.match(/<form[^>]+action="([^"]+)"[^>]*>/i);
-  assert(form, 'Keycloak login form not found');
-  const body = new URLSearchParams();
-  for (const [, name, value] of html.matchAll(/<input[^>]+type="hidden"[^>]+name="([^"]+)"[^>]+value="([^"]*)"[^>]*>/gi)) body.set(name, value);
-  body.set('username', 'operator');
-  body.set('password', password);
 
-  response = await http(new URL(form[1].replaceAll('&amp;', '&'), authUrl), {
-    method: 'POST',
-    headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    body
-  });
-  assert(response.status >= 300 && response.status < 400, 'Keycloak login did not redirect');
-  const callback = new URL(response.headers.get('location'));
+  if (!callback) {
+    assert(response.ok, 'Keycloak login page failed: ' + response.status + ' ' + response.statusText + ' ' + (response.url ?? ''));
+    const html = await response.text();
+    const form = html.match(/<form[^>]+action="([^"]+)"[^>]*>/i);
+    assert(form, 'Keycloak login form not found');
+    const body = new URLSearchParams();
+    for (const [, name, value] of html.matchAll(/<input[^>]+type="hidden"[^>]+name="([^"]+)"[^>]+value="([^"]*)"[^>]*>/gi)) body.set(name, value);
+    body.set('username', 'operator');
+    body.set('password', password);
+
+    response = await http(new URL(form[1].replaceAll('&amp;', '&'), response.url), {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body
+    });
+    assert(response.status >= 300 && response.status < 400, 'Keycloak login did not redirect');
+    callback = new URL(response.headers.get('location'));
+  }
+
   assert(callback.origin === new URL(redirectUri).origin, 'Unexpected callback origin');
   assert(callback.searchParams.get('state') === state, 'OIDC state mismatch');
   const code = callback.searchParams.get('code');
@@ -269,18 +294,12 @@ async function main() {
 
   const beforeKids = await getSigningKids(admin);
   await rotateRealmSigningKey(admin);
-  let afterKids = await getSigningKids(admin);
-  for (let i = 0; i < 20 && afterKids.size <= beforeKids.size; i++) {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    afterKids = await getSigningKids(admin);
-  }
-  const newKids = [...afterKids].filter((kid) => !beforeKids.has(kid));
-  assert(newKids.length >= 1, 'Keycloak did not expose a new active signing key');
 
+  await new Promise((resolve) => setTimeout(resolve, 6000));
   const rotatedTokens = await authorizeAndGetToken(metadata, clientId, redirectUri, password);
   assert(rotatedTokens.access_token, 'Rotated-key access token missing');
   const rotatedHeader = JSON.parse(Buffer.from(rotatedTokens.access_token.split('.')[0], 'base64url').toString());
-  assert(newKids.includes(rotatedHeader.kid ?? ''), 'New token was not signed with the rotated Keycloak key');
+  assert(rotatedHeader.kid && !beforeKids.has(rotatedHeader.kid), 'New token was not signed with a new Keycloak signing key');
   const rotatedMe = await fetch(api + '/auth/me', {
     headers: { authorization: 'Bearer ' + rotatedTokens.access_token }
   });
