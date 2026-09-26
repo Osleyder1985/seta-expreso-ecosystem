@@ -13,7 +13,10 @@
     "latency_ms":{"type":"number","minimum":0},
     "validation":{"enum":["ACCEPTED","REVIEW","REJECTED"]},
     "result":{"type":["object","null"]},
-    "error":{"type":["string","null"]}
+    "error":{"type":["string","null"]},
+    "expected":{"type":["object","null"]},
+    "reference":{"type":["object","null"]},
+    "case_type":{"type":["string","array","null"]}
   },
   "additionalProperties":false
 }
