@@ -1,28 +1,14 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { HealthModule } from './modules/health/health.module';
+import { RateLimitGuard } from './common/security/rate-limit.guard';
 
 @Module({
-  imports: [
-    ThrottlerModule.forRoot([
-      {
-        name: 'short',
-        ttl: 1000,
-        limit: 20,
-      },
-      {
-        name: 'long',
-        ttl: 60000,
-        limit: 300,
-      },
-    ]),
-    HealthModule,
-  ],
+  imports: [HealthModule],
   providers: [
     {
       provide: APP_GUARD,
-      useClass: ThrottlerGuard,
+      useClass: RateLimitGuard,
     },
   ],
 })
