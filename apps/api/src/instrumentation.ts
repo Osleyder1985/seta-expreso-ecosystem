@@ -2,6 +2,7 @@ import { diag, DiagConsoleLogger, DiagLogLevel, metrics } from '@opentelemetry/a
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-proto';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
@@ -18,14 +19,16 @@ const resource = resourceFromAttributes({
   [ATTR_SERVICE_VERSION]: process.env.npm_package_version ?? '0.1.0',
 });
 
-const tracerProvider = new NodeTracerProvider({ resource });
-tracerProvider.addSpanProcessor(
-  new BatchSpanProcessor(
-    new OTLPTraceExporter({
-      url: `${endpoint}/v1/traces`,
-    }),
-  ),
-);
+const tracerProvider = new NodeTracerProvider({
+  resource,
+  spanProcessors: [
+    new BatchSpanProcessor(
+      new OTLPTraceExporter({
+        url: `${endpoint}/v1/traces`,
+      }),
+    ),
+  ],
+});
 tracerProvider.register();
 
 const metricReader = new PeriodicExportingMetricReader({
@@ -38,8 +41,6 @@ const metricReader = new PeriodicExportingMetricReader({
 const meterProvider = new MeterProvider({ resource, readers: [metricReader] });
 metrics.setGlobalMeterProvider(meterProvider);
 
-const httpInstrumentation = new HttpInstrumentation();
-httpInstrumentation.setTracerProvider(tracerProvider);
-httpInstrumentation.enable();
+registerInstrumentations({ instrumentations: [new HttpInstrumentation()] });
 
 export { metricReader, resource, tracerProvider };
