@@ -1,4 +1,4 @@
-# Especificación funcional de Paquetería — v0.1.0
+# Especificación funcional de Paquetería — v0.1.1
 
 **Estado:** En validación
 **Ámbito:** Servicio de Paquetería de SETA EXPRESO SURL
