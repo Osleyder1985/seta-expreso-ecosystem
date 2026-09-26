@@ -1,5 +1,5 @@
 name: observability-baseline
-# Reproducible OpenTelemetry/Prometheus/Loki baseline gate.
+# Reproducible OpenTelemetry/Prometheus/Loki baseline gate with Alloy-to-Loki log collection.
 
 on:
   pull_request:
