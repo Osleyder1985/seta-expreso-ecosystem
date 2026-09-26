@@ -21,12 +21,17 @@ describe('SETA EXPRESO API (e2e)', () => {
   });
 
   it('GET /api/health returns operational status', async () => {
-    await request(app.getHttpServer())
+    const response = await request(app.getHttpServer())
       .get('/api/health')
       .expect(200)
       .expect({
         status: 'ok',
         service: 'seta-expreso-api',
       });
+
+    expect(response.headers['x-content-type-options']).toBe('nosniff');
+    expect(response.headers['x-frame-options']).toBe('SAMEORIGIN');
+    expect(response.headers['referrer-policy']).toBe('no-referrer');
+
   });
 });
