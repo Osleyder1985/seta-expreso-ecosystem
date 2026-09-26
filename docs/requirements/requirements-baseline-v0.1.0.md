@@ -144,7 +144,6 @@ A test is PASS only with executable evidence.
 ## Current blockers to the first production vertical
 
 1. D09 — multiple House per Delivery operational semantics.
-2. D09 — multiple House per Delivery operational semantics.
 3. Exact operational confirmation of House versus child air waybill.
 4. Operational/customs catalogs requiring enforcement.
 5. Final authorization scope/object ownership model.
