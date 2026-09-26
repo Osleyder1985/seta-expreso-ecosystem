@@ -91,22 +91,104 @@ async function http(url, options = {}) {
   return response;
 }
 
-async function main() {
-  assert(adminUser && adminPassword, 'Keycloak admin credentials are required');
-  const password = await createIntegrationUser();
+async function adminToken() {
+  const response = await fetch(
+    base + '/realms/master/protocol/openid-connect/token',
+    {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'password',
+        client_id: 'admin-cli',
+        username: adminUser,
+        password: adminPassword
+      })
+    }
+  );
+  const token = await json(response, 'Keycloak admin authentication failed');
+  return token.access_token;
+}
 
-  const discoveryResponse = await fetch(issuer + '/.well-known/openid-configuration');
-  assert(discoveryResponse.ok, 'OIDC discovery failed');
-  const metadata = await discoveryResponse.json();
+async function createWrongAudienceClient(token) {
+  const response = await fetch(base + '/admin/realms/seta-expreso/clients', {
+    method: 'POST',
+    headers: {
+      authorization: 'Bearer ' + token,
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({
+      clientId: 'seta-expreso-integration-wrong-aud',
+      enabled: true,
+      protocol: 'openid-connect',
+      publicClient: true,
+      standardFlowEnabled: true,
+      directAccessGrantsEnabled: false,
+      redirectUris: ['http://127.0.0.1:3000/callback-wrong']
+    })
+  });
+  assert(response.status === 201, 'Wrong-audience client creation failed: ' + response.status);
+  const clients = await json(
+    await fetch(base + '/admin/realms/seta-expreso/clients?clientId=seta-expreso-integration-wrong-aud', {
+      headers: { authorization: 'Bearer ' + token }
+    }),
+    'Wrong-audience client lookup failed'
+  );
+  assert(clients.length === 1, 'Wrong-audience client lookup returned unexpected result');
+  const scope = await json(
+    await fetch(base + '/admin/realms/seta-expreso/client-scopes', {
+      headers: { authorization: 'Bearer ' + token }
+    }),
+    'Client scope lookup failed'
+  );
+  const apiScope = scope.find((item) => item.name === 'api-audience');
+  assert(apiScope?.id, 'api-audience scope not found');
+  const remove = await fetch(
+    base + '/admin/realms/seta-expreso/clients/' + clients[0].id + '/default-client-scopes/' + apiScope.id,
+    { method: 'DELETE', headers: { authorization: 'Bearer ' + token } }
+  );
+  assert(remove.status === 204, 'Failed to remove API audience default scope');
+  return clients[0].id;
+}
 
+async function rotateRealmSigningKey(token) {
+  const response = await fetch(base + '/admin/realms/seta-expreso/components', {
+    method: 'POST',
+    headers: {
+      authorization: 'Bearer ' + token,
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({
+      name: 'integration-rsa-rotation',
+      providerId: 'rsa-generated',
+      providerType: 'org.keycloak.keys.KeyProvider',
+      parentId: 'seta-expreso',
+      config: {
+        priority: ['200'],
+        enabled: ['true'],
+        active: ['true'],
+        keySize: ['2048']
+      }
+    })
+  });
+  assert(response.status === 201, 'Real Keycloak signing-key rotation failed: ' + response.status);
+}
+
+async function getSigningKids(token) {
+  const response = await fetch(base + '/admin/realms/seta-expreso/keys', {
+    headers: { authorization: 'Bearer ' + token }
+  });
+  const metadata = await json(response, 'Key metadata lookup failed');
+  return new Set((metadata.keys ?? []).filter((key) => key.status === 'ACTIVE').map((key) => key.kid));
+}
+
+async function authorizeAndGetToken(metadata, clientId, redirectUri, password, scopeValue = 'openid api-audience') {
   const verifier = randomBytes(32).toString('base64url');
   const challenge = createHash('sha256').update(verifier).digest('base64url');
   const state = randomBytes(16).toString('hex');
-
   const authUrl = new URL(metadata.authorization_endpoint);
   for (const [key, value] of Object.entries({
     client_id: clientId, redirect_uri: redirectUri, response_type: 'code',
-    scope: 'openid api-audience', state, code_challenge: challenge,
+    scope: scopeValue, state, code_challenge: challenge,
     code_challenge_method: 'S256'
   })) authUrl.searchParams.set(key, value);
 
@@ -117,8 +199,6 @@ async function main() {
     response = await http(loginUrl);
   }
   assert(response.ok, 'Keycloak login page failed');
-
-  const loginUrl = authUrl;
   const html = await response.text();
   const form = html.match(/<form[^>]+action="([^"]+)"[^>]*>/i);
   assert(form, 'Keycloak login form not found');
@@ -127,13 +207,12 @@ async function main() {
   body.set('username', 'operator');
   body.set('password', password);
 
-  response = await http(new URL(form[1].replaceAll('&amp;', '&'), loginUrl), {
+  response = await http(new URL(form[1].replaceAll('&amp;', '&'), authUrl), {
     method: 'POST',
     headers: { 'content-type': 'application/x-www-form-urlencoded' },
     body
   });
   assert(response.status >= 300 && response.status < 400, 'Keycloak login did not redirect');
-
   const callback = new URL(response.headers.get('location'));
   assert(callback.origin === new URL(redirectUri).origin, 'Unexpected callback origin');
   assert(callback.searchParams.get('state') === state, 'OIDC state mismatch');
@@ -148,9 +227,21 @@ async function main() {
       redirect_uri: redirectUri, code, code_verifier: verifier
     })
   });
-  const tokens = await json(tokenResponse, 'Authorization Code + PKCE token exchange failed');
+  return json(tokenResponse, 'Authorization Code + PKCE token exchange failed');
+}
+
+async function main() {
+  assert(adminUser && adminPassword, 'Keycloak admin credentials are required');
+  const password = await createIntegrationUser();
+  const admin = await adminToken();
+  const discoveryResponse = await fetch(issuer + '/.well-known/openid-configuration');
+  assert(discoveryResponse.ok, 'OIDC discovery failed');
+  const metadata = await discoveryResponse.json();
+
+  const tokens = await authorizeAndGetToken(metadata, clientId, redirectUri, password);
   assert(tokens.access_token, 'Access token missing');
   const api = process.env.API_BASE_URL ?? 'http://127.0.0.1:3000/api';
+
   const me = await fetch(api + '/auth/me', { headers: { authorization: 'Bearer ' + tokens.access_token } });
   const principal = await json(me, 'API rejected a valid Keycloak access token');
   assert(principal.subject && principal.roles.includes('operator'), 'API did not map principal/realm role');
@@ -163,12 +254,47 @@ async function main() {
   const malformed = await fetch(api + '/auth/me', { headers: { authorization: 'Bearer ' + tokens.access_token + 'x' } });
   assert(malformed.status === 401, 'Malformed token was not rejected');
 
+  const wrongClientId = await createWrongAudienceClient(admin);
+  const wrongTokens = await authorizeAndGetToken(
+    metadata,
+    'seta-expreso-integration-wrong-aud',
+    'http://127.0.0.1:3000/callback-wrong',
+    password,
+    'openid'
+  );
+  const wrongAudienceResponse = await fetch(api + '/auth/me', {
+    headers: { authorization: 'Bearer ' + wrongTokens.access_token }
+  });
+  assert(wrongAudienceResponse.status === 401, 'Wrong audience token was not rejected');
+
+  const beforeKids = await getSigningKids(admin);
+  await rotateRealmSigningKey(admin);
+  let afterKids = await getSigningKids(admin);
+  for (let i = 0; i < 20 && afterKids.size <= beforeKids.size; i++) {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    afterKids = await getSigningKids(admin);
+  }
+  const newKids = [...afterKids].filter((kid) => !beforeKids.has(kid));
+  assert(newKids.length >= 1, 'Keycloak did not expose a new active signing key');
+
+  const rotatedTokens = await authorizeAndGetToken(metadata, clientId, redirectUri, password);
+  assert(rotatedTokens.access_token, 'Rotated-key access token missing');
+  const rotatedPayload = JSON.parse(Buffer.from(rotatedTokens.access_token.split('.')[1], 'base64url').toString());
+  assert(newKids.includes(rotatedPayload.kid ?? ''), 'New token was not signed with the rotated Keycloak key');
+  const rotatedMe = await fetch(api + '/auth/me', {
+    headers: { authorization: 'Bearer ' + rotatedTokens.access_token }
+  });
+  assert(rotatedMe.ok, 'API failed to refresh JWKS after real Keycloak key rotation');
+
   console.log(JSON.stringify({
-    protocol: 'keycloak-oidc-pkce-integration-v1',
+    protocol: 'keycloak-oidc-pkce-integration-v2',
     authorizationCodePkce: 'PASS',
     apiAuthentication: 'PASS',
     roleMapping: 'PASS',
-    malformedToken: 'PASS'
+    insufficientRole: 'PASS',
+    malformedToken: 'PASS',
+    wrongAudience: 'PASS',
+    realKeyRotation: 'PASS'
   }, null, 2));
 }
 main().catch(error => { console.error(error); process.exit(1); });
