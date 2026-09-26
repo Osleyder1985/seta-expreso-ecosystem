@@ -6,7 +6,7 @@ Este directorio contiene el protocolo y herramientas para ejecutar el benchmark 
 
 - **NestJS 12.1.0 + Node.js 24.21.0 LTS**.
 - **ASP.NET Core + .NET 10 LTS**.
-- PostgreSQL/PostGIS: versión exacta registrada en cada ejecución.
+- PostgreSQL/PostGIS: **PostgreSQL 18.6 + PostGIS 3.6.x** en el entorno de referencia.
 - Docker: versión exacta registrada en cada ejecución.
 
 Node.js 26.10.0 es actualmente una versión **Current**; por tanto, no forma parte del baseline LTS del experimento.
@@ -17,25 +17,55 @@ La ejecución de referencia debe hacerse en el equipo de desarrollo Windows 11 P
 
 GitHub Actions puede ejecutar la validación CI en Linux; esos resultados sirven para verificar corrección y reproducibilidad, pero no deben mezclarse con las mediciones de rendimiento del equipo Windows de referencia.
 
+## Base de datos del benchmark
+
+Para evitar que el benchmark quede bloqueado por la ausencia de PostgreSQL local, se incluye un Compose dedicado:
+
+```powershell
+cd poc/backend/benchmark
+docker compose -f .\docker-compose.postgres.yml up -d
+```
+
+La base queda disponible en:
+
+- Host: `localhost`
+- Puerto: `5433`
+- Base: `poc`
+- Usuario: `poc`
+- Contraseña: `poc`
+- Imagen: `postgis/postgis:18-3.6`
+
+La imagen oficial `postgis/postgis:18-3.6` corresponde a PostgreSQL 18 y PostGIS 3.6.x; el tag publicado actualmente contiene PostgreSQL 18.6 y PostGIS 3.6.4. citeturn0search1turn0search5
+
+Verificación rápida:
+
+```powershell
+Test-NetConnection localhost -Port 5433
+docker ps --filter "name=seta-expreso-benchmark-postgres"
+```
+
+Debe resultar `TcpTestSucceeded : True`.
+
 ## Perfiles de ejecución
 
 ### Perfil nativo Windows
 
-Es el perfil utilizado cuando no se dispone de conectividad suficiente para descargar imágenes Docker. Requiere:
+Requiere:
 
 - Windows 11 Pro del equipo de referencia.
 - Node.js 24.21.0.
 - .NET 10 SDK.
-- PostgreSQL/PostGIS accesible mediante DATABASE_URL.
+- Docker Desktop disponible para levantar la base de datos, **o** PostgreSQL/PostGIS local equivalente accesible mediante `DATABASE_URL`.
+- Puerto 5433 disponible para la base.
 - Puertos libres 3000 y 8081.
 - Dependencias npm ya instaladas para el PoC NestJS.
 
-Desde PowerShell:
+Con la base de datos Compose levantada:
 
 ```powershell
-$env:DATABASE_URL="postgresql://usuario:password@localhost:5433/base"
+$env:DATABASE_URL="postgresql://poc:poc@localhost:5433/poc"
 cd poc/backend/benchmark
-.\run-benchmark-native.ps1 -Requests 1000 -Concurrency 20 -Runs 5 -WarmupRequests 20
+.\run-benchmark-native.ps1 -Operation list -Requests 1000 -Concurrency 20 -Runs 5 -WarmupRequests 20
 ```
 
 El runner nativo construye ambos PoC fuera de contenedores, inicia un solo candidato a la vez, espera `/health`, restablece la tabla `packages` antes de cada medición y guarda resultados por operación en `native-results-<operation>.jsonl`. El entorno queda registrado en `native-run-metadata-<operation>.json`.
@@ -46,7 +76,7 @@ Las métricas de proceso nativas no deben compararse directamente con las métri
 
 ### Perfil Docker
 
-Requiere Docker Desktop, Node.js 24.21.0, .NET 10 SDK y PostgreSQL ejecutado por los Compose de cada PoC.
+Requiere Docker Desktop, Node.js 24.21.0 y .NET 10 SDK.
 
 Desde PowerShell:
 
@@ -76,6 +106,15 @@ El runner:
 - `benchmark-report-template.md`: plantilla del informe final.
 
 Las métricas de memoria y CPU son snapshots posteriores a la carga del contenedor, no promedios de consumo durante toda la carga.
+
+## Limpieza
+
+Al terminar el benchmark nativo, la base puede mantenerse para repetir pruebas. Para eliminarla:
+
+```powershell
+cd poc/backend/benchmark
+docker compose -f .\docker-compose.postgres.yml down -v
+```
 
 ## Reglas
 
