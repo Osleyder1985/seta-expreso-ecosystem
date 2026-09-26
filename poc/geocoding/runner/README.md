@@ -75,3 +75,38 @@ poc/geocoding/
 ```
 
 La implementación de adapters queda separada para impedir vendor lock-in.
+
+
+## Manifiesto de trazabilidad
+
+Cada ejecución del runner puede producir un manifiesto JSON mediante el tercer argumento:
+
+```text
+node run-geocoding-benchmark.mjs <dataset.jsonl> <results.jsonl> <manifest.json>
+```
+
+El manifiesto registra, sin secretos:
+
+- versión del protocolo, dataset y adapter;
+- SHA-256 del dataset de entrada y de los resultados;
+- `run_id`, inicio y fin;
+- solicitudes intentadas;
+- cache hits/misses;
+- configuración de rate limit;
+- User-Agent;
+- versión de Node, plataforma y arquitectura;
+- configuración saneada con secretos reemplazados por `[REDACTED]`.
+
+La instrumentación de cache es un **contrato de métricas**, no una afirmación de que exista todavía cache persistente. El adapter/runner que implemente cache debe incrementar esos contadores.
+
+El manifiesto no contiene API keys, tokens, contraseñas ni headers de autorización.
+
+## Reporte con provenance
+
+El generador acepta opcionalmente el manifiesto como tercer argumento:
+
+```text
+node generate-comparison-report.mjs <evaluated.jsonl> <report.json> <manifest.json>
+```
+
+Esto permite reconstruir qué dataset, versión de adapter, runtime y configuración produjo un resultado sin depender del entorno de ejecución original.
