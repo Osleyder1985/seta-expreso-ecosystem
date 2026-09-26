@@ -1,6 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { openapiV31 } from '@apidevtools/openapi-schemas';
-import Ajv2020 from 'ajv/dist/2020.js';
+import { validate } from '@scalar/openapi-validator';
 
 const path = new URL('../../../docs/api/openapi.json', import.meta.url);
 const document = JSON.parse(await readFile(path, 'utf8'));
@@ -9,10 +8,9 @@ if (document.openapi !== '3.1.0') {
   throw new Error('Expected OpenAPI 3.1.0, received ' + document.openapi);
 }
 
-const ajv = new Ajv2020({ strict: false });
-const validate = ajv.compile(openapiV31);
-if (!validate(document)) {
-  console.error(JSON.stringify(validate.errors, null, 2));
+const result = validate(document);
+if (!result.valid) {
+  console.error(JSON.stringify(result.errors, null, 2));
   process.exit(1);
 }
 
@@ -36,4 +34,10 @@ if (Array.isArray(health?.security) && health.security.length > 0) {
   throw new Error('Health endpoint must remain public in the OpenAPI contract');
 }
 
-console.log(JSON.stringify({ protocol: 'openapi-validation-v1', openapi: document.openapi, schema: 'PASS', requiredPaths: 'PASS', security: 'PASS' }));
+console.log(JSON.stringify({
+  protocol: 'openapi-validation-v2',
+  openapi: document.openapi,
+  schema: 'PASS',
+  requiredPaths: 'PASS',
+  security: 'PASS',
+}));
