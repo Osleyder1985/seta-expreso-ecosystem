@@ -238,3 +238,65 @@ No se repetirán benchmarks existentes ni se ejecutará DELETE para completar ar
 **Siguiente condición de cierre:** resolver B09 mediante evidencia de productividad o declarar formalmente que B09 no es necesario para esta decisión y aprobar esa excepción mediante la gobernanza del proyecto. A continuación se podrá calcular el resultado ponderado sin ocultar criterios ausentes.
 
 **Fin de la actualización del dossier v0.2.0.**
+
+
+### 9.7 Análisis de riesgos y condiciones de cierre
+
+La matriz de riesgos se interpreta contra los requisitos reales del Ecosistema y contra la evidencia disponible al 2026-09-26. Un riesgo no se convierte en bloqueador por su sola existencia; el criterio eliminatorio exige incompatibilidad crítica sin mitigación razonable.
+
+| Riesgo | NestJS | ASP.NET Core | Evidencia / tratamiento |
+|---|---|---|---|
+| Seguridad incompleta del PoC | Medio | Medio | E2: ambos validan entrada y manejan errores, pero aún no implementan autenticación/autorización, gestión de secretos, hardening y threat modeling productivos. Debe resolverse en diseño de seguridad. |
+| Disciplina Clean/Hexagonal | Medio | Medio | E1/E2: ambos soportan la separación requerida, pero el PoC no la materializa completamente. La mitigación es imponer la arquitectura en el código productivo y sus reglas de dependencia. |
+| Incertidumbre causal del rendimiento | Medio | Medio | E2: existe un LIST de cinco corridas válido; Issue #145 conserva una discrepancia histórica de otro conjunto. No se mezclan datasets y no se repite el benchmark. B05 se limita al perfil medido. |
+| Rendimiento bajo cargas no ensayadas | Medio | Medio | E2: el benchmark cubre LIST, no la totalidad de manifiestos, importación XLSX, geocodificación, rutas ni concurrencia productiva. Se mitiga con pruebas específicas cuando cada funcionalidad crítica llegue a integración. |
+| Complejidad operacional | Bajo/Medio | Bajo/Medio | E2: ambos PoC tienen Docker, health check y configuración por entorno. No existe evidencia de una complejidad operativa crítica. |
+| Lock-in tecnológico | Bajo | Bajo | E1/E2: REST/OpenAPI, PostgreSQL y SQL permiten mantener límites relativamente independientes del framework. La arquitectura por puertos/adaptadores reduce acoplamiento. |
+| Obsolescencia de runtime/framework | Bajo | Bajo | E1: baseline en Node 24 LTS/Nest 12.1 y .NET 10 LTS. Debe mantenerse política de versiones estables compatibles. |
+| Dependencia del ecosistema de paquetes | Medio | Bajo/Medio | E1/E2: ambos dependen de ecosistemas externos; la mitigación es fijar versiones, auditar dependencias, CI y actualización controlada. No se ha identificado una dependencia externa crítica específica que bloquee. |
+| Costo/licencia | Bajo | Bajo | E1: no se identifica licencia de framework/runtime que constituya un bloqueador; TCO operativo completo aún no medido. |
+| Migración posterior | Bajo/Medio | Bajo/Medio | E5: inferencia técnica condicionada a mantener contratos REST/OpenAPI y límites de dominio. No hay una migración prevista ahora. |
+
+### 9.8 Verificación de criterios eliminatorios
+
+Con la evidencia disponible al corte, **ninguno de los dos candidatos activa un criterio eliminatorio**.
+
+Verificación:
+
+- **Entorno:** ambos PoC funcionan en el entorno Windows de referencia; no existe incompatibilidad conocida.
+- **PostgreSQL/PostGIS:** ambos utilizan PostgreSQL en el PoC y el acceso SQL permite integrar PostGIS. No se ha identificado una imposibilidad técnica.
+- **API para Web/Mobile:** ambos exponen REST/OpenAPI y, por tanto, satisfacen el mecanismo de integración requerido.
+- **Licencia:** no se ha identificado incompatibilidad de licencia para el escenario.
+- **Funciones críticas:** ninguno presenta una imposibilidad demostrada para manifiestos, paquetes, direcciones, geocodificación, rutas o integración con clientes externos. Estas capacidades todavía deben implementarse en el backend productivo, pero su ausencia en el PoC no constituye incapacidad del framework.
+- **Seguridad:** existe una brecha de implementación productiva, pero no un riesgo crítico demostrado sin mitigación razonable. Autenticación, autorización, secretos, hardening y pruebas de seguridad siguen siendo requisitos de diseño.
+- **Servicios externos:** los candidatos no dependen intrínsecamente de un proveedor externo específico para funcionar.
+
+**Conclusión de eliminatorios:** ambos permanecen técnicamente viables para continuar la evaluación.
+
+### 9.9 Interpretación de la evidencia para la decisión
+
+El conjunto de evidencia permite reducir la incertidumbre principal de la evaluación:
+
+1. **No existe un bloqueador técnico demostrado para ninguno de los dos candidatos.**
+2. **B05 ya no está vacío:** existe evidencia LIST nativa de cinco corridas y 0% de errores.
+3. **La evidencia B05 es específica del PoC y perfil medido**, por lo que no se extrapola automáticamente a importación XLSX, geocodificación, routing ni cargas productivas.
+4. **B09 permanece No evaluado** y no se rellenará mediante estimación retrospectiva.
+5. La diferencia observada de rendimiento no compensa ni invalida por sí sola los demás criterios.
+6. La decisión debe considerar especialmente la arquitectura objetivo, seguridad productiva, operación y capacidad de evolución del Ecosistema.
+
+Por tanto, el estado correcto al corte es:
+
+> **EVALUACIÓN PARCIAL CON AMBAS ALTERNATIVAS VIABLES; DECISIÓN DE BACKEND ABIERTA.**
+
+La siguiente acción de gobernanza no es repetir el benchmark ni ejecutar DELETE. Es determinar si la evidencia existente es suficiente para una decisión contextual o si se requiere únicamente completar una justificación/ADR que acepte explícitamente B09 como no evaluado.
+
+### 9.10 Regla de no repetición
+
+Queda establecida para esta ronda:
+
+- no repetir el benchmark LIST;
+- no ejecutar el benchmark DELETE;
+- no sustituir el dataset recuperado por resultados posteriores de una ejecución fallida;
+- no mezclar el dataset de cinco corridas con el dataset histórico descrito en Issue #145;
+- no presentar los índices parciales 69.47/100 y 67.37/100 como puntuaciones finales;
+- no declarar un ganador por diferencia numérica aislada.
