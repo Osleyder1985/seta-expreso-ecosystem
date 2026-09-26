@@ -51,7 +51,7 @@ jobs:
         run: npm run telemetry:test
 
       - name: Run observability unit test
-        run: npm test -- --runTestsByPath src/modules/observability/observability.test.ts
+        run: npm test -- --runTestsByPath test/observability.e2e-spec.ts
 
       - name: Validate observability Compose
         working-directory: .
