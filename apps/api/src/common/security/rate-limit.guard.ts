@@ -2,7 +2,8 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
-  TooManyRequestsException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 
@@ -45,7 +46,7 @@ export class RateLimitGuard implements CanActivate {
     response.setHeader('RateLimit-Reset', String(Math.ceil((resetAt - now) / 1000)));
 
     if (entry.short.count > 20 || entry.long.count > 300) {
-      throw new TooManyRequestsException('Too many requests');
+      throw new HttpException('Too many requests', HttpStatus.TOO_MANY_REQUESTS);
     }
 
     return true;
