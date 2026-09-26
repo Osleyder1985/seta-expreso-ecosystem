@@ -79,3 +79,5 @@ jobs:
             poc/geocoding/self-hosted-nominatim/reverse-smoke.json
             poc/geocoding/self-hosted-nominatim/nominatim.log
             poc/geocoding/self-hosted-nominatim/docker-disk-usage.txt
+
+# observable PR trigger
