@@ -61,7 +61,7 @@ Los contratos de aplicación indicados aquí son **candidatos**. No constituyen 
 | D09 — múltiples House en Delivery | RF-PQ-020, RF-PQ-013 | UC-14, UC-15 | AT-26 | BLOQUEADO |
 | D10 — fallos, retry y retorno | RF-PQ-012, RF-PQ-014 | UC-16, UC-17 | AT-11, AT-12, AT-23 | CUBIERTO CONCEPTUALMENTE |
 | D11 — máquina de estados | RF-PQ-010…RF-PQ-018 | UC-11, UC-13, UC-14, UC-20 | AT-15, AT-16 | PARCIAL |
-| D12 — mínimo POD | RF-PQ-013 | UC-15 | AT-13 | BLOQUEADO |
+| D12 — mínimo POD | RF-PQ-013 | UC-15 | AT-13 | CERRADO |
 
 ## 5. Reglas transversales
 
