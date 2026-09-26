@@ -6,7 +6,8 @@ const client = new Client({ connectionString: process.env.DATABASE_URL });
 await client.connect();
 
 const extension = await client.query("SELECT extversion FROM pg_extension WHERE extname = 'postgis'");
-const spatial = await client.query("SELECT postgis_typmod_dims(a.atttypmod) AS dims, postgis_typmod_srid(a.atttypmod) AS srid, postgis_typmod_type(a.atttypmod) AS type FROM pg_attribute a WHERE a.attrelid = 'public."Geolocation"'::regclass AND a.attname = 'location' AND NOT a.attisdropped");
+const spatial = await client.query("SELECT postgis_typmod_dims(a.atttypmod) AS dims, postgis_typmod_srid(a.atttypmod) AS srid, postgis_typmod_type(a.atttypmod) AS type FROM pg_attribute a JOIN pg_class c ON c.oid = a.attrelid JOIN pg_namespace n ON n.oid = c.relnamespace
+WHERE n.nspname = 'public' AND c.relname = 'Geolocation' AND a.attname = 'location' AND NOT a.attisdropped");
 const index = await client.query("SELECT indexname FROM pg_indexes WHERE indexname = 'Geolocation_location_gist_idx'");
 const tables = await client.query("SELECT count(*)::int AS count FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('Manifest','House','PhysicalUnit','Geolocation','Delivery','DeliveryHouse','AuditRecord')");
 
