@@ -170,24 +170,50 @@ Esta sección aplica la escala 0–5 únicamente cuando existe evidencia trazabl
 
 ### 9.3 Resultado cuantitativo parcial
 
-No se publica un total 0–100 todavía.
+La matriz vigente exige que los pesos sumen 100%, pero B09 permanece sin evidencia cuantitativa homogénea. Por ello se publican dos valores distintos y explícitamente etiquetados:
 
-La razón es metodológica: B09 carece de puntuación y la matriz vigente no define una regla de renormalización de pesos para criterios No evaluado. Renormalizar ahora cambiaría el significado del 100% y podría aparentar una completitud que todavía no existe.
+1. **Puntaje ponderado observado sobre criterios evaluados (95% de cobertura):**
+   - NestJS: **66.00 puntos ponderados sobre 100 de peso total disponible**.
+   - ASP.NET Core: **64.00 puntos ponderados sobre 100 de peso total disponible**.
 
-Por tanto, el estado correcto es:
+2. **Índice normalizado de cobertura evaluada (no es el resultado final de la matriz):**
+   - NestJS: **69.47 / 100**.
+   - ASP.NET Core: **67.37 / 100**.
 
-- **Puntuaciones trazables:** B01–B08 y B10–B12.
-- **No evaluado:** B09.
-- **Benchmark experimental disponible:** B05, únicamente perfil LIST nativo.
-- **Decisión final:** abierta.
+La segunda cifra se obtiene dividiendo el puntaje ponderado observado entre el 95% de peso efectivamente evaluado. Su única finalidad es mostrar el estado de la evidencia disponible; **no constituye una puntuación final ni una recomendación de selección**.
 
-### 9.4 Observación importante sobre B05
+No se imputan los 5 puntos porcentuales de B09 a ningún candidato. No se inventa una puntuación de productividad ni se redistribuye su peso.
 
-La diferencia observada en LIST es material dentro de este experimento: NestJS registró mayor throughput y menores p50/p95, mientras ASP.NET Core registró menor startup, menor build y menor working set.
+**Consecuencia:** todavía no corresponde cerrar la decisión mediante la puntuación 0–100 oficial. La diferencia cuantitativa observada queda registrada como evidencia parcial, pero debe interpretarse junto con riesgos, criterios eliminatorios y evidencia cualitativa.
 
-Esto debe interpretarse como evidencia del PoC y de este entorno/configuración. No se transforma en una afirmación general sobre NestJS frente a ASP.NET Core.
+### 9.4 Resolución metodológica de B09
 
-### 9.5 Criterios eliminatorios
+No se ejecutará un nuevo experimento para medir productividad.
+
+A la fecha de corte no existe un registro homogéneo de horas/personas, tareas equivalentes, commits normalizados o tiempo de implementación comparable entre los dos PoC que permita asignar B09 con rigor.
+
+Por tanto, B09 se declara **No evaluado en esta ronda** y queda como una **excepción explícita de evidencia**, no como un cero.
+
+Esta decisión preserva la integridad de la matriz: ausencia de evidencia ≠ bajo desempeño.
+
+Para futuras evaluaciones, B09 podrá medirse mediante un protocolo previamente definido, por ejemplo:
+- mismas historias/tareas;
+- mismo alcance funcional;
+- criterios de aceptación idénticos;
+- tiempo de implementación registrado;
+- número y complejidad de cambios controlados;
+- defectos introducidos y corregidos;
+- revisión independiente de mantenibilidad.
+
+No se utilizará retrospectivamente una estimación subjetiva para llenar la celda actual.
+
+### 9.5 Lectura técnica del resultado parcial
+
+Con los criterios actualmente puntuables, ambos candidatos muestran una base técnica suficiente para continuar la evaluación. Las puntuaciones son muy cercanas en los criterios documentales/estructurales; la principal diferencia cuantitativa procede de B05, cuyo experimento LIST favoreció a NestJS en throughput y latencia, mientras ASP.NET Core mostró ventajas en startup, build y memoria.
+
+Este resultado **no debe transformarse por sí solo en una decisión de backend**. La decisión final requiere además consolidar los riesgos, bloqueadores, requisitos operativos y la arquitectura objetivo.
+
+### 9.6 Criterios eliminatorios
 
 No se ha identificado, con la evidencia disponible al corte, un incumplimiento eliminatorio de ninguno de los dos candidatos respecto a los requisitos backend establecidos.
 
