@@ -20,7 +20,9 @@
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:validate": "prisma validate",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "openapi:generate": "npm run build && node scripts/generate-openapi.mjs",
+    "openapi:validate": "node scripts/validate-openapi.mjs"
   },
   "dependencies": {
     "@nestjs/common": "12.1.0",
@@ -34,7 +36,8 @@
     "@prisma/adapter-pg": "7.10.0",
     "@prisma/client": "7.10.0",
     "pg": "8.23.0",
-    "temporal-polyfill": "1.0.5"
+    "temporal-polyfill": "1.0.5",
+    "@nestjs/swagger": "12.0.2"
   },
   "devDependencies": {
     "@nestjs/cli": "12.0.7",
@@ -50,6 +53,7 @@
     "supertest": "7.2.2",
     "typescript": "6.0.3",
     "dotenv": "17.2.2",
-    "prisma": "7.10.0"
+    "prisma": "7.10.0",
+    "@scalar/openapi-validator": "0.1.1"
   }
 }
