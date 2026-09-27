@@ -42,6 +42,11 @@ describe('WorkbookReaderPort primitives', () => {
     expect(cell.detectedType).toBe('NUMBER');
   });
 
+  it('supports a provider-neutral source size limit option', () => {
+    const options: import('./workbook-reader.port').WorkbookReaderOptions = { maxSourceBytes: 50 * 1024 * 1024 };
+    expect(options.maxSourceBytes).toBe(50 * 1024 * 1024);
+  });
+
   it('fails closed for invalid column indexes', () => {
     expect(() => columnLetter(0)).toThrow(RangeError);
     expect(() => columnLetter(-1)).toThrow(RangeError);
