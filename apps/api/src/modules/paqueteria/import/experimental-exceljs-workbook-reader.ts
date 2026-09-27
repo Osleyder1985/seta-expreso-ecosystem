@@ -1,10 +1,11 @@
 import ExcelJS from 'exceljs';
 import type { DetectedCellType, ImportSnapshot, RowKind, SheetVisibility, SourceCell, SourceRow } from './workbook-reader.types';
 import type { WorkbookReaderMetadata, WorkbookReaderOptions, WorkbookReaderPort } from './workbook-reader.port';
+import { DEFAULT_WORKBOOK_READER_LIMITS } from './workbook-reader.limits';
 
 export class ExperimentalExcelJsWorkbookReader implements WorkbookReaderPort {
   async read(source: Buffer, metadata: WorkbookReaderMetadata, options: WorkbookReaderOptions = {}): Promise<ImportSnapshot> {
-    const limits = { maxSourceBytes: options.maxSourceBytes ?? 50*1024*1024, maxRowsPerSheet: options.maxRowsPerSheet ?? 100000, maxSheets: options.maxSheets ?? 32, maxCellsPerSheet: options.maxCellsPerSheet ?? 1000000 };
+    const limits = { ...DEFAULT_WORKBOOK_READER_LIMITS, ...options };
     if (source.byteLength > limits.maxSourceBytes) throw new Error('XLSX source exceeds configured byte limit');
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(source as unknown as Parameters<typeof workbook.xlsx.load>[0]);
