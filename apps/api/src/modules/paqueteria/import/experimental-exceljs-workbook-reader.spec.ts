@@ -92,4 +92,30 @@ describe('ExperimentalExcelJsWorkbookReader', () => {
 
     assertCommonEvidenceSnapshot(snapshot);
   });
+
+  it('preserves number formats and date/error cell types', async () => {
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Tipos');
+    sheet.addRow(['Fecha', 'Peso', 'Error']);
+    const date = new Date('2026-09-27T00:00:00.000Z');
+    sheet.addRow([date, 12.5, { error: '#DIV/0!' }]);
+    sheet.getCell('B2').numFmt = '0.00';
+    const source = Buffer.from(await workbook.xlsx.writeBuffer());
+    const snapshot = await new ExperimentalExcelJsWorkbookReader().read(source, metadata);
+    const cells = snapshot.sheets[0].rows[1].cells;
+    expect(cells[0].detectedType).toBe('DATE');
+    expect(cells[1].numberFormat).toBe('0.00');
+    expect(cells[2].detectedType).toBe('ERROR');
+  });
+
+  it('enforces row and cell limits', async () => {
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Limites');
+    sheet.addRow(['A']);
+    sheet.addRow(['B']);
+    const source = Buffer.from(await workbook.xlsx.writeBuffer());
+    const reader = new ExperimentalExcelJsWorkbookReader();
+    await expect(reader.read(source, metadata, { maxRowsPerSheet: 1 })).rejects.toThrow('row limit');
+    await expect(reader.read(source, metadata, { maxCellsPerSheet: 1 })).rejects.toThrow('cell limit');
+  });
 });
