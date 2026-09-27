@@ -24,7 +24,7 @@
     "openapi:generate": "npm run build && node scripts/generate-openapi.mjs",
     "openapi:validate": "node scripts/validate-openapi.mjs",
     "telemetry:test": "node scripts/verify-telemetry.mjs",
-    "test:xlsx-readers": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config jest.xlsx-readers.config.mjs --runInBand src/modules/paqueteria/import/experimental-sheetjs-workbook-reader.spec.ts"
+    "test:xlsx-readers": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config jest.xlsx-readers.config.mjs --runInBand src/modules/paqueteria/import/experimental-*workbook-reader.spec.ts"
   },
   "dependencies": {
     "@nestjs/common": "12.1.0",
