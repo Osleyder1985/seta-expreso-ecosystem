@@ -17,6 +17,8 @@ describe('ExperimentalReadExcelFileWorkbookReader', () => {
     expect(snapshot.sheets[0].rows.map(row => row.kind)).toEqual(['HEADER', 'DATA', 'DATA']);
     expect(snapshot.sheets[0].rows[1].cells[1].rawValue).toBe(12.5);
     expect(snapshot.sheets[0].rows[2].cells[2].rawValue).toBe('DIRECCION_TEST_001');
+    expect(snapshot.sheets[0].rows[1].cells[0].ref.columnHeaderRaw).toBe('House');
+    expect(snapshot.sheets[0].rows[1].cells[2].ref.columnHeaderRaw).toBe('Dirección');
   });
 
   it('enforces the source byte limit before parsing', async () => {
