@@ -1,6 +1,6 @@
 # Requirements Baseline — SETA EXPRESO SURL / Zpress Ecosystem
 
-**Revision:** 0.1.1 — D12 closed; D09 remains open
+**Revision:** 0.1.2 — domain decisions D09, B-01/D01, B-04, B-05 and B-06 reconciled
 
 **Version:** 0.1.0
 **Status:** Baseline for engineering traceability
@@ -41,7 +41,7 @@ Documentation alone never establishes implementation.
 | RF-PQ-001 | Import manifests preserving source file, hash, sheet, rows, columns and original values. | UC-01 | AT-01,02 | BASELINED |
 | RF-PQ-002 | Validate manifest structure and row semantics. | UC-02 | AT-01,05 | BASELINED |
 | RF-PQ-003 | Record discrepancies without destroying valid source information. | UC-03 | AT-03,04,18…21 | BASELINED |
-| RF-PQ-004 | Represent Master AWB, House and PhysicalUnit separately. | UC-04…06 | AT-06 | PARTIAL |
+| RF-PQ-004 | Represent Master AWB, Child AWB, House and PhysicalUnit as distinct concepts. | UC-04…06 | AT-06 | BASELINED |
 | RF-PQ-005 | Model Person independently from Sender/Recipient roles. | UC-07 | AT-08 | BASELINED |
 | RF-PQ-006 | Preserve original address and normalized/validated address. | UC-08 | AT-09 | BASELINED |
 | RF-PQ-007 | Resolve versioned geolocation without destroying an address on failure. | UC-09 | AT-10,25 | BASELINED |
@@ -57,7 +57,7 @@ Documentation alone never establishes implementation.
 | RF-PQ-017 | Authorize operations by role, permission, context and object state. | UC-20 | AT-15,16 | PARTIAL |
 | RF-PQ-018 | Preserve status-transition history. | UC-20 | AT-15,16 | BASELINED |
 | RF-PQ-019 | Audit critical operations with actor, timestamp, object, operation, reason and result. | UC-19 | AT-17 | BASELINED |
-| RF-PQ-020 | Support Delivery ↔ House N:M until D09 is operationally closed. | UC-14,15 | AT-26 | BLOCKED |
+| RF-PQ-020 | Support Delivery ↔ House N:M; same delivery address groups multiple House into one Delivery. | UC-14,15 | AT-26 | BASELINED |
 
 ## Cross-cutting system requirements
 
@@ -124,6 +124,9 @@ AT-01 through AT-26 are the current Paquetería acceptance baseline:
 - AT-18…21: discrepancies/incidents.
 - AT-22…25: custody/customs/geolocation failure.
 - AT-26: multiple House with the same delivery address are recorded in one Delivery.
+- AT-27: destination unit uses the operational airport code; territories without an international airport map to OTRAS.
+- AT-28: AeroVaradero delivers; authorized SETA personnel receive; Agency Manifest and AeroVaradero Manifest are retained as references.
+- AT-29: modifications/cancellation are permitted before archival; archived operations are not directly modified.
 
 A test is PASS only with executable evidence.
 
@@ -168,7 +171,7 @@ No implementation may silently reinterpret a baselined requirement.
 
 This baseline separates business objectives, Paquetería requirements, cross-cutting system requirements, quality requirements, security requirements, acceptance criteria, implementation issues and explicit blockers.
 
-The first vertical is not production-complete. D09 and D12 are now closed operational rules. B-01/D01, final authorization scope/object ownership and executable end-to-end acceptance evidence remain open before freezing irreversible physical domain rules.
+The first vertical is not production-complete. D09, D12, B-01/D01, B-04 and B-05/B-06 are closed operational/domain rules. Final authorization scope/object ownership, executable end-to-end acceptance evidence and the logical design of still-unrepresented concepts remain before freezing irreversible physical domain rules.
 
 
 ## Operational rules confirmed after baseline — 2026-09-27
@@ -178,7 +181,7 @@ The first vertical is not production-complete. D09 and D12 are now closed operat
 - **B-05:** AeroVaradero delivers; authorized SETA personnel receive; Agency Manifest + AeroVaradero Manifest are retained as operational references; customs release remains an external fact.
 - **B-06:** modification/cancellation is permitted before archival; archival prevents direct modification of the historical operation.
 
-B-01/House ↔ Child AWB remains unresolved and must not be inferred from terminology.
+B-01/D01 is resolved as a negative equivalence: House is not synonymous with Child Air Waybill. Master AWB, Child AWB, House/number of package and PhysicalUnit remain separate concepts.
 
 
 ## B-01 / D01 confirmed rule — 2026-09-27
