@@ -2,6 +2,27 @@ import { assertF01F20Ledger, certifyF01F20 } from './f01-f20-certification';
 import ExcelJS from 'exceljs';
 import { ExperimentalExcelJsWorkbookReader } from './experimental-exceljs-workbook-reader';
 
+async function workbookBuffer(): Promise<Buffer> {
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet('Manifiesto');
+  sheet.addRow(['House', 'Bultos', 'Dirección', 'Teléfono', 'Latitud', 'Longitud', 'Aduana', 'Consolidado', 'Peso']);
+  const firstDataRow = sheet.addRow(['CACC-00000001', 3, 'DIRECCION_TEST_001', '+5350000001', 21.38, -77.92, 'Aduana Camagüey', 'CONSOLIDADO-001', 12.5]);
+  firstDataRow.getCell(9).numFmt = '0.00';
+  sheet.addRow(['CACC-00000002', 1, 'DIRECCION_TEST_001', '+5350000002', null, null, 'Aduana Camagüey', 'CONSOLIDADO-001', 7.5]);
+  sheet.addRow([]);
+  sheet.addRow(['SUBTOTAL Habana', null, null, null, null, null, null, null, 20]);
+  sheet.addRow(['TOTAL', null, null, null, null, null, null, null, 20]);
+  const formulaRow = sheet.addRow([null, 2, 'DIRECCION_TEST_002', '+5350000003', 23.1, -82.3666, 'Aduana Habana', 'CONSOLIDADO-002', 3.25]);
+  formulaRow.getCell(1).value = { formula: 'UPPER("CACC-00000003")', result: 'CACC-00000003' };
+  formulaRow.getCell(9).numFmt = '0.00';
+
+  const hidden = workbook.addWorksheet('Oculta');
+  hidden.state = 'hidden';
+  const veryHidden = workbook.addWorksheet('MuyOculta');
+  veryHidden.state = 'veryHidden';
+
+  return Buffer.from(await workbook.xlsx.writeBuffer());
+}
 describe('ExperimentalExcelJsWorkbookReader', () => {
   const metadata = {
     importSnapshotId: 'IMP-EXCELJS-001',
@@ -11,28 +32,6 @@ describe('ExperimentalExcelJsWorkbookReader', () => {
     mappingProfileId: 'manifest-default',
     mappingProfileVersion: '1.0.0',
   };
-
-  async function workbookBuffer(): Promise<Buffer> {
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet('Manifiesto');
-    sheet.addRow(['House', 'Bultos', 'Dirección', 'Teléfono', 'Latitud', 'Longitud', 'Aduana', 'Consolidado', 'Peso']);
-    const firstDataRow = sheet.addRow(['CACC-00000001', 3, 'DIRECCION_TEST_001', '+5350000001', 21.38, -77.92, 'Aduana Camagüey', 'CONSOLIDADO-001', 12.5]);
-    firstDataRow.getCell(9).numFmt = '0.00';
-    sheet.addRow(['CACC-00000002', 1, 'DIRECCION_TEST_001', '+5350000002', null, null, 'Aduana Camagüey', 'CONSOLIDADO-001', 7.5]);
-    sheet.addRow([]);
-    sheet.addRow(['SUBTOTAL Habana', null, null, null, null, null, null, null, 20]);
-    sheet.addRow(['TOTAL', null, null, null, null, null, null, null, 20]);
-    const formulaRow = sheet.addRow([null, 2, 'DIRECCION_TEST_002', '+5350000003', 23.1, -82.3666, 'Aduana Habana', 'CONSOLIDADO-002', 3.25]);
-    formulaRow.getCell(1).value = { formula: 'UPPER("CACC-00000003")', result: 'CACC-00000003' };
-    formulaRow.getCell(9).numFmt = '0.00';
-
-    const hidden = workbook.addWorksheet('Oculta');
-    hidden.state = 'hidden';
-    const veryHidden = workbook.addWorksheet('MuyOculta');
-    veryHidden.state = 'veryHidden';
-
-    return Buffer.from(await workbook.xlsx.writeBuffer());
-  }
 
   it('maps the real workbook structure into the provider-neutral contract', async () => {
     const reader = new ExperimentalExcelJsWorkbookReader();
