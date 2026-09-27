@@ -33,7 +33,7 @@ export const mapSnapshot = (snapshot: ImportSnapshot, profile: MappingProfile): 
       }
 
       mappedAddresses.add(sourceCell.ref.cellAddress);
-      const exact = spec.headers.some(header => normalize(sourceCell.ref.columnHeaderRaw) === normalize(header));
+      const exact = normalize(sourceCell.ref.columnHeaderRaw) === normalize(spec.headers[0]);
       fields.push({ canonicalField: spec.canonicalField, value: sourceCell.rawValue, decision: exact ? 'EXACT' : 'ALIAS', sourceCells: [sourceCell] });
     }
 
