@@ -123,7 +123,7 @@ AT-01 through AT-26 are the current Paquetería acceptance baseline:
 - AT-17: traceability/audit.
 - AT-18…21: discrepancies/incidents.
 - AT-22…25: custody/customs/geolocation failure.
-- AT-26: multiple House per Delivery, conditional on D09.
+- AT-26: multiple House with the same delivery address are recorded in one Delivery.
 
 A test is PASS only with executable evidence.
 
@@ -145,11 +145,9 @@ A test is PASS only with executable evidence.
 
 ## Current blockers to the first production vertical
 
-1. D09 — multiple House per Delivery operational semantics.
-2. Exact operational confirmation of House versus child air waybill.
-3. Operational/customs catalogs requiring enforcement.
-4. Final authorization scope/object ownership model.
-5. Executable end-to-end Paquetería acceptance suite.
+1. Exact operational confirmation of House versus child air waybill.
+2. Final authorization scope/object ownership model.
+3. Executable end-to-end Paquetería acceptance suite.
 
 ## Definition of Ready
 
@@ -172,3 +170,13 @@ No implementation may silently reinterpret a baselined requirement.
 This baseline separates business objectives, Paquetería requirements, cross-cutting system requirements, quality requirements, security requirements, acceptance criteria, implementation issues and explicit blockers.
 
 The first vertical is not production-complete. D12 is now a closed operational POD rule; D09 remains an explicit domain constraint. The next engineering step is to close D09 and the remaining operational/catalog decisions before freezing irreversible physical domain rules.
+
+
+## Operational rules confirmed after baseline — 2026-09-27
+
+- **D09:** same delivery address → one Delivery containing multiple House.
+- **B-04:** destination unit is the operational airport code (e.g. CMW); territories without an international airport map to OTRAS.
+- **B-05:** AeroVaradero delivers; authorized SETA personnel receive; Agency Manifest + AeroVaradero Manifest are retained as operational references; customs release remains an external fact.
+- **B-06:** modification/cancellation is permitted before archival; archival prevents direct modification of the historical operation.
+
+B-01/House ↔ Child AWB remains unresolved and must not be inferred from terminology.

@@ -1,6 +1,6 @@
 # Cierre de decisiones críticas de Paquetería — v0.2.1
 
-**Estado:** D12 cerrado; D09 y otras decisiones operacionales permanecen abiertas
+**Estado:** D09, B-04, B-05 y B-06 cerrados con evidencia operacional; B-01 permanece parcial
 **Fecha:** 2026-09-24
 
 ## 1. Objetivo
@@ -63,17 +63,21 @@ La etiqueta House frente a guía hija queda pendiente de confirmación operacion
 
 ## 4. D09 — múltiples House en una Delivery
 
-### Estado: ABIERTO
+### Estado: CERRADO
 
-El manifiesto demuestra varios House y direcciones repetidas, pero no demuestra que el procedimiento real de SETA obligue a agruparlos en una misma entrega.
+Regla operacional confirmada por SETA:
 
-Decisión técnica provisional:
+> Cuando varios House corresponden a una misma dirección de entrega, SETA registra una sola Delivery que agrupa esos House.
 
-**Delivery ↔ House = N:M**
+Consecuencias:
+- una misma Delivery puede contener múltiples House;
+- la agrupación se determina por la misma dirección/punto de entrega;
+- la visita física se representa como una única operación de entrega;
+- la Delivery conserva la asociación con todos los House involucrados.
 
-Esto permite tanto una entrega individual como una operación agrupada.
+**Cardinalidad:** Delivery ↔ House = N:M.
 
-No debe crearse una FK única delivery.house_id como diseño definitivo.
+La cardinalidad N:M deja de ser solamente capacidad técnica y pasa a estar respaldada por una regla operacional.
 
 ## 5. D12 — mínimo de POD
 
@@ -182,7 +186,40 @@ Debe conservar tipo de acto, referencia, autoridad, fecha/hora, resultado, evide
 
 Debe conservar tipo legal, autoridad, resolución/referencia, fecha, causal, mercancía afectada y evidencia.
 
-## 11. Actualización D01–D12
+## 11. B-04 — Unidad de destino
+
+### Estado: CERRADO
+
+Regla confirmada: la Unidad de destino se identifica operacionalmente por el código IATA del aeropuerto internacional de referencia. Para Camagüey, la unidad de destino es **CMW**.
+
+La carga se agrupa al aeropuerto internacional más cercano a la dirección del destinatario. Los territorios sin aeropuerto internacional se agrupan en **OTRAS**.
+
+Consecuencia: `destinationUnit` representa el código operacional de la unidad (por ejemplo `CMW`), no el nombre de una provincia.
+
+## 12. B-05 — liberación hacia distribución
+
+### Estado: CERRADO para el flujo operacional SETA
+
+Flujo confirmado:
+1. Aduana completa las condiciones aplicables y libera la carga para extracción.
+2. **AeroVaradero entrega** físicamente la carga.
+3. La carga es retirada por **personal autorizado de la Mipyme**.
+4. La extracción utiliza como referencias el **Manifiesto recibido de la Agencia** y el **Manifiesto generado por AeroVaradero**.
+5. La recepción por personal autorizado de SETA establece el hecho operacional que permite continuar hacia distribución.
+
+SETA registra la situación aduanera externa; no representa la liberación aduanera como una acción ejecutada por SETA. `FACTURADO` no se interpreta como sinónimo universal de liberación aduanera.
+
+## 13. B-06 — modificación y cancelación por etapa
+
+### Estado: CERRADO como regla operacional de SETA
+
+Regla confirmada:
+
+> Las operaciones pueden modificarse/cancelarse durante todas las etapas operacionales anteriores al archivado. Una vez archivada la operación, ya no se permiten modificaciones operacionales directas.
+
+Las modificaciones anteriores al archivado deben conservar trazabilidad/auditoría. Después del archivado, cualquier corrección excepcional debe preservar el estado histórico y no modificar directamente el registro archivado.
+
+## 14. Actualización D01–D12
 
 | Decisión | Estado |
 |---|---|
@@ -194,12 +231,12 @@ Debe conservar tipo legal, autoridad, resolución/referencia, fecha, causal, mer
 | D06 | Abierta |
 | D07 | Abierta |
 | D08 | Respaldada |
-| D09 | Abierta; soporte técnico N:M |
+| D09 | Cerrada: misma dirección → una Delivery con múltiples House |
 | D10 | Cerrada conceptualmente |
 | D11 | Arquitectura cerrada; detalle jurídico/operacional pendiente |
 | D12 | Cerrada: POD mínimo operativo = fotografía del documento de identidad del receptor asociada al paquete/operación; retención legal separada |
 
-## 12. Nuevos criterios de aceptación
+## 15. Nuevos criterios de aceptación
 
 - AT-18: faltante parcial → registrar discrepancia sin borrar House.
 - AT-19: sobrante → registrar cantidad recibida y discrepancia.
@@ -209,9 +246,12 @@ Debe conservar tipo legal, autoridad, resolución/referencia, fecha, causal, mer
 - AT-23: DeliveryFailed no crea abandono automáticamente.
 - AT-24: abandono con referencia de autoridad → crear AbandonmentRecord.
 - AT-25: House sin geocodificación no se pierde ni se invalida documentalmente.
-- AT-26: varios House pueden asociarse a un mismo Delivery.
+- AT-26: varios House con una misma dirección se asocian a un mismo Delivery.
+- AT-27: Unidad de destino por código operacional de aeropuerto; destinos sin aeropuerto internacional → OTRAS.
+- AT-28: recepción SETA registra AeroVaradero como entregante, personal autorizado como receptor y ambos manifiestos como referencias.
+- AT-29: antes del archivado se permite modificación/cancelación con trazabilidad; después del archivado no hay modificación directa.
 
-## 13. Fuentes
+## 16. Fuentes
 
 La Gaceta Oficial No. 7 Ordinaria de 2026 contiene el Decreto-Ley 108, Decreto 134 y las Resoluciones 529–537.
 
@@ -223,13 +263,13 @@ La Resolución 534/2025 regula el abandono.
 
 La normativa de control de aeronaves documenta guía master, guía hija, cantidad de bultos y peso.
 
-## 14. Resultado
+## 17. Resultado
 
 D01 queda suficientemente definido para continuar el diseño conceptual, pero la equivalencia House = guía hija requiere confirmación operacional.
 
-D09 permanece abierto, pero el modelo debe soportar N:M.
+D09 queda cerrado: una misma dirección de entrega se representa como una única Delivery con múltiples House.
 
-D12 permanece abierto.
+D12 permanece cerrado.
 
 **No se autoriza todavía el esquema físico PostgreSQL definitivo.**
 

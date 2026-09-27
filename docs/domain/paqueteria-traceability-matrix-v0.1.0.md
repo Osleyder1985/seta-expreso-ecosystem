@@ -183,3 +183,10 @@ La matriz es válida como baseline cuando:
 - ningún bloqueador se oculta mediante una decisión técnica.
 
 **Conclusión:** la trazabilidad funcional está establecida. El siguiente paso debe ser cerrar la semántica operacional pendiente y, después, elaborar el modelo lógico PostgreSQL/PostGIS v0.1.0 acompañado de ADRs para las decisiones que afecten persistencia.
+
+## Reglas operacionales cerradas — 2026-09-27
+
+- **D09 / AT-26:** una misma dirección de entrega se registra como una sola Delivery con múltiples House.
+- **B-04:** la Unidad de destino utiliza el código operacional del aeropuerto internacional de referencia; ejemplo confirmado: **CMW**. Destinos sin aeropuerto internacional se agrupan en **OTRAS**.
+- **B-05:** AeroVaradero entrega la carga; personal autorizado de SETA la recibe para continuar el flujo, utilizando el Manifiesto recibido de la Agencia y el Manifiesto generado por AeroVaradero como referencias documentales. La liberación aduanera es un hecho externo.
+- **B-06:** antes del archivado se permiten modificaciones/cancelaciones con trazabilidad; el archivado impide modificación directa del histórico.
