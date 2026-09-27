@@ -75,7 +75,6 @@ describe('Experimental SheetJS workbook reader', () => {
     await expect(reader.read(source, metadata, { maxCellsPerSheet: 2 })).rejects.toThrow('cell limit');
   });
 })
-
   it('certifies the complete F01-F20 ledger with explicit statuses', async () => {
     const snapshot = await new ExperimentalSheetJsWorkbookReader().read(await createFixture(), { importSnapshotId: 'IMP-FIXTURE-F01-F20-001', sourceDocumentId: 'DOC-FIXTURE-F01-F20-001', contentHash: 'fixture-f01-f20-sha256', sourceFileName: 'manifest-f01-f20.xlsx', mappingProfileId: 'manifest-default', mappingProfileVersion: '1.0.0' });
     const evidence = certifyF01F20(snapshot, 'sheetjs');
