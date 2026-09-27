@@ -11,7 +11,7 @@ const toDetectedType = (cell: XLSX.CellObject | undefined): SourceCell['detected
   if (cell.t === 'n') return 'NUMBER';
   if (cell.t === 'b') return 'BOOLEAN';
   if (cell.t === 'd') return 'DATE';
-  if (cell.t === 's' || cell.t === 'str') return 'STRING';
+  if (cell.t === 's') return 'STRING';
   return 'UNKNOWN';
 };
 
@@ -27,7 +27,7 @@ export class ExperimentalSheetJsWorkbookReader implements WorkbookReaderPort {
     const workbook = XLSX.read(source, { type: 'buffer', cellFormula: true, cellNF: true, cellDates: true, cellStyles: true, cellText: true });
     if (options.maxSheets !== undefined && workbook.SheetNames.length > options.maxSheets) throw new RangeError('XLSX workbook exceeds the configured sheet limit.');
     const visibility = new Map<string, number>();
-    for (const sheet of workbook.Workbook?.Sheets ?? []) visibility.set(sheet.name, sheet.Hidden ?? 0);
+    for (const sheet of workbook.Workbook?.Sheets ?? []) { if (sheet.name) visibility.set(sheet.name, sheet.Hidden ?? 0); }
     const sheets: SourceSheet[] = workbook.SheetNames.map((sheetName, sheetIndex) => {
       const worksheet = workbook.Sheets[sheetName];
       const range = worksheet['!ref'] ? XLSX.utils.decode_range(worksheet['!ref']) : { s: { r: 0, c: 0 }, e: { r: -1, c: -1 } };
@@ -47,7 +47,7 @@ export class ExperimentalSheetJsWorkbookReader implements WorkbookReaderPort {
           const cell = worksheet[address] as XLSX.CellObject | undefined;
           const rawValue = cell?.v ?? null;
           values.push(rawValue);
-          cells.push({ ref: { sheetName, rowNumber, columnIndex: columnIndex + 1, columnHeaderRaw: rowIndex === range.s.r && typeof rawValue === 'string' ? rawValue : undefined, cellAddress: address }, rawValue, displayedValue: cell?.w, detectedType: toDetectedType(cell), formula: cell?.f, formulaResult: cell?.f ? cell.v : undefined, numberFormat: cell?.z });
+          cells.push({ ref: { sheetName, rowNumber, columnIndex: columnIndex + 1, columnHeaderRaw: rowIndex === range.s.r && typeof rawValue === 'string' ? rawValue : undefined, cellAddress: address }, rawValue, displayedValue: cell?.w, detectedType: toDetectedType(cell), formula: cell?.f, formulaResult: cell?.f ? cell.v : undefined, numberFormat: cell?.z === undefined ? undefined : String(cell.z) });
         }
         rows.push({ sheetName, rowNumber, kind: classifyRow(values, rowIndex === range.s.r), cells });
       }
