@@ -1,23 +1,47 @@
-import ExcelJS from 'exceljs';
+import * as XLSX from 'xlsx';
 import { ExperimentalSheetJsWorkbookReader } from './experimental-sheetjs-workbook-reader';
 
 const metadata = { importSnapshotId: 'IMP-SHEETJS-001', sourceDocumentId: 'DOC-SHEETJS-001', contentHash: 'sheetjs-fixture', sourceFileName: 'manifest-sheetjs-fixture.xlsx', mappingProfileId: 'manifest-default', mappingProfileVersion: '1.0.0' };
 
 const createFixture = async (): Promise<Buffer> => {
-  const workbook = new ExcelJS.Workbook();
-  const sheet = workbook.addWorksheet('Manifiesto');
-  sheet.addRow(['House', 'Bultos', 'Dirección', 'Teléfono', 'Latitud', 'Longitud', 'Aduana', 'Consolidado', 'Peso']);
-  sheet.addRow(['CACC-00000001', 3, 'DIRECCION_TEST_001', '+5350000001', 21.38, -77.92, 'Aduana Camagüey', 'CONSOLIDADO-001', 12.5]);
-  sheet.addRow(['CACC-00000002', 1, 'DIRECCION_TEST_001', '+5350000002', null, null, 'Aduana Camagüey', 'CONSOLIDADO-001', 7.5]);
-  sheet.addRow([]);
-  sheet.addRow(['SUBTOTAL Habana', null, null, null, null, null, null, null, 20]);
-  sheet.addRow(['TOTAL', null, null, null, null, null, null, null, 20]);
-  const formulaRow = sheet.addRow(['CACC-00000003', 2, 'DIRECCION_TEST_002', '+5350000003', 23.1, -82.3666, 'Aduana Habana', 'CONSOLIDADO-002', 3.25]);
-  formulaRow.getCell(1).value = { formula: 'UPPER("CACC-00000003")', result: 'CACC-00000003' };
-  sheet.getCell('B2').numFmt = '0.00';
-  workbook.addWorksheet('Oculta').state = 'hidden';
-  workbook.addWorksheet('MuyOculta').state = 'veryHidden';
-  return Buffer.from(await workbook.xlsx.writeBuffer());
+  const sheet: XLSX.WorkSheet = {};
+  const values = [
+    ['House', 'Bultos', 'Dirección', 'Teléfono', 'Latitud', 'Longitud', 'Aduana', 'Consolidado', 'Peso'],
+    ['CACC-00000001', 3, 'DIRECCION_TEST_001', '+5350000001', 21.38, -77.92, 'Aduana Camagüey', 'CONSOLIDADO-001', 12.5],
+    ['CACC-00000002', 1, 'DIRECCION_TEST_001', '+5350000002', null, null, 'Aduana Camagüey', 'CONSOLIDADO-001', 7.5],
+    [],
+    ['SUBTOTAL Habana'],
+    ['TOTAL'],
+    ['CACC-00000003', 2, 'DIRECCION_TEST_002', '+5350000003', 23.1, -82.3666, 'Aduana Habana', 'CONSOLIDADO-002', 3.25],
+  ];
+  values.forEach((row, rowIndex) => row.forEach((value, columnIndex) => {
+    if (value !== null && value !== undefined) {
+      sheet[XLSX.utils.encode_cell({ r: rowIndex, c: columnIndex })] = {
+        v: value,
+        t: typeof value === 'number' ? 'n' : 's',
+      };
+    }
+  }));
+  sheet['I2'].z = '0.00';
+  sheet['A7'] = { t: 's', f: 'UPPER("CACC-00000003")', v: 'CACC-00000003' };
+  sheet['!ref'] = 'A1:I7';
+
+  const workbook: XLSX.WorkBook = {
+    SheetNames: ['Manifiesto', 'Oculta', 'MuyOculta'],
+    Sheets: {
+      Manifiesto: sheet,
+      Oculta: { '!ref': 'A1:A1' },
+      MuyOculta: { '!ref': 'A1:A1' },
+    },
+    Workbook: {
+      Sheets: [
+        { name: 'Manifiesto' },
+        { name: 'Oculta', Hidden: 1 },
+        { name: 'MuyOculta', Hidden: 2 },
+      ],
+    },
+  };
+  return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx', cellFormula: true, cellNF: true });
 };
 
 describe('Experimental SheetJS workbook reader', () => {
