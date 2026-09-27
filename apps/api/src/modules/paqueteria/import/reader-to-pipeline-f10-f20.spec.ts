@@ -1,8 +1,12 @@
 import ExcelJS from 'exceljs';
+import { mkdtemp, readFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { ExperimentalExcelJsWorkbookReader } from './experimental-exceljs-workbook-reader';
 import { ExperimentalSheetJsWorkbookReader } from './experimental-sheetjs-workbook-reader';
 import { ExperimentalReadExcelFileWorkbookReader } from './experimental-read-excel-file-workbook-reader';
 import { runImportPipeline } from './import-pipeline';
+import { JsonlEvidencePersistence } from './evidence-persistence';
 import type { MappingProfile } from './import-pipeline.types';
 import type { ImportSnapshot, SourceCell, SourceRow } from './workbook-reader.types';
 
@@ -49,6 +53,13 @@ describe.each(readers)('%s → real snapshot → F10-F20 pipeline',(adapter,read
    expect(result.mapping.records).toHaveLength(3);
    expect(result.mapping.records[0].additionalColumns.some(c=>c.rawValue==='KEEP')).toBe(true);
    expect(result.acceptance.state).toBe('ACCEPTED');
+   const dir=await mkdtemp(join(tmpdir(),'seta-reader-f20-'));
+   const persisted=await runImportPipeline(snapshot,profile,undefined,{persistence:new JsonlEvidencePersistence(join(dir,'provenance.jsonl'),join(dir,'audit.jsonl'))});
+   const provenance=await readFile(join(dir,'provenance.jsonl'),'utf8');
+   const audit=await readFile(join(dir,'audit.jsonl'),'utf8');
+   expect(persisted.provenance.length).toBeGreaterThan(0);
+   expect(provenance).toContain('"sourceDocumentId":"DOC-CERT"');
+   expect(audit).toContain('"eventType":"ManifestAccepted"');
  });
  test('F10 uses the reader-produced TOTAL row for real reconciliation',async()=>{
    const bad=cloneSnapshot(snapshot,rows=>{const total=rows.find(r=>r.kind==='TOTAL')!;total.cells[4].rawValue=99;});
