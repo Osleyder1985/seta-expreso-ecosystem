@@ -15,7 +15,8 @@ describe('ExperimentalExcelJsWorkbookReader', () => {
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet('Manifiesto');
     sheet.addRow(['House', 'Bultos', 'Dirección', 'Teléfono', 'Latitud', 'Longitud', 'Aduana', 'Consolidado', 'Peso']);
-    sheet.addRow(['CACC-00000001', 3, 'DIRECCION_TEST_001', '+5350000001', 21.38, -77.92, 'Aduana Camagüey', 'CONSOLIDADO-001', 12.5]);
+    const firstDataRow = sheet.addRow(['CACC-00000001', 3, 'DIRECCION_TEST_001', '+5350000001', 21.38, -77.92, 'Aduana Camagüey', 'CONSOLIDADO-001', 12.5]);
+    firstDataRow.getCell(9).numFmt = '0.00';
     sheet.addRow(['CACC-00000002', 1, 'DIRECCION_TEST_001', '+5350000002', null, null, 'Aduana Camagüey', 'CONSOLIDADO-001', 7.5]);
     sheet.addRow([]);
     sheet.addRow(['SUBTOTAL Habana', null, null, null, null, null, null, null, 20]);
