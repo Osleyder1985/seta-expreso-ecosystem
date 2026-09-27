@@ -33,7 +33,7 @@ describe('Experimental SheetJS workbook reader', () => {
     expect(addresses.filter((value) => value === 'DIRECCION_TEST_001')).toHaveLength(2);
   });
   it('enforces the experimental source-size limit', async () => {
-    await expect(new ExperimentalSheetJsWorkbookReader().read(Buffer.alloc(50 * 1024 * 1024 + 1), metadata)).rejects.toThrow('maximum size');
+    await expect(new ExperimentalSheetJsWorkbookReader().read(Buffer.alloc(11), metadata, { maxSourceBytes: 10 })).rejects.toThrow('configured byte limit');
   });
 
 
