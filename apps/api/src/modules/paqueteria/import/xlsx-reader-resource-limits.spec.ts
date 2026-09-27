@@ -3,6 +3,7 @@ import { ExperimentalExcelJsWorkbookReader } from './experimental-exceljs-workbo
 import { ExperimentalSheetJsWorkbookReader } from './experimental-sheetjs-workbook-reader';
 import { ExperimentalReadExcelFileWorkbookReader } from './experimental-read-excel-file-workbook-reader';
 import type { WorkbookReaderPort } from './workbook-reader.port';
+import { DEFAULT_WORKBOOK_READER_LIMITS } from './workbook-reader.limits';
 
 const metadata = {
   importSnapshotId: 'limits-test',
@@ -14,6 +15,14 @@ const metadata = {
 };
 
 describe('XLSX reader resource-limit contract', () => {
+  test('uses one shared default limit contract', () => {
+    expect(DEFAULT_WORKBOOK_READER_LIMITS).toEqual({
+      maxSourceBytes: 50 * 1024 * 1024,
+      maxRowsPerSheet: 100_000,
+      maxSheets: 32,
+      maxCellsPerSheet: 1_000_000,
+    });
+  });
   const readers: Array<[string, WorkbookReaderPort]> = [
     ['ExcelJS', new ExperimentalExcelJsWorkbookReader()],
     ['SheetJS', new ExperimentalSheetJsWorkbookReader()],
