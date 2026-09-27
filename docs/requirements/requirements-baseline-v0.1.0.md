@@ -145,9 +145,8 @@ A test is PASS only with executable evidence.
 
 ## Current blockers to the first production vertical
 
-1. Exact operational confirmation of House versus child air waybill.
-2. Final authorization scope/object ownership model.
-3. Executable end-to-end Paquetería acceptance suite.
+1. Final authorization scope/object ownership model.
+2. Executable end-to-end Paquetería acceptance suite.
 
 ## Definition of Ready
 
@@ -180,3 +179,8 @@ The first vertical is not production-complete. D09 and D12 are now closed operat
 - **B-06:** modification/cancellation is permitted before archival; archival prevents direct modification of the historical operation.
 
 B-01/House ↔ Child AWB remains unresolved and must not be inferred from terminology.
+
+
+## B-01 / D01 confirmed rule — 2026-09-27
+
+House is not synonymous with Child Air Waybill. The requirements baseline shall preserve separate concepts for Master AWB, Child AWB, House/number of package and PhysicalUnit. No HAWB formatting or uniqueness rule may be imposed on House without separate operational evidence.

@@ -132,3 +132,46 @@ La ausencia de prueba de equivalencia no debe resolverse mediante un alias técn
 **Terminología coincidente ≠ identidad de dominio.**
 
 La decisión permanecerá abierta hasta obtener evidencia documental/operacional emparejable.
+
+
+## Actualización de evidencia — 2026-09-27
+
+### Evidencia normativa de Aduana
+
+La normativa cubana para el manifiesto aéreo mantiene campos separados para:
+- guia_numero: número de guía master;
+- guia_hija: número de guía hija;
+- bultos: cantidad de bultos.
+
+La documentación de ejemplo de Aduana muestra un mismo Master AWB con distintas guías hijas (por ejemplo, ...-1 y ...-2) y cantidades de bultos asociadas a cada guía hija. Esto demuestra que Child AWB/guía hija y bulto no son sinónimos. (Resolución 1/2007 y Resolución 537/2025). 
+
+### Evidencia operacional de AeroVaradero
+
+La información publicada sobre el sistema de consulta de AeroVaradero, reproduciendo instrucciones comunicadas por la propia empresa, identifica el segundo dato de consulta como House/Número de bulto y especifica que allí se introduce el número del paquete, conocido como número house.
+
+El sistema de consulta se estructura por:
+- número de guía aérea (AWB);
+- House / número de bulto.
+
+Por tanto, la evidencia operacional disponible no respalda interpretar House como el identificador de guia_hija; respalda interpretarlo como identificador operacional del paquete/bulto asociado a la guía aérea.
+
+### Conclusión de ingeniería
+
+B-01/D01 se cierra negativamente respecto a la equivalencia:
+
+House NO debe modelarse como sinónimo de ChildAirWaybill.
+
+La relación debe mantener separados:
+- MasterAirWaybill;
+- ChildAirWaybill;
+- House/paquete/bulto.
+
+Para el proceso operacional SETA/AeroVaradero, la combinación Master AWB + House identifica el paquete/bulto que se consulta y gestiona operacionalmente.
+
+No se debe imponer formato, longitud ni unicidad de HAWB sobre House.
+
+### Límite de la evidencia
+
+No se encontró en el sitio público de AeroVaradero una definición técnica publicada que documente una relación explícita entre House y Child AWB. El sitio oficial de tracking no pudo ser recuperado directamente durante esta búsqueda por timeout. La conclusión se basa en la combinación de la normativa aduanera y las instrucciones operacionales publicadas por AeroVaradero y reproducidas por fuentes que citan a la empresa.
+
+La conclusión necesaria para el dominio sí es suficientemente clara: no fusionar House con ChildAirWaybill.

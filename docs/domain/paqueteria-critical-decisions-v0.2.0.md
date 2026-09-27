@@ -265,7 +265,7 @@ La normativa de control de aeronaves documenta guía master, guía hija, cantida
 
 ## 17. Resultado
 
-D01 queda suficientemente definido para continuar el diseño conceptual, pero la equivalencia House = guía hija requiere confirmación operacional.
+D01 queda cerrado: la evidencia normativa y operacional disponible indica que House/Número de bulto no debe modelarse como sinónimo de ChildAirWaybill. Los conceptos permanecen separados.
 
 D09 queda cerrado: una misma dirección de entrega se representa como una única Delivery con múltiples House.
 
@@ -277,3 +277,14 @@ El siguiente paso es resolver B-01/D01, completar el modelo de autorización y c
 
 
 **Fase/nota:** El estado anterior, si existía, se conserva como descripción histórica de fase; el campo `Estado` usa exclusivamente la taxonomía formal de gobernanza.
+
+
+## B-01 / D01 — House y Child Air Waybill: cierre — 2026-09-27
+
+Regla de dominio:
+
+> **House no es sinónimo de Child Air Waybill.**
+
+La Aduana distingue explícitamente guía master, guía hija y cantidad de bultos. La operación de AeroVaradero identifica House como número de paquete/bulto en su consulta de carga. Por tanto, SETA debe conservar separados MasterAirWaybill, ChildAirWaybill y House/PhysicalUnit, manteniendo trazabilidad entre ellos cuando exista evidencia documental.
+
+No se debe imponer sobre House el formato o unicidad propios de una guía hija.

@@ -190,3 +190,11 @@ La matriz es válida como baseline cuando:
 - **B-04:** la Unidad de destino utiliza el código operacional del aeropuerto internacional de referencia; ejemplo confirmado: **CMW**. Destinos sin aeropuerto internacional se agrupan en **OTRAS**.
 - **B-05:** AeroVaradero entrega la carga; personal autorizado de SETA la recibe para continuar el flujo, utilizando el Manifiesto recibido de la Agencia y el Manifiesto generado por AeroVaradero como referencias documentales. La liberación aduanera es un hecho externo.
 - **B-06:** antes del archivado se permiten modificaciones/cancelaciones con trazabilidad; el archivado impide modificación directa del histórico.
+
+
+## B-01 / D01 cerrado — 2026-09-27
+
+- House ≠ ChildAirWaybill.
+- Aduana distingue guia_numero (Master), guia_hija (Child) y bultos.
+- AeroVaradero utiliza House/Número de bulto junto al AWB para identificar/consultar el paquete.
+- El modelo debe mantener separados MasterAirWaybill, ChildAirWaybill, House y PhysicalUnit.
