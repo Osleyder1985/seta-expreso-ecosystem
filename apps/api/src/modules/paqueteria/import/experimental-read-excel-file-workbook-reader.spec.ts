@@ -45,7 +45,6 @@ describe('ExperimentalReadExcelFileWorkbookReader', () => {
     });
     expect(() => assertCommonEvidenceSnapshot(snapshot)).toThrow();
   });
-});
 
   it('certifies the complete F01-F20 ledger with explicit statuses', async () => {
     const snapshot = await new ExperimentalReadExcelFileWorkbookReader().read(source, { importSnapshotId: 'IMP-FIXTURE-F01-F20-001', sourceDocumentId: 'DOC-FIXTURE-F01-F20-001', contentHash: 'fixture-f01-f20-sha256', sourceFileName: 'manifest-f01-f20.xlsx', mappingProfileId: 'manifest-default', mappingProfileVersion: '1.0.0' });
