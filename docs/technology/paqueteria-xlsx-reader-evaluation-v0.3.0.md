@@ -433,3 +433,37 @@ This is now **reader-to-pipeline evidence**, materially stronger than reader-onl
 - provenance/audit persistence executes against those snapshots.
 
 F20 is still not closed as the final production persistence gate until the operational persistence transaction/storage integration is demonstrated.
+
+
+### 5.5.1 Comparación de equivalencia semántica de snapshots — 2026-09-27
+
+Se ejecutó el mismo binario XLSX contra los tres adapters y se compararon los `ImportSnapshot` producidos mediante el protocolo `xlsx-reader-snapshot-equivalence-v1.0.0`.
+
+**Evidencia CI:**
+- Workflow: `xlsx-f10-f19-pipeline-certification #25`
+- Run: `36350685619`
+- Job: `108708649846`
+- Artifact: `xlsx-reader-snapshot-equivalence`
+- Commit: `87aa23ab5accb55f0aac523edaa5e1e09b90fc0a`
+- Build: PASS
+- F10–F19 pipeline: PASS
+- Reader → pipeline: PASS
+- Comparación de snapshots: PASS
+- Artifact de evidencia: generado correctamente
+
+La comparación es estricta para metadata común, estructura de workbook, hojas, filas, celdas, coordenadas, headers, valores, tipos, fórmulas, resultados de fórmula y formatos. No se normalizan silenciosamente diferencias del proveedor; solamente se normalizan representaciones de `Date` y `-0` para serialización.
+
+| Comparación | Diferencias críticas | Diferencias significativas |
+|---|---:|---:|
+| ExcelJS ↔ SheetJS | 0 | 35 |
+| ExcelJS ↔ read-excel-file | 0 | 2 |
+| SheetJS ↔ read-excel-file | 0 | 37 |
+
+**Hallazgos:**
+
+1. **No hubo diferencias CRÍTICAS.** Los tres lectores conservaron la misma estructura, filas, celdas, valores y tipos observados por el protocolo sobre esta fixture.
+2. **SheetJS vs ExcelJS:** SheetJS expone `numberFormat = "General"` en celdas donde ExcelJS deja el campo ausente. La diferencia no alteró el pipeline de esta fixture, pero sí constituye una diferencia de fidelidad del snapshot.
+3. **read-excel-file vs ExcelJS/SheetJS:** las hojas `Oculta` y `MuyOculta` fueron reportadas como `VISIBLE` por el adapter de read-excel-file. Esto confirma una pérdida de metadata de visibilidad ya anticipada por la evaluación aislada.
+4. Estas diferencias **no se interpretan como selección de lector**. Se registraron en #249 para definir primero el contrato definitivo de fidelidad del `ImportSnapshot` y repetir la comparación.
+
+**Issue de seguimiento:** #249 — resolver diferencias de fidelidad entre snapshots XLSX.
