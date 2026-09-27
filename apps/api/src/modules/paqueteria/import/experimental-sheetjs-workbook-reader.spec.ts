@@ -3,7 +3,7 @@ import { ExperimentalSheetJsWorkbookReader } from './experimental-sheetjs-workbo
 
 const metadata = { importSnapshotId: 'IMP-SHEETJS-001', sourceDocumentId: 'DOC-SHEETJS-001', contentHash: 'sheetjs-fixture', sourceFileName: 'manifest-sheetjs-fixture.xlsx', mappingProfileId: 'manifest-default', mappingProfileVersion: '1.0.0' };
 
-const createFixture = async (): Promise<Buffer> => {
+export const createFixture = async (): Promise<Buffer> => {
   const values = [
     ['House', 'Bultos', 'Dirección', 'Teléfono', 'Latitud', 'Longitud', 'Aduana', 'Consolidado', 'Peso'],
     ['CACC-00000001', 3, 'DIRECCION_TEST_001', '+5350000001', 21.38, -77.92, 'Aduana Camagüey', 'CONSOLIDADO-001', 12.5],
