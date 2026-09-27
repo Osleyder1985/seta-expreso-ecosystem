@@ -283,3 +283,53 @@ La certificación reader-level ya produce evidencia CI reproducible para los tre
 Los estados NOT_EXECUTED de F11-F13 y F16-F19 no se convertirán en PASS mediante fixtures o mocks aislados: cada control debe ejecutar la capa real que gobierna la regla y producir evidencia determinista. F10 requiere reconciliación real de totales; F14 debe demostrar preservación de columnas adicionales dentro del flujo de importación; F18/F19 requieren ejecución del pipeline y control explícito de identidad/versionado.
 
 Hasta cerrar #247 y F20 end-to-end, el ledger F01-F20 se considera **ejecutado pero incompleto**, y no constituye una autorización de selección/promoción de parser.
+
+
+## 5.4 Evidencia pipeline-level F10–F19 + provenance — 2026-09-27
+
+Issue rector de ejecución: **#247**. PR de implementación: **#248**.
+
+Se incorporó una capa neutral sobre `ImportSnapshot` que ejecuta:
+
+`ImportSnapshot → mapping → validation → reconciliation → acceptance`
+
+y, en paralelo:
+
+`ImportSnapshot → provenance → persistencia/auditoría`.
+
+La implementación se mantiene independiente del parser XLSX concreto y utiliza contratos explícitos para mapping profile/version, findings, reconciliation, acceptance, provenance y audit.
+
+### Evidencia CI
+
+- Workflow: `xlsx-f10-f19-pipeline-certification`
+- Run: `36349196549`
+- Job: `108704402043`
+- Build: **PASS**
+- Suite: **PASS**
+- Tests: **10/10 PASS**
+
+| Control | Evidencia ejecutada | Resultado observable |
+|---|---|---|
+| F10 | Reconciliación TOTAL vs detalle | discrepancia real → REQUIRES_RECONCILIATION |
+| F11 | Mapping por aliases autorizados | ALIAS |
+| F12 | Dos headers candidatos para campo crítico | AMBIGUOUS + fail-closed |
+| F13 | Campo crítico ausente | BLOCKED |
+| F14 | Columna fuera del perfil | preservada en additionalColumns |
+| F16 | Valor numérico anómalo | finding bloqueante |
+| F17 | Misma identidad con direcciones distintas | REQUIRES_RECONCILIATION |
+| F18 | Segunda ejecución con misma identidad de idempotencia | reutilización sin duplicación |
+| F19 | Mismo contenido con versión de mapping distinta | claves de ejecución distintas |
+| F20 | Provenance + audit | persistencia JSONL verificable |
+
+### Alcance de la evidencia
+
+Esta ejecución demuestra las reglas en las capas donde realmente viven y no utiliza mocks para sustituir mapping, validation, reconciliation o pipeline.
+
+**F20 aún no se cierra como gate productivo de persistencia operacional.** La evidencia actual demuestra persistencia de provenance/auditoría mediante un adapter append-only JSONL. Falta conectar esta evidencia con el almacenamiento operacional definitivo y demostrar la trazabilidad completa dentro de la transacción/flujo de producción.
+
+La ejecución tampoco selecciona ExcelJS, SheetJS ni read-excel-file. Los adapters continúan aislados detrás de `WorkbookReaderPort`.
+
+### Corrección metodológica durante la ejecución
+
+El primer run `36349113154` falló porque el `jest.config.mjs` existente está configurado para descubrimiento E2E y no encontraba la suite específica. Se corrigió mediante una configuración Jest dedicada `jest.xlsx-pipeline.config.mjs`. No se utilizó `--passWithNoTests`.
+
