@@ -3,6 +3,7 @@ import { cpus, totalmem } from 'node:os';
 import { readFile, writeFile, mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { mkdir } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import ExcelJS from 'exceljs';
 import { createRequire } from 'node:module';
@@ -83,7 +84,9 @@ async function runBenchmark() {
       results,
     };
 
-    const output = join(process.cwd(), 'certification-artifacts', 'xlsx-reader-resource-benchmark.json');
+    const outputDir = join(process.cwd(), 'certification-artifacts');
+    await mkdir(outputDir, { recursive: true });
+    const output = join(outputDir, 'xlsx-reader-resource-benchmark.json');
     await writeFile(output, JSON.stringify(artifact, null, 2) + '\n', 'utf8');
     console.log(JSON.stringify({ output, fixtures: generated.length, resultRows: results.length }, null, 2));
   } finally {
@@ -98,7 +101,7 @@ async function runWorker() {
   if (sha256(source) !== fixtureHash) throw new Error('Fixture hash mismatch');
   const started = performance.now();
   const before = process.memoryUsage().rss;
-  const module = await import(new URL(READER_MODULES[reader], import.meta.url));
+  const module = await import(new URL('../' + READER_MODULES[reader].replace(/^\.\//, ''), import.meta.url));
   const className = reader === 'exceljs'
     ? 'ExperimentalExcelJsWorkbookReader'
     : reader === 'sheetjs'
