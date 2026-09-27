@@ -64,9 +64,9 @@ Documentation alone never establishes implementation.
 | ID | Requirement | Verification | State |
 |---|---|---|---|
 | SYS-SEC-001 | Protected API operations require server-side authentication. | OIDC integration | IMPLEMENTED |
-| SYS-SEC-002 | Authorization is server-side and independent of client controls. | Negative E2E | PARTIAL |
-| SYS-SEC-003 | Object-level authorization prevents BOLA/IDOR. | Two-principal tests | BLOCKED by resource API |
-| SYS-SEC-004 | Security-sensitive actions are attributable. | Audit-event tests | PARTIAL |
+| SYS-SEC-002 | Authorization is server-side and independent of client controls. | Manifest contextual authorization tests; broader E2E | PARTIAL |
+| SYS-SEC-003 | Object-level authorization prevents BOLA/IDOR. | Manifest ownership isolation + two-principal E2E | PARTIAL; Manifest enforcement implemented, broader resource coverage pending |
+| SYS-SEC-004 | Security-sensitive actions are attributable. | Manifest authorization AuditRecord tests; broader event coverage | PARTIAL |
 | SYS-DATA-001 | Source business data is not silently overwritten. | Import/domain tests | BASELINED |
 | SYS-DATA-002 | Critical historical facts remain reconstructable. | History/traceability tests | BASELINED |
 | SYS-API-001 | API contracts are explicit and versioned. | OpenAPI validation | PARTIAL |
@@ -149,8 +149,9 @@ A test is PASS only with executable evidence.
 
 ## Current blockers to the first production vertical
 
-1. Final authorization scope/object ownership model.
+1. Contextual authorization across the remaining Paquetería resources and executable multi-principal E2E evidence.
 2. Executable end-to-end Paquetería acceptance suite.
+3. Remaining logical-domain concepts required before their physical migration (POD/evidence, ReceiptHandoff, ChildAWB evidence link, DestinationUnit, archival history).
 
 ## Definition of Ready
 
@@ -172,7 +173,7 @@ No implementation may silently reinterpret a baselined requirement.
 
 This baseline separates business objectives, Paquetería requirements, cross-cutting system requirements, quality requirements, security requirements, acceptance criteria, implementation issues and explicit blockers.
 
-The first vertical is not production-complete. D09, D12, B-01/D01, B-04, B-05 and B-06 are closed operational/domain rules. The logical model is now defined in docs/domain/paqueteria-logical-domain-model-v0.1.0.md. Final authorization scope/object ownership, executable end-to-end acceptance evidence and physical schema decisions for the still-unrepresented concepts remain open.
+The first vertical is not production-complete. D09, D12, B-01/D01, B-04, B-05 and B-06 are closed operational/domain rules. The logical model is now defined in docs/domain/paqueteria-logical-domain-model-v0.1.0.md. Manifest ownership and contextual enforcement are implemented as the first real resource; broader authorization coverage, executable end-to-end acceptance evidence and physical schema decisions for still-unrepresented concepts remain open.
 
 
 ## Operational rules confirmed after baseline — 2026-09-27
