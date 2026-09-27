@@ -8,14 +8,6 @@ on:
       - 'apps/api/jest.xlsx-readers.config.mjs'
       - 'apps/api/package-lock.json'
       - '.github/workflows/xlsx-reader-adapters-conformance.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'apps/api/src/modules/paqueteria/import/**'
-      - 'apps/api/package.json'
-      - 'apps/api/jest.xlsx-readers.config.mjs'
-      - 'apps/api/package-lock.json'
-      - '.github/workflows/xlsx-reader-adapters-conformance.yml'
 
 permissions:
   contents: read
