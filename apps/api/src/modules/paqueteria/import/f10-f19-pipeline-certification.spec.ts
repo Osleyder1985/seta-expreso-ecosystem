@@ -24,8 +24,8 @@ const buildSnapshot = (headers:string[], data:unknown[][], totalBultos?:number):
 };
 
 const profile=(version='1.0.0'):MappingProfile=>({profileId:'manifest',version,fields:[
-  {canonicalField:'house',headers:['House','No. House'],required:true},
-  {canonicalField:'bultos',headers:['Bultos','Cantidad'],required:true},
+  {canonicalField:'house',headers:['House'],aliases:['No. House'],required:true},
+  {canonicalField:'bultos',headers:['Bultos'],aliases:['Cantidad'],required:true},
   {canonicalField:'peso',headers:['Peso'],required:false},
   {canonicalField:'recipient',headers:['Destinatario'],required:false},
   {canonicalField:'address',headers:['Dirección','Direccion'],required:true},
