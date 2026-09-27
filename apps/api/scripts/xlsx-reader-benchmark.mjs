@@ -4,6 +4,7 @@ import { readFile, writeFile, mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { mkdir } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
 import ExcelJS from 'exceljs';
 import { createRequire } from 'node:module';
@@ -136,7 +137,7 @@ async function runWorker() {
 
 async function runIsolatedReader(reader, fixturePath, fixtureHash, fixtureId) {
   return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, [new URL(import.meta.url), '--worker', reader, fixturePath, fixtureHash, fixtureId], {
+    const child = spawn(process.execPath, [fileURLToPath(import.meta.url), '--worker', reader, fixturePath, fixtureHash, fixtureId], {
       stdio: ['ignore', 'pipe', 'pipe'],
       env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=4096' },
     });
