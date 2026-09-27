@@ -127,7 +127,6 @@ describe('ExperimentalExcelJsWorkbookReader', () => {
     await expect(reader.read(source, metadata, { maxRowsPerSheet: 1 })).rejects.toThrow('row limit');
     await expect(reader.read(source, metadata, { maxCellsPerSheet: 1 })).rejects.toThrow('cell limit');
   });
-});
 
   it('certifies the complete F01-F20 ledger with explicit statuses', async () => {
     const snapshot = await new ExperimentalExcelJsWorkbookReader().read(await workbookBuffer(), { importSnapshotId: 'IMP-FIXTURE-F01-F20-001', sourceDocumentId: 'DOC-FIXTURE-F01-F20-001', contentHash: 'fixture-f01-f20-sha256', sourceFileName: 'manifest-f01-f20.xlsx', mappingProfileId: 'manifest-default', mappingProfileVersion: '1.0.0' });
@@ -136,3 +135,4 @@ describe('ExperimentalExcelJsWorkbookReader', () => {
     expect(evidence.map(e => e.status)).toEqual(['PASS','PASS','PASS','NOT_EXECUTED','PASS','PASS','PASS','PASS','PASS','PARTIAL','NOT_EXECUTED','NOT_EXECUTED','NOT_EXECUTED','NOT_EXECUTED','PASS','NOT_EXECUTED','NOT_EXECUTED','NOT_EXECUTED','NOT_EXECUTED','PARTIAL']);
     console.log(JSON.stringify({ adapter: 'exceljs', evidence }, null, 2));
   });
+});
