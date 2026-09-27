@@ -53,3 +53,5 @@ describe('ExperimentalReadExcelFileWorkbookReader', () => {
     expect(evidence.map(e => e.status)).toEqual(['PASS','NOT_EXECUTED','PASS','NOT_EXECUTED','NOT_EXECUTED','PASS','NOT_EXECUTED','NOT_EXECUTED','GAP','PARTIAL','NOT_EXECUTED','NOT_EXECUTED','NOT_EXECUTED','NOT_EXECUTED','PASS','NOT_EXECUTED','NOT_EXECUTED','NOT_EXECUTED','NOT_EXECUTED','GAP']);
     console.log(JSON.stringify({ adapter: 'read-excel-file', evidence }, null, 2));
   });
+
+});
