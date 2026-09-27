@@ -1,7 +1,7 @@
 import type { ImportSnapshot, SourceCell, SourceRow } from './workbook-reader.types';
 
 export type MappingDecision = 'EXACT' | 'ALIAS' | 'UNMAPPED' | 'AMBIGUOUS' | 'BLOCKED';
-export interface MappingFieldSpec { readonly canonicalField: string; readonly headers: readonly string[]; readonly required?: boolean; }
+export interface MappingFieldSpec { readonly canonicalField: string; readonly headers: readonly string[]; readonly aliases?: readonly string[]; readonly required?: boolean; }
 export interface MappingProfile { readonly profileId: string; readonly version: string; readonly fields: readonly MappingFieldSpec[]; }
 export interface MappedField { readonly canonicalField: string; readonly value: unknown; readonly decision: MappingDecision; readonly sourceCells: readonly SourceCell[]; }
 export interface MappedRecord { readonly row: SourceRow; readonly fields: readonly MappedField[]; readonly additionalColumns: readonly SourceCell[]; }
