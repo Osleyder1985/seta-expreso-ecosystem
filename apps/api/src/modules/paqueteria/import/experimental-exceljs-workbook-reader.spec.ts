@@ -98,7 +98,7 @@ describe('ExperimentalExcelJsWorkbookReader', () => {
       mappingProfileVersion: '1.0.0',
     });
 
-    assertCommonEvidenceSnapshot(snapshot);
+    expect(() => assertCommonEvidenceSnapshot(snapshot)).not.toThrow();
   });
 
   it('preserves number formats and date/error cell types', async () => {
