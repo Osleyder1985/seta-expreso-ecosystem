@@ -35,4 +35,19 @@ describe('Experimental SheetJS workbook reader', () => {
   it('enforces the experimental source-size limit', async () => {
     await expect(new ExperimentalSheetJsWorkbookReader().read(Buffer.alloc(50 * 1024 * 1024 + 1), metadata)).rejects.toThrow('maximum size');
   });
+
+
+  it('executes the provider-neutral conformance gate against an XLSX workbook', async () => {
+    const { assertCommonEvidenceSnapshot } = await import('./workbook-reader-conformance');
+    const snapshot = await new ExperimentalSheetJsWorkbookReader().read(await createFixture(), {
+      importSnapshotId: 'IMP-FIXTURE-F01-F20-001',
+      sourceDocumentId: 'DOC-FIXTURE-F01-F20-001',
+      contentHash: 'fixture-f01-f20-sha256',
+      sourceFileName: 'manifest-f01-f20.xlsx',
+      mappingProfileId: 'manifest-default',
+      mappingProfileVersion: '1.0.0',
+    });
+
+    assertCommonEvidenceSnapshot(snapshot);
+  });
 });
