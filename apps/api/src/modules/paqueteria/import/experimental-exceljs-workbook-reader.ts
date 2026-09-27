@@ -71,6 +71,7 @@ export class ExperimentalExcelJsWorkbookReader implements WorkbookReaderPort {
     }
 
     const rows: SourceRow[] = [];
+    const headerByColumn = new Map<number, string>();
     let cellCount = 0;
     let headerDetected = false;
 
@@ -87,13 +88,20 @@ export class ExperimentalExcelJsWorkbookReader implements WorkbookReaderPort {
         cells.push(this.toSourceCell(worksheet.name, row.number, columnIndex, cell));
       });
 
-      const kind = this.classifyRow(cells, headerDetected);
+      if (!headerDetected && cells.every(({ rawValue }) => typeof rawValue === 'string')) {
+        for (const cell of cells) headerByColumn.set(cell.ref.columnIndex, String(cell.rawValue));
+      }
+      const normalizedCells = cells.map((cell) => ({
+        ...cell,
+        ref: { ...cell.ref, columnHeaderRaw: headerByColumn.get(cell.ref.columnIndex) },
+      }));
+      const kind = this.classifyRow(normalizedCells, headerDetected);
       if (kind === 'HEADER') headerDetected = true;
       rows.push({
         sheetName: worksheet.name,
         rowNumber: row.number,
         kind,
-        cells,
+        cells: normalizedCells,
       });
     });
 
