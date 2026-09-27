@@ -125,6 +125,17 @@ Commit de incorporación en `main`: `ad0903f37c426119721acc1673374d9e439253ee`. 
 
 Para SheetJS existe evidencia CI observable previa: workflow de conformance con **4/4 tests PASS**. Esa evidencia sigue siendo estructural y experimental.
 
+
+### 5.1 Evidencia posterior — 2026-09-27
+
+En #234 se produjo una ejecución dedicada observable del workflow ExcelJS (run #5, ID `36330413051`) sobre `ebaacdc12f9f60ddd736e5c5ba62437fc5f8d930`. El build pasó y 5/6 pruebas pasaron; el gate común falló por una discrepancia de fixture: la celda de `Peso` no tenía el formato numérico esperado `0.00`. Se corrigió el fixture y posteriormente se corrigió el workflow para usar `apps/api/package-lock.json` como dependencia de caché.
+
+El último commit del branch ExcelJS es `5ed2d169ae842731bd376761a6de14c6f63f5314`. GitHub no muestra todavía una ejecución dedicada asociada a ese SHA; por tanto, la corrección aún no se certifica por CI.
+
+Para #236, el último commit evaluado es `43b5e76f548db5edcd35829c31aa9f408d5f3507`. La ejecución observable asociada hasta ahora corresponde únicamente a `security-assurance.yml` y terminó en failure; no se utiliza como evidencia de conformance del adapter. No existe todavía una ejecución dedicada observable para el adapter read-excel-file en ese SHA.
+
+La ausencia de ejecución dedicada se registra como **NOT EXECUTED**, nunca como PASS.
+
 ## 6. Arquitectura vigente
 
 El parser concreto permanece aislado:
