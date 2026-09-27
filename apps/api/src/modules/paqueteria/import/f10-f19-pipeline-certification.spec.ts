@@ -20,7 +20,7 @@ const buildSnapshot = (headers:string[], data:unknown[][], totalBultos?:number):
     ...data.map((values,index)=>({sheetName:sheet,rowNumber:index+2,kind:'DATA' as const,cells:values.map((v,i)=>cell(sheet,index+2,i+1,headers[i],v))})),
   ];
   if (totalBultos !== undefined) rows.push({sheetName:sheet,rowNumber:data.length+2,kind:'TOTAL',cells:[cell(sheet,data.length+2,1,'House','TOTAL'),cell(sheet,data.length+2,2,'bultos',totalBultos)]});
-  return {importSnapshotId:'IMP-CERT-'+Math.random().toString(16).slice(2),sourceDocumentId:'DOC-CERT',contentHash:'sha-cert',sourceFileName:'cert.xlsx',sourceFormat:'XLSX',mappingProfileId:'manifest',mappingProfileVersion:'1.0.0',sheets:[{name:sheet,ordinal:1,visibility:'VISIBLE',rows}]};
+  return {importSnapshotId:'IMP-CERT-001',sourceDocumentId:'DOC-CERT',contentHash:'sha-cert',sourceFileName:'cert.xlsx',sourceFormat:'XLSX',mappingProfileId:'manifest',mappingProfileVersion:'1.0.0',sheets:[{name:sheet,ordinal:1,visibility:'VISIBLE',rows}]};
 };
 
 const profile=(version='1.0.0'):MappingProfile=>({profileId:'manifest',version,fields:[
