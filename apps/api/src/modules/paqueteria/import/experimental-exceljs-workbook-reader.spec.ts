@@ -76,4 +76,20 @@ describe('ExperimentalExcelJsWorkbookReader', () => {
       reader.read(source, metadata, { maxSheets: 1 }),
     ).rejects.toThrow('XLSX workbook exceeds configured sheet limit');
   });
+
+
+  it('executes the provider-neutral conformance gate against an XLSX workbook', async () => {
+    const { assertCommonEvidenceSnapshot } = await import('./workbook-reader-conformance');
+    const reader = new ExperimentalExcelJsWorkbookReader();
+    const snapshot = await reader.read(await workbookBuffer(), {
+      importSnapshotId: 'IMP-FIXTURE-F01-F20-001',
+      sourceDocumentId: 'DOC-FIXTURE-F01-F20-001',
+      contentHash: 'fixture-f01-f20-sha256',
+      sourceFileName: 'manifest-f01-f20.xlsx',
+      mappingProfileId: 'manifest-default',
+      mappingProfileVersion: '1.0.0',
+    });
+
+    assertCommonEvidenceSnapshot(snapshot);
+  });
 });
