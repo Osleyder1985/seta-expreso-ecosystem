@@ -22,6 +22,7 @@ describe('ExperimentalExcelJsWorkbookReader', () => {
     sheet.addRow(['TOTAL', null, null, null, null, null, null, null, 20]);
     const formulaRow = sheet.addRow([null, 2, 'DIRECCION_TEST_002', '+5350000003', 23.1, -82.3666, 'Aduana Habana', 'CONSOLIDADO-002', 3.25]);
     formulaRow.getCell(1).value = { formula: 'UPPER("CACC-00000003")', result: 'CACC-00000003' };
+    formulaRow.getCell(9).numFmt = '0.00';
 
     const hidden = workbook.addWorksheet('Oculta');
     hidden.state = 'hidden';
