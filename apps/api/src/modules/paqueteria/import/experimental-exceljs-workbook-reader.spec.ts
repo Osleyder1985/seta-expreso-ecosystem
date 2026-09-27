@@ -54,6 +54,7 @@ describe('ExperimentalExcelJsWorkbookReader', () => {
 
     expect(snapshot.sheets[0].rows[1].cells[0].ref.columnHeaderRaw).toBe('House');
     expect(snapshot.sheets[0].rows[1].cells[2].ref.columnHeaderRaw).toBe('Dirección');
+    expect(snapshot.sheets[0].rows[6].cells[8].ref.columnHeaderRaw).toBe('Peso');
     expect(snapshot.sheets[0].rows.filter(row => row.kind === 'DATA').map(row => row.cells[2].rawValue).filter(value => value === 'DIRECCION_TEST_001')).toHaveLength(2);
 
     const formula = snapshot.sheets[0].rows[6].cells[0];
