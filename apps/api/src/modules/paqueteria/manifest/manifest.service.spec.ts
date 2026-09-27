@@ -1,5 +1,6 @@
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { ManifestService } from './manifest.service';
+import { AuthorizationService } from '../../../auth/authorization/authorization.service';
 
 describe('ManifestService contextual authorization', () => {
   const principal = (subject: string, roles = ['operator']) => ({
@@ -33,23 +34,7 @@ describe('ManifestService contextual authorization', () => {
         create: jest.fn().mockResolvedValue({}),
       },
     };
-    const authorization = {
-      evaluate: jest.fn((context: any) => ({
-        decision:
-          context.principal.subject === context.resource.ownerSubject ||
-          context.principal.roles.includes('admin')
-            ? 'allow'
-            : 'deny',
-        reason:
-          context.principal.subject === context.resource.ownerSubject
-            ? 'RESOURCE_OWNER_OPERATOR'
-            : 'RESOURCE_OWNERSHIP_OR_ROLE_REQUIRED',
-        actorSubject: context.principal.subject,
-        action: context.action,
-        resourceType: context.resource.type,
-        resourceId: context.resource.id,
-      })),
-    };
+    const authorization = new AuthorizationService();
     return {
       instance: new ManifestService(prisma as never, authorization as never),
       prisma,
