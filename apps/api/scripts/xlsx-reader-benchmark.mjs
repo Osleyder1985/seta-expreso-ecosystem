@@ -17,7 +17,8 @@ const READER_MODULES = {
 
 const NODE_VERSION = process.version;
 const NPM_VERSION = await commandVersion('npm', ['--version']);
-const READER_VERSIONS = Object.fromEntries(Object.keys(READER_MODULES).map(name => [name, readInstalledPackageVersion(name === 'read-excel-file' ? 'read-excel-file' : name)]));
+const READER_PACKAGE_NAMES = { exceljs: 'exceljs', sheetjs: 'xlsx', 'read-excel-file': 'read-excel-file' };
+const READER_VERSIONS = Object.fromEntries(Object.entries(READER_PACKAGE_NAMES).map(([reader, packageName]) => [reader, readInstalledPackageVersion(packageName)]));
 const ITERATIONS = 5;
 const WARMUP = 1;
 const FIXTURES = [
