@@ -1,6 +1,14 @@
 name: xlsx-reader-read-excel-file-conformance
 
 on:
+  push:
+    branches:
+      - 'feat/paqueteria-xlsx-read-excel-file-adapter'
+    paths:
+      - 'apps/api/src/modules/paqueteria/import/**'
+      - 'apps/api/package.json'
+      - 'apps/api/jest.xlsx-readers.config.mjs'
+      - '.github/workflows/xlsx-reader-read-excel-file-conformance.yml'
   pull_request:
     paths:
       - 'apps/api/src/modules/paqueteria/import/**'
