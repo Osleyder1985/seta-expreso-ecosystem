@@ -57,13 +57,13 @@ describe.each(readers)('%s → real snapshot → F10-F20 pipeline',(adapter,read
    expect(result.acceptance.state).toBe('REQUIRES_RECONCILIATION');
  });
  test('F11-F13 execute mapping against the reader-produced source observations',async()=>{
-   const alias=cloneSnapshot(snapshot,rows=>{const h=rows[0];h.cells[0].rawValue='No. House';h.cells[1].rawValue='Cantidad';});
+   const alias=cloneSnapshot(snapshot,rows=>{const h=rows[0];h.cells[0].rawValue='No. House';h.cells[0].ref.columnHeaderRaw='No. House';h.cells[1].rawValue='Cantidad';h.cells[1].ref.columnHeaderRaw='Cantidad';});
    const aliasResult=await runImportPipeline(alias,profile);
    expect(aliasResult.mapping.records[0].fields.find(f=>f.canonicalField==='house')?.decision).toBe('ALIAS');
    const ambiguous=cloneSnapshot(snapshot,rows=>{rows[0].cells[0].ref.columnIndex=1;rows[0].cells[0].ref.cellAddress='A1';rows[0].cells[0].rawValue='House';rows[0].cells[1].ref.columnIndex=2;rows[0].cells[1].ref.cellAddress='B1';rows[0].cells[1].rawValue='House';});
    const ambiguousResult=await runImportPipeline(ambiguous,profile);
    expect(ambiguousResult.mapping.findings.some(f=>f.ruleId==='R-MAP-AMBIGUOUS-HEADER')).toBe(true);
-   const missing=cloneSnapshot(snapshot,rows=>{rows[0].cells[2].rawValue='Otra';});
+   const missing=cloneSnapshot(snapshot,rows=>{rows[0].cells[2].rawValue='Otra';rows[0].cells[2].ref.columnHeaderRaw='Otra';});
    const missingResult=await runImportPipeline(missing,profile);
    expect(missingResult.mapping.findings.some(f=>f.ruleId==='R-MAP-CRITICAL-FIELD-MISSING')).toBe(true);
  });
