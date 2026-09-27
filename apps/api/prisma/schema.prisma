@@ -15,12 +15,14 @@ model Manifest {
   sourceSha256 String @db.VarChar(64)
   sourceImportedAt DateTime @default(now()) @db.Timestamptz(6)
   externalReference String?
+  ownerSubject String?
   status String @default("IMPORTED")
   createdAt DateTime @default(now()) @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @db.Timestamptz(6)
   transportDocuments TransportDocument[]
   houses House[]
   @@index([sourceSha256])
+  @@index([ownerSubject])
 }
 model TransportDocument {
   id String @id @default(uuid()) @db.Uuid

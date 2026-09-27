@@ -110,12 +110,12 @@ Priority is qualitative: impact × likelihood × exposure.
 |---|---|---|---|---|---|
 | T-01 | S/E | Forged/manipulated access token | Critical | RS256/JWKS, issuer, audience, exp, sub; real Keycloak tests | Reduced |
 | T-02 | E | Low-privilege token invokes admin operation | Critical | Global auth + role guard; operator to admin-probe returns 403 | Reduced |
-| T-03 | E | BOLA/IDOR exposes another business object | Critical | Resource API not yet implemented completely | OPEN |
+| T-03 | E | BOLA/IDOR exposes another business object | Critical | Manifest resource now enforces server-side owner authorization; broader Paquetería resource coverage remains incomplete | PARTIAL |
 | T-04 | D | API/authentication flooding | High | Rate-limit policy not yet implemented | OPEN |
 | T-05 | S/T | Wrong issuer/audience/algorithm trust | Critical | Issuer/audience + RS256 allowlist + wrong-audience real test | Reduced |
 | T-06 | D | Key rotation causes authentication outage | High | Remote JWKS with bounded cooldown + real rotation test | Reduced |
-| T-07 | T/E | Unauthorized manifest/package modification | High | Authorization architecture; resource policy incomplete | OPEN/PARTIAL |
-| T-08 | I | Collection endpoint exposes unrelated records | High | Domain/API contracts still evolving | OPEN |
+| T-07 | T/E | Unauthorized manifest/package modification | High | Manifest update is ownership-checked and audited; package resources remain pending | PARTIAL |
+| T-08 | I | Collection endpoint exposes unrelated records | High | Manifest collection is owner-scoped for operators; broader collections remain pending | PARTIAL |
 | T-09 | T/E | Hostile XLSX content reaches parser/worker | High | XLSX certification exists; hostile-file limits incomplete | OPEN |
 | T-10 | D | XLSX CPU/memory exhaustion | High | Import resource quotas not finalized | OPEN |
 | T-11 | I | Private file/evidence exposed by predictable access path | High | Storage architecture exists; final policy pending | OPEN |
@@ -127,7 +127,7 @@ Priority is qualitative: impact × likelihood × exposure.
 | T-17 | T/E | Workflow gains excessive repository privileges | Critical | Workflow permission checks and least privilege | Reduced |
 | T-18 | T | Compromised third-party CI action | Critical | Audited workflows pin actions to SHA | Reduced |
 | T-19 | I | Secrets leak to logs/artifacts | Critical | Gitleaks/security assurance | Reduced |
-| T-20 | R | Security action cannot be attributed | High | Audit architecture exists; complete event coverage pending | OPEN |
+| T-20 | R | Security action cannot be attributed | High | Manifest authorization decisions are persisted to AuditRecord; complete event coverage pending | PARTIAL |
 | T-21 | I | Logs contain tokens or excessive PII | High | Logging requirements identified; field policy pending | OPEN |
 | T-22 | D/I | Missing HTTP security controls enlarge attack surface | High | Headers/CORS/CSP/rate limiting pending | OPEN |
 | T-23 | T/E | Client changes protected ownership/security fields | High | Server-side authorization principle | OPEN |
@@ -147,7 +147,7 @@ A principal authenticated as A requests a resource belonging to B.
 
 Expected: 403 or 404 according to the API disclosure policy, never the protected object.
 
-Status: **OPEN until resource endpoints exist and tests are implemented.**
+Status: **PARTIAL** — Manifest now has a real ownership-enforced endpoint surface and automated positive/negative service tests; end-to-end multi-principal evidence and other Paquetería resources remain open.
 
 ### AC-02 — Vertical privilege escalation
 
