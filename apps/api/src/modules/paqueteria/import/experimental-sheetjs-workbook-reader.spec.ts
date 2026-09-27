@@ -4,24 +4,7 @@ import { ExperimentalSheetJsWorkbookReader } from './experimental-sheetjs-workbo
 const metadata = { importSnapshotId: 'IMP-SHEETJS-001', sourceDocumentId: 'DOC-SHEETJS-001', contentHash: 'sheetjs-fixture', sourceFileName: 'manifest-sheetjs-fixture.xlsx', mappingProfileId: 'manifest-default', mappingProfileVersion: '1.0.0' };
 
 const createFixture = async (): Promise<Buffer> => {
-  const sheet: XLSX.WorkSheet = {};
-  const values = [
-    ['House', 'Bultos', 'Dirección', 'Teléfono', 'Latitud', 'Longitud', 'Aduana', 'Consolidado', 'Peso'],
-    ['CACC-00000001', 3, 'DIRECCION_TEST_001', '+5350000001', 21.38, -77.92, 'Aduana Camagüey', 'CONSOLIDADO-001', 12.5],
-    ['CACC-00000002', 1, 'DIRECCION_TEST_001', '+5350000002', null, null, 'Aduana Camagüey', 'CONSOLIDADO-001', 7.5],
-    [],
-    ['SUBTOTAL Habana'],
-    ['TOTAL'],
-    ['CACC-00000003', 2, 'DIRECCION_TEST_002', '+5350000003', 23.1, -82.3666, 'Aduana Habana', 'CONSOLIDADO-002', 3.25],
-  ];
-  values.forEach((row, rowIndex) => row.forEach((value, columnIndex) => {
-    if (value !== null && value !== undefined) {
-      sheet[XLSX.utils.encode_cell({ r: rowIndex, c: columnIndex })] = {
-        v: value,
-        t: typeof value === 'number' ? 'n' : 's',
-      };
-    }
-  }));
+  const sheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(values);
   sheet['I2'].z = '0.00';
   sheet['A7'] = { t: 's', f: 'UPPER("CACC-00000003")', v: 'CACC-00000003' };
   sheet['!ref'] = 'A1:I7';
@@ -41,7 +24,7 @@ const createFixture = async (): Promise<Buffer> => {
       ],
     },
   };
-  return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx', cellFormula: true, cellNF: true });
+  return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx', cellFormula: true, cellNF: true, cellStyles: true });
 };
 
 describe('Experimental SheetJS workbook reader', () => {
@@ -52,7 +35,7 @@ describe('Experimental SheetJS workbook reader', () => {
     const formulaCell = snapshot.sheets[0].rows[6].cells[0];
     expect(formulaCell.formula).toBe('UPPER("CACC-00000003")');
     expect(formulaCell.formulaResult).toBe('CACC-00000003');
-    expect(snapshot.sheets[0].rows[1].cells[1].numberFormat).toBe('0.00');
+    expect(snapshot.sheets[0].rows[1].cells[8].numberFormat).toBe('0.00');
     const addresses = snapshot.sheets[0].rows.filter((row) => row.kind === 'DATA').map((row) => row.cells[2].rawValue);
     expect(addresses.filter((value) => value === 'DIRECCION_TEST_001')).toHaveLength(2);
   });
