@@ -467,3 +467,32 @@ La comparación es estricta para metadata común, estructura de workbook, hojas,
 4. Estas diferencias **no se interpretan como selección de lector**. Se registraron en #249 para definir primero el contrato definitivo de fidelidad del `ImportSnapshot` y repetir la comparación.
 
 **Issue de seguimiento:** #249 — resolver diferencias de fidelidad entre snapshots XLSX.
+
+
+### 5.5.2 Caracterización ampliada de fidelidad — 2026-09-27
+
+Se amplió la fixture de equivalencia para cubrir fórmula/cache, fechas, formatos numéricos, celdas vacías, errores XLSX y hojas `HIDDEN`/`VERY_HIDDEN`.
+
+**Evidencia CI final:**
+- Run: `36351926595`
+- Job: `108712139941`
+- Commit: `f28cd42c93974b923d1ddcbab2247498788f3c24`
+- Build: PASS
+- F10–F19: PASS
+- Reader → pipeline: PASS
+- Snapshot equivalence: PASS
+- Tests totales del workflow: 30/30 PASS en las tres suites
+
+La comparación mantiene un principio fail-closed: los gaps conocidos se registran explícitamente y la prueba falla si aparece una diferencia crítica/significativa que no esté clasificada en el baseline.
+
+Hallazgos nuevos:
+
+1. **ExcelJS ↔ SheetJS:** no se observaron gaps críticos salvo la representación de la celda de error de la fixture; ambos conservan fórmula, fecha y estructura. SheetJS usa `General` como formato por defecto y sus `displayedValue` reflejan el formato aplicado (`10.00`, `27/09/2026`).
+2. **read-excel-file:** no conserva la fórmula como fórmula ni su `formulaResult` en el snapshot común; la celda de fórmula queda como `NUMBER`. Tampoco conserva el formato numérico de la fórmula/fecha en el contrato actual.
+3. **read-excel-file:** la celda XLSX con error no se conserva como `ERROR`; en esta fixture se observa pérdida de contenido/celdas respecto de ExcelJS/SheetJS.
+4. **read-excel-file:** continúa perdiendo `HIDDEN` y `VERY_HIDDEN`, reportándolas como `VISIBLE`.
+5. Las diferencias `General` de SheetJS y las diferencias de representación de `displayedValue` se clasifican como diferencias significativas de representación, no como pérdida de estructura. Las pérdidas anteriores de fórmula/error/visibilidad permanecen como gaps funcionales explícitos.
+
+El baseline de gaps conocidos quedó codificado en `reader-snapshot-equivalence.spec.ts`. Esto no convierte los gaps en PASS: solamente evita que CI confunda una limitación ya documentada con una regresión desconocida.
+
+**Issue de seguimiento:** #249.
