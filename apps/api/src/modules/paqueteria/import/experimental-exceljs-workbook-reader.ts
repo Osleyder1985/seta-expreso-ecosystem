@@ -7,7 +7,7 @@ export class ExperimentalExcelJsWorkbookReader implements WorkbookReaderPort {
     const limits = { maxSourceBytes: options.maxSourceBytes ?? 50*1024*1024, maxRowsPerSheet: options.maxRowsPerSheet ?? 100000, maxSheets: options.maxSheets ?? 32, maxCellsPerSheet: options.maxCellsPerSheet ?? 1000000 };
     if (source.byteLength > limits.maxSourceBytes) throw new Error('XLSX source exceeds configured byte limit');
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(source as Parameters<typeof workbook.xlsx.load>[0]);
+    await workbook.xlsx.load(source as unknown as Parameters<typeof workbook.xlsx.load>[0]);
     if (workbook.worksheets.length > limits.maxSheets) throw new Error('XLSX workbook exceeds configured sheet limit');
     return { ...metadata, sourceFormat:'XLSX', sheets: workbook.worksheets.map((sheet,i)=>this.readSheet(sheet,i+1,limits)) };
   }
