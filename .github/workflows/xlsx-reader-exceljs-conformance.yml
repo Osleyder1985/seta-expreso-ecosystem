@@ -1,6 +1,14 @@
 name: xlsx-reader-exceljs-conformance
 
 on:
+  push:
+    branches:
+      - 'feat/paqueteria-xlsx-exceljs-experimental-adapter'
+    paths:
+      - 'apps/api/src/modules/paqueteria/import/**'
+      - 'apps/api/package.json'
+      - 'apps/api/jest.xlsx-readers.config.mjs'
+      - '.github/workflows/xlsx-reader-exceljs-conformance.yml'
   pull_request:
     paths:
       - 'apps/api/src/modules/paqueteria/import/**'
