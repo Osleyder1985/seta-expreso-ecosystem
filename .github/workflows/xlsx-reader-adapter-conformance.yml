@@ -13,13 +13,6 @@ on:
       - 'apps/api/src/modules/paqueteria/import/**'
       - 'apps/api/package.json'
       - '.github/workflows/xlsx-reader-adapter-conformance.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'apps/api/src/modules/paqueteria/import/**'
-      - 'apps/api/package.json'
-      - '.github/workflows/xlsx-reader-adapter-conformance.yml'
-
 permissions:
   contents: read
 
@@ -49,5 +42,3 @@ jobs:
 
       - name: Execute XLSX reader adapter tests
         run: npm run test:xlsx-readers
-
-# F01-F20 certification trigger
