@@ -256,3 +256,21 @@ Evidencia observable de CI:
 La certificación actual es una certificación de ejecución del ledger, no una certificación de cumplimiento F01–F20 completa. F10 sólo demuestra evidencia estructural de TOTAL/SUBTOTAL; F11–F19 requieren capas de mapping/validation/reconciliation/pipeline; F20 exige provenance de extremo a extremo hasta persistencia. Por ello no se selecciona parser ni se habilita producción con esta ejecución.
 
 Limitación de reproducibilidad: los branches experimentales ExcelJS/read-excel-file no disponen actualmente de lockfile y sus workflows dedicados usan npm install; esto queda fuera del gate de adopción productiva, que exige lockfile/dependency tree, límites de recursos, benchmark, security/maintenance review, evidencia real anonimizada y ADR.
+
+### 5.2 Certificación ejecutable F01–F20 — 2026-09-27
+
+Se incorporó un ledger ejecutable de los 20 casos F01–F20 y se ejecutó dentro de las suites CI dedicadas de los tres adaptadores.
+
+| Adaptador | Commit certificado | Workflow | Resultado CI |
+|---|---|---|---|
+| ExcelJS | `470561f50dee36b490ffe4f6073cdbecedc27131` | run `36348234806` | PASS |
+| SheetJS CE | `97e624afe4ad25d2c4b8a1dea3f5db57ee6b6bba` | run `36348236784` | PASS |
+| read-excel-file | `a20daa357685dd46e415ea1730e96f5420c3bf0b` | run `36348240441` | PASS |
+
+**Importante:** PASS de CI significa que el ledger F01–F20 fue ejecutado y que sus estados explícitos coincidieron con los estados esperados. No significa que F01–F20 estén todos en PASS.
+
+La evidencia actual demuestra, entre otros puntos, que ExcelJS y SheetJS preservan en esta fixture House, Bultos, dirección repetida, coordenadas resueltas/no resueltas, Aduana, Consolidado, fórmula/cache y TOTAL/SUBTOTAL. F10 permanece PARTIAL porque la fixture demuestra estructura de totales, pero todavía no ejecuta la reconciliación empresarial de discrepancias. F11–F13 y F16–F19 permanecen NOT_EXECUTED porque requieren capas de mapping/validation/reconciliation/pipeline aún no ejecutadas en esta certificación. F20 permanece PARTIAL para ExcelJS/SheetJS porque la provenance del reader existe, pero todavía falta demostrar mapping transformation y persistencia end-to-end.
+
+read-excel-file conserva evidencia básica y F06/F15 en esta ejecución, pero mantiene GAP explícito en F09 y F20 por las limitaciones del proveedor ya documentadas.
+
+Por tanto, **no se selecciona parser y no se declara el gate F01–F20 cerrado**. La siguiente fase es ejecutar F10–F19 sobre fixtures y pipeline reales de importación/reconciliación, completar F20 end-to-end y cruzar la evidencia con #152 y los gates de supply-chain.
