@@ -273,7 +273,7 @@ D12 permanece cerrado.
 
 **No se autoriza todavía el esquema físico PostgreSQL definitivo.**
 
-El siguiente paso es cerrar la semántica operacional de recepción → liberación → preparación para distribución → entrega y convertir las reglas confirmadas en especificación funcional y contratos de aplicación.
+El siguiente paso es resolver B-01/D01, completar el modelo de autorización y construir la evidencia ejecutable end-to-end de Paquetería.
 
 
 **Fase/nota:** El estado anterior, si existía, se conserva como descripción histórica de fase; el campo `Estado` usa exclusivamente la taxonomía formal de gobernanza.
