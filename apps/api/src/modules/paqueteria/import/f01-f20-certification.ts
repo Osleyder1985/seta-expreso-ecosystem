@@ -43,3 +43,5 @@ export const assertF01F20Ledger = (evidence: readonly F01F20Evidence[]): void =>
   const ids = evidence.map(e => e.id);
   for (let i = 1; i <= 20; i += 1) if (!ids.includes(`F${String(i).padStart(2, '0')}`)) throw new Error(`Missing F${String(i).padStart(2, '0')}`);
 };
+
+// F01-F20 ledger remains provider-neutral; status is evidence, not selection.
