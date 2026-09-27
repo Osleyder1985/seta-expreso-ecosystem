@@ -1,4 +1,4 @@
-# Matriz de trazabilidad de Paquetería — v0.1.1
+# Matriz de trazabilidad de Paquetería — v0.1.2
 
 **Estado:** baseline de trazabilidad para validación de dominio y diseño de aplicación  
 **Ámbito:** Servicio de Paquetería de SETA EXPRESO SURL  
@@ -28,7 +28,7 @@ Los contratos de aplicación indicados aquí son **candidatos**. No constituyen 
 | RF-PQ-001 | UC-01 | I01, I02; conservar archivo, hash, hoja, filas y valores originales | ManifestIngested | AT-01, AT-02 | POST /manifest-imports | CUBIERTO |
 | RF-PQ-002 | UC-02 | I07; validación estructural y semántica por fila | ManifestValidated | AT-01, AT-05 | POST /manifest-imports/{id}/validate | CUBIERTO |
 | RF-PQ-003 | UC-03 | M-04/M-05/M-06; discrepancia no destruye información válida | ManifestDiscrepancyDetected | AT-03, AT-04, AT-18, AT-19, AT-20, AT-21 | GET /manifest-imports/{id}/discrepancies | CUBIERTO |
-| RF-PQ-004 | UC-04, UC-05, UC-06 | D01-D04; Master AWB, House y PhysicalUnit son conceptos separados | HouseRegistered, PhysicalUnitsRegistered | AT-06 | POST /houses; POST /houses/{id}/physical-units | PARCIAL |
+| RF-PQ-004 | UC-04, UC-05, UC-06 | Master AWB, Child AWB, House y PhysicalUnit son conceptos separados; ChildAWB↔House solo por evidencia | HouseRegistered, ChildAirWaybillLinked, PhysicalUnitsRegistered | AT-06, AT-30 | POST /houses; POST /child-air-waybills; POST /child-air-waybills/{id}/house-links | PARCIAL |
 | RF-PQ-005 | UC-07 | D05; Person independiente, Sender/Recipient como roles; no fusionar por nombre | PersonRoleResolved | AT-08 | POST /persons/resolve | CUBIERTO |
 | RF-PQ-006 | UC-08 | I06, RT-02; conservar dirección original y resultados de normalización | AddressNormalized | AT-09 | POST /addresses/normalize | CUBIERTO |
 | RF-PQ-007 | UC-09 | geocodificación versionada y desacoplada; fallo no elimina dirección | GeolocationResolved | AT-10, AT-25 | POST /geolocations/resolve | CUBIERTO |
@@ -44,13 +44,13 @@ Los contratos de aplicación indicados aquí son **candidatos**. No constituyen 
 | RF-PQ-017 | UC-20 + autorización transversal | operación autorizada por rol, permiso, ámbito y estado | StatusTransitionRecorded, AuditRecordCreated | AT-15, AT-16 | POST /status-transitions | PARCIAL |
 | RF-PQ-018 | UC-20 | no perder transiciones; estado multidimensional | StatusTransitionRecorded | AT-15, AT-16 | GET /{resource}/{id}/status-history | CUBIERTO |
 | RF-PQ-019 | UC-19 + auditoría | operaciones críticas deben atribuirse a actor, tiempo, operación y motivo | AuditRecordCreated | AT-17 | GET /audit/records | CUBIERTO |
-| RF-PQ-020 | UC-14, UC-15 | D09 abierto; soporte técnico provisional Delivery ↔ House N:M | DeliveryAttemptRecorded, DeliveryCompleted | AT-26 | POST /deliveries/{id}/houses | BLOQUEADO |
+| RF-PQ-020 | UC-14, UC-15 | D09 cerrado: misma dirección/punto → una Delivery con múltiples House | DeliveryGrouped, DeliveryCompleted | AT-26 | POST /deliveries/{id}/houses | BASELINED |
 
 ## 4. Trazabilidad D01–D12
 
 | Decisión | Requisitos afectados | UC | Pruebas | Estado |
 |---|---|---|---|---|
-| D01 — jerarquía Master AWB/Guide/House | RF-PQ-001, RF-PQ-004, RF-PQ-016 | UC-01, UC-04, UC-05, UC-19 | AT-17 | PARCIAL |
+| D01 — separación Master AWB / Child AWB / House | RF-PQ-001, RF-PQ-004, RF-PQ-016 | UC-01, UC-04, UC-05, UC-19 | AT-17, AT-30 | CERRADO |
 | D02 — House vs PhysicalUnit | RF-PQ-004 | UC-05, UC-06 | AT-06 | PARCIAL |
 | D03 — jerarquía documental y cardinalidad | RF-PQ-004 | UC-01, UC-04, UC-05 | AT-17 | PARCIAL |
 | D04 — House → PhysicalUnit | RF-PQ-004 | UC-06 | AT-06 | CUBIERTO ESTRUCTURALMENTE |
@@ -58,7 +58,7 @@ Los contratos de aplicación indicados aquí son **candidatos**. No constituyen 
 | D06 — Customer | RF-PQ-005 | UC-07 | futuras pruebas comerciales | BLOQUEADO PARA MODELO COMERCIAL |
 | D07 — reutilización de Address | RF-PQ-006, RF-PQ-010 | UC-08, UC-10 | AT-09, AT-10 | PARCIAL |
 | D08 — DeliveryPoint/Stop | RF-PQ-010, RF-PQ-011 | UC-10, UC-12, UC-13 | AT-07 | CUBIERTO |
-| D09 — múltiples House en Delivery | RF-PQ-020, RF-PQ-013 | UC-14, UC-15 | AT-26 | BLOQUEADO |
+| D09 — múltiples House en Delivery | RF-PQ-020, RF-PQ-013 | UC-14, UC-15 | AT-26 | CERRADO |
 | D10 — fallos, retry y retorno | RF-PQ-012, RF-PQ-014 | UC-16, UC-17 | AT-11, AT-12, AT-23 | CUBIERTO CONCEPTUALMENTE |
 | D11 — máquina de estados | RF-PQ-010…RF-PQ-018 | UC-11, UC-13, UC-14, UC-20 | AT-15, AT-16 | PARCIAL |
 | D12 — mínimo POD | RF-PQ-013 | UC-15 | AT-13 | CERRADO |
@@ -105,7 +105,7 @@ Los contratos de aplicación indicados aquí son **candidatos**. No constituyen 
 | AT-23 | RF-PQ-014 | UC-16, UC-17 | DeliveryFailed no crea AbandonmentRecord |
 | AT-24 | RF-PQ-009 | operación aduanera | abandono solo con referencia/acto correspondiente |
 | AT-25 | RF-PQ-007, 010 | UC-09, UC-11 | House se conserva aunque no exista geolocalización |
-| AT-26 | RF-PQ-020 | UC-14, UC-15 | varios House pueden asociarse técnicamente a una Delivery; ejecución final condicionada por D09 |
+| AT-26 | RF-PQ-020 | UC-14, UC-15 | varios House con la misma dirección/punto se asocian a una única Delivery |
 
 ## 7. Contratos de aplicación candidatos
 
@@ -156,13 +156,13 @@ RecordAbandonment no debe ser una simple transición de entrega; requiere contex
 
 ### Bloqueadores de dominio
 
-1. D09: agrupación operacional de múltiples House en una Delivery.
-2. D12: mínimo operativo de POD.
-3. Confirmación operacional de House = guía hija.
-4. Catálogo oficial/operacional de Unidad de destino.
-5. Reglas exactas de modificación/cancelación por etapa.
-6. Catálogo operativo de estados/actos aduaneros que SETA debe registrar.
-7. Procedimiento de liberación desde custodia/aduana hacia distribución.
+1. Diseño lógico de ChildAirWaybill y relación ChildAWB↔House basada en evidencia.
+2. Catálogo lógico de DestinationUnit y su referencia geográfica.
+3. Lifecycle de archivado y corrección histórica.
+4. Modelo lógico de POD/evidencia y límites de retención.
+5. ReceiptHandoff SETA y referencias de ambos manifiestos.
+6. Autorización contextual y ownership de objetos.
+7. Evidencia ejecutable end-to-end de Paquetería.
 
 ### No bloquean el diseño lógico conceptual
 
@@ -182,7 +182,7 @@ La matriz es válida como baseline cuando:
 - los bloqueadores están identificados explícitamente;
 - ningún bloqueador se oculta mediante una decisión técnica.
 
-**Conclusión:** la trazabilidad funcional de las reglas cerradas está establecida. Los siguientes bloqueadores son B-01/D01, autorización de objetos/alcance y la evidencia ejecutable end-to-end; el modelo físico definitivo seguirá condicionado por las decisiones aún abiertas.
+**Conclusión:** D09, D12 y B-01/D01 están trazados como reglas cerradas. El modelo físico definitivo permanece condicionado por los gaps lógicos enumerados y por autorización contextual/ownership y evidencia end-to-end.
 
 ## Reglas operacionales cerradas — 2026-09-27
 
