@@ -333,3 +333,47 @@ La ejecución tampoco selecciona ExcelJS, SheetJS ni read-excel-file. Los adapte
 
 El primer run `36349113154` falló porque el `jest.config.mjs` existente está configurado para descubrimiento E2E y no encontraba la suite específica. Se corrigió mediante una configuración Jest dedicada `jest.xlsx-pipeline.config.mjs`. No se utilizó `--passWithNoTests`.
 
+
+
+## 5.5 Evidencia reader → pipeline — 2026-09-27
+
+Run de certificación: `36350174196`  
+Job: `108707211156`
+
+Resultado:
+- Build: **PASS**
+- Certificación F10–F19: **PASS**
+- Ejecución F10–F20 después de cada reader real: **PASS**
+- Suite reader-to-pipeline: **22 tests PASS**
+
+Se utilizó el mismo fixture XLSX binario para los tres adapters:
+
+1. ExcelJS
+2. SheetJS
+3. read-excel-file
+
+Flujo:
+
+`XLSX bytes → reader real → ImportSnapshot → mapping → validation → reconciliation → acceptance`
+
+La evidencia demuestra que los tres readers pueden alimentar el mismo contrato `ImportSnapshot` y atravesar las reglas de mapping, validation, reconciliation e idempotencia/versionado sin seleccionar todavía un candidato.
+
+### Corrección metodológica F11
+
+Durante la primera ejecución, el fixture declaraba `No. House` y `Cantidad` como headers válidos del campo, por lo que el mapping correctamente devolvía `EXACT`. Para certificar realmente F11, el contrato de mapping fue refinado para distinguir:
+
+- `headers`: nombres canónicos;
+- `aliases`: nombres alternativos autorizados.
+
+La suite posterior valida `ALIAS` sobre esa distinción y quedó verde.
+
+### Estado de F20
+
+La ejecución reader-to-pipeline demuestra que la provenance se genera a partir del snapshot producido por cada reader. La persistencia/auditoría JSONL continúa demostrada por la suite F10–F19/F20 base.
+
+Esto todavía **no cierra F20 como persistencia operacional productiva**. Falta la integración con el almacenamiento operacional definitivo y su comportamiento transaccional/auditable.
+
+### Estado de selección
+
+**No se selecciona reader.** ExcelJS, SheetJS y read-excel-file permanecen como candidatos técnicamente conformes en este tramo.
+
