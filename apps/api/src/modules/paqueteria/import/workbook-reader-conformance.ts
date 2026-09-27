@@ -1,5 +1,6 @@
 import { comprehensiveEvidenceFixture } from './common-evidence-fixture';
 import type { ImportSnapshot } from './workbook-reader.types';
+import { expect } from 'vitest';
 
 export const assertCommonEvidenceSnapshot = (
   actual: ImportSnapshot,
