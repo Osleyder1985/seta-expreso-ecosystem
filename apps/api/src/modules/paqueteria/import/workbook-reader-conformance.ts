@@ -1,42 +1,57 @@
+import assert from 'node:assert/strict';
 import { comprehensiveEvidenceFixture } from './common-evidence-fixture';
 import type { ImportSnapshot } from './workbook-reader.types';
-import { expect } from 'vitest';
 
 export const assertCommonEvidenceSnapshot = (
   actual: ImportSnapshot,
 ): void => {
   const expected = comprehensiveEvidenceFixture();
 
-  expect(actual.sourceFormat).toBe('XLSX');
-  expect(actual.sourceDocumentId).toBe(expected.sourceDocumentId);
-  expect(actual.contentHash).toBe(expected.contentHash);
-  expect(actual.mappingProfileId).toBe(expected.mappingProfileId);
-  expect(actual.mappingProfileVersion).toBe(expected.mappingProfileVersion);
+  assert.equal(actual.sourceFormat, 'XLSX');
+  assert.equal(actual.sourceDocumentId, expected.sourceDocumentId);
+  assert.equal(actual.contentHash, expected.contentHash);
+  assert.equal(actual.mappingProfileId, expected.mappingProfileId);
+  assert.equal(actual.mappingProfileVersion, expected.mappingProfileVersion);
 
   const sheet = actual.sheets.find(({ name }) => name === 'Manifiesto');
-  expect(sheet).toBeDefined();
-  expect(sheet?.visibility).toBe('VISIBLE');
+  assert.ok(sheet);
+  assert.equal(sheet.visibility, 'VISIBLE');
 
-  const dataRows = sheet?.rows.filter(({ kind }) => kind === 'DATA') ?? [];
-  expect(dataRows).toHaveLength(3);
+  const dataRows = sheet.rows.filter(({ kind }) => kind === 'DATA');
+  assert.equal(dataRows.length, 3);
 
   const addresses = dataRows.map((row) =>
     row.cells.find(({ ref }) => ref.columnHeaderRaw === 'Dirección')?.rawValue,
   );
-  expect(addresses).toContain('DIRECCION_TEST_001');
-  expect(addresses.filter((value) => value === 'DIRECCION_TEST_001')).toHaveLength(2);
+  assert.ok(addresses.includes('DIRECCION_TEST_001'));
+  assert.equal(
+    addresses.filter((value) => value === 'DIRECCION_TEST_001').length,
+    2,
+  );
 
-  const formulaCell = dataRows[2]?.cells.find(({ ref }) => ref.columnHeaderRaw === 'House');
-  expect(formulaCell?.formula).toBeDefined();
-  expect(formulaCell?.formulaResult).toBe('CACC-00000003');
+  const formulaCell = dataRows[2]?.cells.find(
+    ({ ref }) => ref.columnHeaderRaw === 'House',
+  );
+  assert.ok(formulaCell);
+  assert.ok(formulaCell.formula);
+  assert.equal(formulaCell.formulaResult, 'CACC-00000003');
 
-  const weightCell = dataRows[0]?.cells.find(({ ref }) => ref.columnHeaderRaw === 'Peso');
-  expect(weightCell?.numberFormat).toBe('0.00');
+  const weightCell = dataRows[0]?.cells.find(
+    ({ ref }) => ref.columnHeaderRaw === 'Peso',
+  );
+  assert.ok(weightCell);
+  assert.equal(weightCell.numberFormat, '0.00');
 
-  expect(sheet?.rows.some(({ kind }) => kind === 'EMPTY')).toBe(true);
-  expect(sheet?.rows.some(({ kind }) => kind === 'SUBTOTAL')).toBe(true);
-  expect(sheet?.rows.some(({ kind }) => kind === 'TOTAL')).toBe(true);
+  assert.ok(sheet.rows.some(({ kind }) => kind === 'EMPTY'));
+  assert.ok(sheet.rows.some(({ kind }) => kind === 'SUBTOTAL'));
+  assert.ok(sheet.rows.some(({ kind }) => kind === 'TOTAL'));
 
-  expect(actual.sheets.find(({ name }) => name === 'Oculta')?.visibility).toBe('HIDDEN');
-  expect(actual.sheets.find(({ name }) => name === 'MuyOculta')?.visibility).toBe('VERY_HIDDEN');
+  assert.equal(
+    actual.sheets.find(({ name }) => name === 'Oculta')?.visibility,
+    'HIDDEN',
+  );
+  assert.equal(
+    actual.sheets.find(({ name }) => name === 'MuyOculta')?.visibility,
+    'VERY_HIDDEN',
+  );
 };
