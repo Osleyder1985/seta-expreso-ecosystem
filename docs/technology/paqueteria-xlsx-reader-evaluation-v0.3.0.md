@@ -67,7 +67,7 @@ El adapter experimental implementa:
 - propagación de `columnHeaderRaw`;
 - prueba explícita del gate provider-neutral F01–F20.
 
-**Estado:** adapter experimental técnicamente instrumentado; **BLOCKED FOR PRODUCTION**. La ausencia de una ejecución CI observable en el branch no se interpreta como PASS.
+**Estado:** adapter experimental técnicamente instrumentado; **BLOCKED FOR PRODUCTION**. Evidencia CI dedicada reproducible: run `36331157010`, job `108653206761`, SHA `ce224581c85a4b475defb961b9ae00e2cfb2e4a6`; build y `test:xlsx-readers` PASS.
 
 ### read-excel-file 9.3.10
 
@@ -84,7 +84,7 @@ El adapter experimental implementa:
 
 La implementación no falsea conformidad: la API utilizada no proporciona de forma suficiente fórmula/cache, hidden/veryHidden, number format y otras capacidades requeridas por el contrato.
 
-**Estado:** adapter experimental completo para evaluación comparativa; **CANDIDATO / GAP CONOCIDO / NO SELECCIONADO**. La ausencia de una ejecución CI observable no se interpreta como PASS.
+**Estado:** adapter experimental completo para evaluación comparativa; **CANDIDATO / GAP CONOCIDO / NO SELECCIONADO**. La ejecución dedicada `36330974147` sobre SHA `f6da8e72ea388dadc921618eaa66360116271c1f` terminó SUCCESS. La prueba del gate registra deliberadamente el GAP conocido; esto no equivale a PASS F01–F20.
 
 ### SheetJS CE 0.20.3
 
@@ -123,18 +123,16 @@ Commit de incorporación en `main`: `ad0903f37c426119721acc1673374d9e439253ee`. 
 
 **Importante:** al actualizar esta documentación no se inventa evidencia de ejecución para #234 o #236. Sus workflows dedicados existen en los branches, pero no se ha observado todavía una ejecución CI verificable asociada a sus últimos commits. El workflow central en `main` deja establecida la vía reproducible para que la evidencia se produzca desde los PR.
 
-Para SheetJS existe evidencia CI observable previa: workflow de conformance con **4/4 tests PASS**. Esa evidencia sigue siendo estructural y experimental.
+Para SheetJS existe evidencia CI observable: run `36329351335`, con **4/4 tests PASS**. Esa evidencia sigue siendo estructural y experimental.
 
 
 ### 5.1 Evidencia posterior — 2026-09-27
 
 En #234 se produjo una ejecución dedicada observable del workflow ExcelJS (run #5, ID `36330413051`) sobre `ebaacdc12f9f60ddd736e5c5ba62437fc5f8d930`. El build pasó y 5/6 pruebas pasaron; el gate común falló por una discrepancia de fixture: la celda de `Peso` no tenía el formato numérico esperado `0.00`. Se corrigió el fixture y posteriormente se corrigió el workflow para usar `apps/api/package-lock.json` como dependencia de caché.
 
-El último commit del branch ExcelJS es `5ed2d169ae842731bd376761a6de14c6f63f5314`. GitHub no muestra todavía una ejecución dedicada asociada a ese SHA; por tanto, la corrección aún no se certifica por CI.
+La corrección quedó certificada posteriormente por run `36331157010` sobre `ce224581c85a4b475defb961b9ae00e2cfb2e4a6`: build PASS y conformance PASS.
 
-Para #236, el último commit evaluado es `43b5e76f548db5edcd35829c31aa9f408d5f3507`. La ejecución observable asociada hasta ahora corresponde únicamente a `security-assurance.yml` y terminó en failure; no se utiliza como evidencia de conformance del adapter. No existe todavía una ejecución dedicada observable para el adapter read-excel-file en ese SHA.
-
-La ausencia de ejecución dedicada se registra como **NOT EXECUTED**, nunca como PASS.
+Para #236, la evidencia dedicada posterior es run `36330974147` sobre `f6da8e72ea388dadc921618eaa66360116271c1f`: build PASS y suite PASS, incluyendo la prueba que documenta el GAP conocido del proveedor. No se interpreta como PASS F01–F20.
 
 ## 6. Arquitectura vigente
 
