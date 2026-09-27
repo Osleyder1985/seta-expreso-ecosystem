@@ -1,0 +1,25 @@
+name: xlsx-reader-read-excel-file-conformance
+
+on:
+  pull_request:
+    paths:
+      - 'apps/api/src/modules/paqueteria/import/**'
+      - 'apps/api/package.json'
+      - 'apps/api/jest.xlsx-readers.config.mjs'
+      - '.github/workflows/xlsx-reader-read-excel-file-conformance.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: apps/api } }
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.21.0
+          cache: npm
+          cache-dependency-path: apps/api/package.json
+      - run: npm install
+      - run: npm run build
+      - run: npm run test:xlsx-readers
