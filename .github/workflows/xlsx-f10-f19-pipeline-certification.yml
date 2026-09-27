@@ -31,3 +31,5 @@ jobs:
         run: npm run build
       - name: Execute F10-F19 pipeline certification
         run: npm run test:xlsx-pipeline
+      - name: Execute F10-F20 through each real XLSX reader
+        run: npm run test:xlsx-reader-pipeline
