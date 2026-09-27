@@ -304,6 +304,40 @@ describe('XLSX reader semantic snapshot equivalence', () => {
     return false;
   };
 
+  const expectedKnownSignificantGap = (left: ReaderName, right: ReaderName, diff: SnapshotDiff): boolean => {
+    const pair = [left, right].sort().join('|');
+
+    if (pair === 'exceljs|sheetjs') {
+      return diff.path.endsWith('.numberFormat') && (diff.left === null || diff.left === undefined) && diff.right === 'General';
+    }
+
+    if (pair === 'exceljs|read-excel-file' || pair === 'read-excel-file|sheetjs') {
+      return (
+        diff.path.includes('.formula') ||
+        diff.path.includes('.formulaResult') ||
+        diff.path.includes('.numberFormat') ||
+        diff.path.includes('.displayedValue') ||
+        diff.path.includes('.visibility')
+      );
+    }
+
+    return false;
+  };
+
+  test.each([
+    ['exceljs', 'sheetjs'],
+    ['exceljs', 'read-excel-file'],
+    ['sheetjs', 'read-excel-file'],
+  ] as const)('%s vs %s: no unclassified significant snapshot gaps', (leftName, rightName) => {
+    const left = results.find(r => r.reader === leftName)!;
+    const right = results.find(r => r.reader === rightName)!;
+    const diffs = compareSnapshots(left, right);
+    const significant = diffs.filter(d => d.severity === 'SIGNIFICANT');
+    const unexpected = significant.filter(d => !expectedKnownSignificantGap(leftName, rightName, d));
+
+    expect(unexpected).toEqual([]);
+  });
+
   test.each([
     ['exceljs', 'sheetjs'],
     ['exceljs', 'read-excel-file'],
