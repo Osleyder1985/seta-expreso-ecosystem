@@ -37,7 +37,7 @@ export class ExperimentalExcelJsWorkbookReader implements WorkbookReaderPort {
     }
 
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(source);
+    await workbook.xlsx.load(source as unknown as Parameters<typeof workbook.xlsx.load>[0]);
 
     if (workbook.worksheets.length > limits.maxSheets) {
       throw new Error('XLSX workbook exceeds configured sheet limit');
