@@ -14,7 +14,7 @@ describe('ExperimentalReadExcelFileWorkbookReader', () => {
   it('maps basic workbook rows through the common structural contract', async () => {
     const snapshot = await new ExperimentalReadExcelFileWorkbookReader().read(source, metadata);
     expect(snapshot.sheets).toHaveLength(1);
-    expect(snapshot.sheets[0].rows.map(row => row.kind)).toEqual(['HEADER', 'DATA', 'DATA']);
+    expect(snapshot.sheets[0].rows.map(row => row.kind)).toEqual(['HEADER', 'DATA', 'DATA', 'EMPTY', 'SUBTOTAL', 'TOTAL']);
     expect(snapshot.sheets[0].rows[1].cells[1].rawValue).toBe(12.5);
     expect(snapshot.sheets[0].rows[2].cells[2].rawValue).toBe('DIRECCION_TEST_001');
     expect(snapshot.sheets[0].rows[1].cells[0].ref.columnHeaderRaw).toBe('House');
