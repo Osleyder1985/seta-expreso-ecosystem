@@ -45,6 +45,16 @@ Define el modelo lógico que precede a cualquier migración PostgreSQL/Prisma de
 - AuditRecord
 - autorización contextual y object ownership
 
+### Ownership contextual — decisión para el primer recurso real
+- El primer agregado expuesto por API será `Manifest`.
+- `Manifest` tendrá ownership operacional explícito mediante `ownerSubject`, vinculado al `sub` del principal autenticado que lo crea.
+- Un actor `operator` podrá operar únicamente sobre `Manifest` cuyo `ownerSubject` coincida con su `sub`.
+- `admin` conserva el acceso transversal definido por la baseline de autorización.
+- La autorización no confiará en identificadores enviados por el cliente para determinar ownership.
+- El organizational scope queda como dimensión separada y extensible; no se inventa un claim de organización hasta que exista evidencia contractual de identidad que lo proporcione.
+- Los recursos existentes sin ownership resoluble quedan inaccesibles para `operator` (fail-closed); no se realizará un backfill ficticio.
+- Esta decisión habilita la primera migración física de ownership únicamente para `Manifest` y no congela todavía el ownership de `House`, `Delivery`, `Route`, POD ni Evidence.
+
 ## 3. Cadena documental
 
 Manifest → TransportDocument → MasterAirWaybill → ChildAirWaybill (cuando exista) → House → PhysicalUnit
