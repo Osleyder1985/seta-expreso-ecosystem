@@ -134,6 +134,61 @@ La corrección quedó certificada posteriormente por run `36331157010` sobre `ce
 
 Para #236, la evidencia dedicada posterior es run `36330974147` sobre `f6da8e72ea388dadc921618eaa66360116271c1f`: build PASS y suite PASS, incluyendo la prueba que documenta el GAP conocido del proveedor. No se interpreta como PASS F01–F20.
 
+
+
+## 5.2 Certificación ejecutable F01–F20 — 2026-09-27
+
+Se implementó un ledger provider-neutral de exactamente 20 requisitos en
+`apps/api/src/modules/paqueteria/import/f01-f20-certification.ts`. El ledger
+obliga a distinguir **PASS**, **PARTIAL**, **GAP** y **NOT_EXECUTED**; no convierte
+la ausencia de evidencia en PASS.
+
+Se ejecutaron suites dedicadas sobre los tres adapters:
+
+| Adapter | SHA | Run | Job | Resultado CI |
+|---|---|---:|---:|---|
+| ExcelJS 4.4.0 | `ac8f8b03e256445481ee36fcb3bd56156739fc6b` | `36333990786` | `108661211656` | PASS |
+| read-excel-file 9.3.10 | `8eb4088c916a671fe8a6b7e485068da239325ebe` | `36334029875` | `108661324840` | PASS |
+| SheetJS CE 0.20.3 | `402eed62288d64e880017c517b9875da1162807d` | `36334377939` | `108662303147` | PASS |
+
+La certificación ejecutada en esta fase es **reader-level**, no una certificación
+productiva completa del pipeline. F04, F11–F14 y F16–F19 permanecen
+NOT_EXECUTED porque requieren mapping/validation/reconciliation/pipeline.
+F10 queda PARTIAL porque la suite demuestra clasificación/preservación de
+TOTAL/SUBTOTAL pero todavía no ejecuta la regla de discrepancia de negocio.
+F20 queda PARTIAL para ExcelJS/SheetJS y GAP para read-excel-file porque aún no
+existe provenance end-to-end hasta mapping, persistencia y auditoría.
+
+### Matriz de estado producida por el ledger
+
+| Fixture | ExcelJS | read-excel-file | SheetJS |
+|---|---|---|---|
+| F01 | PASS | PASS | PASS |
+| F02 | PASS | NOT_EXECUTED | PASS |
+| F03 | PASS | PASS | PASS |
+| F04 | NOT_EXECUTED | NOT_EXECUTED | NOT_EXECUTED |
+| F05 | PASS | NOT_EXECUTED | PASS |
+| F06 | PASS | PASS | PASS |
+| F07 | PASS | NOT_EXECUTED | PASS |
+| F08 | PASS | NOT_EXECUTED | PASS |
+| F09 | PASS | GAP | PASS |
+| F10 | PARTIAL | PARTIAL | PARTIAL |
+| F11 | NOT_EXECUTED | NOT_EXECUTED | NOT_EXECUTED |
+| F12 | NOT_EXECUTED | NOT_EXECUTED | NOT_EXECUTED |
+| F13 | NOT_EXECUTED | NOT_EXECUTED | NOT_EXECUTED |
+| F14 | NOT_EXECUTED | NOT_EXECUTED | NOT_EXECUTED |
+| F15 | PASS | PASS | PASS |
+| F16 | NOT_EXECUTED | NOT_EXECUTED | NOT_EXECUTED |
+| F17 | NOT_EXECUTED | NOT_EXECUTED | NOT_EXECUTED |
+| F18 | NOT_EXECUTED | NOT_EXECUTED | NOT_EXECUTED |
+| F19 | NOT_EXECUTED | NOT_EXECUTED | NOT_EXECUTED |
+| F20 | PARTIAL | GAP | PARTIAL |
+
+Esta matriz reemplaza la interpretación anterior de PASS estructural cuando la
+evidencia no cubría realmente el requisito completo. En particular, **F14 ya no
+se considera PASS** en esta certificación porque el fixture ejecutado no incluye
+una columna adicional específica.
+
 ## 6. Arquitectura vigente
 
 El parser concreto permanece aislado:
