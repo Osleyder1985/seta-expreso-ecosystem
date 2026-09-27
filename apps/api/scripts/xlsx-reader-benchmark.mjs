@@ -17,6 +17,7 @@ const READER_MODULES = {
 
 const NODE_VERSION = process.version;
 const NPM_VERSION = await commandVersion('npm', ['--version']);
+const READER_VERSIONS = Object.fromEntries(Object.keys(READER_MODULES).map(name => [name, readInstalledPackageVersion(name === 'read-excel-file' ? 'read-excel-file' : name)]));
 const ITERATIONS = 5;
 const WARMUP = 1;
 const FIXTURES = [
@@ -67,6 +68,7 @@ async function runBenchmark() {
       generatedAt: new Date().toISOString(),
       node: NODE_VERSION,
       npm: NPM_VERSION,
+      readerVersions: READER_VERSIONS,
       platform: process.platform,
       arch: process.arch,
       cpus: cpus().length,
@@ -226,6 +228,14 @@ async function commandVersion(command, args) {
     child.on('error', reject);
     child.on('close', code => code === 0 ? resolve(out.trim()) : reject(new Error(err)));
   });
+}
+
+function readInstalledPackageVersion(name) {
+  try {
+    return createRequire(import.meta.url)(name + '/package.json').version;
+  } catch (error) {
+    return 'UNRESOLVED:' + String(error?.message ?? error);
+  }
 }
 
 function sha256(value) {
