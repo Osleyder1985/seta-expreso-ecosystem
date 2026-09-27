@@ -24,7 +24,7 @@
     "openapi:generate": "npm run build && node scripts/generate-openapi.mjs",
     "openapi:validate": "node scripts/validate-openapi.mjs",
     "telemetry:test": "node scripts/verify-telemetry.mjs",
-    "test:xlsx-pipeline": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config jest.config.mjs --runInBand src/modules/paqueteria/import/f10-f19-pipeline-certification.spec.ts"
+    "test:xlsx-pipeline": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config jest.xlsx-pipeline.config.mjs --runInBand"
   },
   "dependencies": {
     "@nestjs/common": "12.1.0",
