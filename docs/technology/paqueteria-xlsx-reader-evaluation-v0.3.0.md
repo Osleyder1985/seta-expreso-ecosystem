@@ -274,3 +274,12 @@ La evidencia actual demuestra, entre otros puntos, que ExcelJS y SheetJS preserv
 read-excel-file conserva evidencia básica y F06/F15 en esta ejecución, pero mantiene GAP explícito en F09 y F20 por las limitaciones del proveedor ya documentadas.
 
 Por tanto, **no se selecciona parser y no se declara el gate F01–F20 cerrado**. La siguiente fase es ejecutar F10–F19 sobre fixtures y pipeline reales de importación/reconciliación, completar F20 end-to-end y cruzar la evidencia con #152 y los gates de supply-chain.
+
+
+### 5.3 Estado de transición hacia F10-F19 — 2026-09-27
+
+La certificación reader-level ya produce evidencia CI reproducible para los tres adapters. La siguiente frontera de ingeniería es **#247**, que eleva F10-F19 a las capas reales de mapping, validation, reconciliation y pipeline.
+
+Los estados NOT_EXECUTED de F11-F13 y F16-F19 no se convertirán en PASS mediante fixtures o mocks aislados: cada control debe ejecutar la capa real que gobierna la regla y producir evidencia determinista. F10 requiere reconciliación real de totales; F14 debe demostrar preservación de columnas adicionales dentro del flujo de importación; F18/F19 requieren ejecución del pipeline y control explícito de identidad/versionado.
+
+Hasta cerrar #247 y F20 end-to-end, el ledger F01-F20 se considera **ejecutado pero incompleto**, y no constituye una autorización de selección/promoción de parser.
