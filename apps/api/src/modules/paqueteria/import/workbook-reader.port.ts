@@ -14,6 +14,7 @@ export interface WorkbookReaderMetadata {
 }
 
 export interface WorkbookReaderOptions {
+  readonly maxSourceBytes?: number;
   readonly maxRowsPerSheet?: number;
   readonly maxSheets?: number;
   readonly maxCellsPerSheet?: number;
