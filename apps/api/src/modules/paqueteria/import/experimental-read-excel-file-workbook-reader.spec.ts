@@ -51,6 +51,6 @@ describe('ExperimentalReadExcelFileWorkbookReader', () => {
     const snapshot = await new ExperimentalReadExcelFileWorkbookReader().read(source, { importSnapshotId: 'IMP-FIXTURE-F01-F20-001', sourceDocumentId: 'DOC-FIXTURE-F01-F20-001', contentHash: 'fixture-f01-f20-sha256', sourceFileName: 'manifest-f01-f20.xlsx', mappingProfileId: 'manifest-default', mappingProfileVersion: '1.0.0' });
     const evidence = certifyF01F20(snapshot, 'read-excel-file');
     assertF01F20Ledger(evidence);
-    expect(evidence.map(e => e.status)).toEqual(['PASS','NOT_EXECUTED','PASS','NOT_EXECUTED','NOT_EXECUTED','NOT_EXECUTED','NOT_EXECUTED','NOT_EXECUTED','GAP','PARTIAL','NOT_EXECUTED','NOT_EXECUTED','NOT_EXECUTED','NOT_EXECUTED','PASS','NOT_EXECUTED','NOT_EXECUTED','NOT_EXECUTED','NOT_EXECUTED','GAP']);
+    expect(evidence.map(e => e.status)).toEqual(['PASS','NOT_EXECUTED','PASS','NOT_EXECUTED','NOT_EXECUTED','PASS','NOT_EXECUTED','NOT_EXECUTED','GAP','PARTIAL','NOT_EXECUTED','NOT_EXECUTED','NOT_EXECUTED','NOT_EXECUTED','PASS','NOT_EXECUTED','NOT_EXECUTED','NOT_EXECUTED','NOT_EXECUTED','GAP']);
     console.log(JSON.stringify({ adapter: 'read-excel-file', evidence }, null, 2));
   });
