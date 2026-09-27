@@ -283,3 +283,398 @@ La certificación reader-level ya produce evidencia CI reproducible para los tre
 Los estados NOT_EXECUTED de F11-F13 y F16-F19 no se convertirán en PASS mediante fixtures o mocks aislados: cada control debe ejecutar la capa real que gobierna la regla y producir evidencia determinista. F10 requiere reconciliación real de totales; F14 debe demostrar preservación de columnas adicionales dentro del flujo de importación; F18/F19 requieren ejecución del pipeline y control explícito de identidad/versionado.
 
 Hasta cerrar #247 y F20 end-to-end, el ledger F01-F20 se considera **ejecutado pero incompleto**, y no constituye una autorización de selección/promoción de parser.
+
+
+## 5.4 Evidencia pipeline-level F10–F19 + provenance — 2026-09-27
+
+Issue rector de ejecución: **#247**. PR de implementación: **#248**.
+
+Se incorporó una capa neutral sobre `ImportSnapshot` que ejecuta:
+
+`ImportSnapshot → mapping → validation → reconciliation → acceptance`
+
+y, en paralelo:
+
+`ImportSnapshot → provenance → persistencia/auditoría`.
+
+La implementación se mantiene independiente del parser XLSX concreto y utiliza contratos explícitos para mapping profile/version, findings, reconciliation, acceptance, provenance y audit.
+
+### Evidencia CI
+
+- Workflow: `xlsx-f10-f19-pipeline-certification`
+- Run: `36349196549`
+- Job: `108704402043`
+- Build: **PASS**
+- Suite: **PASS**
+- Tests: **10/10 PASS**
+
+| Control | Evidencia ejecutada | Resultado observable |
+|---|---|---|
+| F10 | Reconciliación TOTAL vs detalle | discrepancia real → REQUIRES_RECONCILIATION |
+| F11 | Mapping por aliases autorizados | ALIAS |
+| F12 | Dos headers candidatos para campo crítico | AMBIGUOUS + fail-closed |
+| F13 | Campo crítico ausente | BLOCKED |
+| F14 | Columna fuera del perfil | preservada en additionalColumns |
+| F16 | Valor numérico anómalo | finding bloqueante |
+| F17 | Misma identidad con direcciones distintas | REQUIRES_RECONCILIATION |
+| F18 | Segunda ejecución con misma identidad de idempotencia | reutilización sin duplicación |
+| F19 | Mismo contenido con versión de mapping distinta | claves de ejecución distintas |
+| F20 | Provenance + audit | persistencia JSONL verificable |
+
+### Alcance de la evidencia
+
+Esta ejecución demuestra las reglas en las capas donde realmente viven y no utiliza mocks para sustituir mapping, validation, reconciliation o pipeline.
+
+**F20 aún no se cierra como gate productivo de persistencia operacional.** La evidencia actual demuestra persistencia de provenance/auditoría mediante un adapter append-only JSONL. Falta conectar esta evidencia con el almacenamiento operacional definitivo y demostrar la trazabilidad completa dentro de la transacción/flujo de producción.
+
+La ejecución tampoco selecciona ExcelJS, SheetJS ni read-excel-file. Los adapters continúan aislados detrás de `WorkbookReaderPort`.
+
+### Corrección metodológica durante la ejecución
+
+El primer run `36349113154` falló porque el `jest.config.mjs` existente está configurado para descubrimiento E2E y no encontraba la suite específica. Se corrigió mediante una configuración Jest dedicada `jest.xlsx-pipeline.config.mjs`. No se utilizó `--passWithNoTests`.
+
+
+
+## 5.5 Evidencia reader → pipeline — 2026-09-27
+
+Run de certificación: `36350174196`  
+Job: `108707211156`
+
+Resultado:
+- Build: **PASS**
+- Certificación F10–F19: **PASS**
+- Ejecución F10–F20 después de cada reader real: **PASS**
+- Suite reader-to-pipeline: **22 tests PASS**
+
+Se utilizó el mismo fixture XLSX binario para los tres adapters:
+
+1. ExcelJS
+2. SheetJS
+3. read-excel-file
+
+Flujo:
+
+`XLSX bytes → reader real → ImportSnapshot → mapping → validation → reconciliation → acceptance`
+
+La evidencia demuestra que los tres readers pueden alimentar el mismo contrato `ImportSnapshot` y atravesar las reglas de mapping, validation, reconciliation e idempotencia/versionado sin seleccionar todavía un candidato.
+
+### Corrección metodológica F11
+
+Durante la primera ejecución, el fixture declaraba `No. House` y `Cantidad` como headers válidos del campo, por lo que el mapping correctamente devolvía `EXACT`. Para certificar realmente F11, el contrato de mapping fue refinado para distinguir:
+
+- `headers`: nombres canónicos;
+- `aliases`: nombres alternativos autorizados.
+
+La suite posterior valida `ALIAS` sobre esa distinción y quedó verde.
+
+### Estado de F20
+
+La ejecución reader-to-pipeline demuestra que la provenance se genera a partir del snapshot producido por cada reader. La persistencia/auditoría JSONL continúa demostrada por la suite F10–F19/F20 base.
+
+Esto todavía **no cierra F20 como persistencia operacional productiva**. Falta la integración con el almacenamiento operacional definitivo y su comportamiento transaccional/auditable.
+
+### Estado de selección
+
+**No se selecciona reader.** ExcelJS, SheetJS y read-excel-file permanecen como candidatos técnicamente conformes en este tramo.
+
+
+
+## 5.5 Reader → pipeline certification — 2026-09-27
+
+PR **#248** extends the provider-neutral pipeline evidence to the three experimental readers without selecting one for production.
+
+The same generated XLSX byte stream is parsed independently by:
+
+- ExcelJS
+- SheetJS CE
+- read-excel-file
+
+Each resulting `ImportSnapshot` is then passed through the same pipeline:
+
+`reader → ImportSnapshot → mapping → validation → reconciliation → acceptance`
+
+and F20 is exercised as:
+
+`reader → ImportSnapshot → provenance → persisted audit evidence`.
+
+### CI evidence
+
+- Run: `36350210816`
+- Job: `108707316027`
+- Build: **PASS**
+- Generic pipeline suites: **22/22 PASS**
+- Reader-to-pipeline suite: **12/12 PASS**
+- Three readers × four grouped executable scenarios = **12 reader-level pipeline scenarios**
+
+The reader-level scenarios cover F10, F11, F12, F13, F14, F16, F17, F18, F19 and F20. F15 remains structurally covered by the existing reader conformance/fixture evidence.
+
+### Defect discovered by the executable gate
+
+The reader-to-pipeline comparison exposed a real mapping defect: the mapping layer classified every authorized header as `EXACT`. This incorrectly collapsed canonical-header and alias semantics.
+
+The mapping engine was corrected so that:
+
+- `spec.headers[0]` is the canonical header → `EXACT`;
+- other authorized headers → `ALIAS`.
+
+The defect was therefore detected by the executable pipeline gate and corrected rather than being masked by fixture-level assumptions.
+
+### Security/supply-chain observation
+
+The certification CI installation currently reports **11 dependency vulnerabilities (7 moderate, 4 high)**. This is recorded as a separate security/supply-chain gate and does not constitute a reader selection decision. No parser is promoted on the basis of this run.
+
+### Current interpretation
+
+This is now **reader-to-pipeline evidence**, materially stronger than reader-only evidence:
+
+- reader fidelity is exercised before the business pipeline;
+- mapping/validation/reconciliation execute against reader-produced observations;
+- idempotency and mapping-version behavior execute against those snapshots;
+- provenance/audit persistence executes against those snapshots.
+
+F20 is still not closed as the final production persistence gate until the operational persistence transaction/storage integration is demonstrated.
+
+
+### 5.5.1 Comparación de equivalencia semántica de snapshots — 2026-09-27
+
+Se ejecutó el mismo binario XLSX contra los tres adapters y se compararon los `ImportSnapshot` producidos mediante el protocolo `xlsx-reader-snapshot-equivalence-v1.0.0`.
+
+**Evidencia CI:**
+- Workflow: `xlsx-f10-f19-pipeline-certification #25`
+- Run: `36350685619`
+- Job: `108708649846`
+- Artifact: `xlsx-reader-snapshot-equivalence`
+- Commit: `87aa23ab5accb55f0aac523edaa5e1e09b90fc0a`
+- Build: PASS
+- F10–F19 pipeline: PASS
+- Reader → pipeline: PASS
+- Comparación de snapshots: PASS
+- Artifact de evidencia: generado correctamente
+
+La comparación es estricta para metadata común, estructura de workbook, hojas, filas, celdas, coordenadas, headers, valores, tipos, fórmulas, resultados de fórmula y formatos. No se normalizan silenciosamente diferencias del proveedor; solamente se normalizan representaciones de `Date` y `-0` para serialización.
+
+| Comparación | Diferencias críticas | Diferencias significativas |
+|---|---:|---:|
+| ExcelJS ↔ SheetJS | 0 | 35 |
+| ExcelJS ↔ read-excel-file | 0 | 2 |
+| SheetJS ↔ read-excel-file | 0 | 37 |
+
+**Hallazgos:**
+
+1. **No hubo diferencias CRÍTICAS.** Los tres lectores conservaron la misma estructura, filas, celdas, valores y tipos observados por el protocolo sobre esta fixture.
+2. **SheetJS vs ExcelJS:** SheetJS expone `numberFormat = "General"` en celdas donde ExcelJS deja el campo ausente. La diferencia no alteró el pipeline de esta fixture, pero sí constituye una diferencia de fidelidad del snapshot.
+3. **read-excel-file vs ExcelJS/SheetJS:** las hojas `Oculta` y `MuyOculta` fueron reportadas como `VISIBLE` por el adapter de read-excel-file. Esto confirma una pérdida de metadata de visibilidad ya anticipada por la evaluación aislada.
+4. Estas diferencias **no se interpretan como selección de lector**. Se registraron en #249 para definir primero el contrato definitivo de fidelidad del `ImportSnapshot` y repetir la comparación.
+
+**Issue de seguimiento:** #249 — resolver diferencias de fidelidad entre snapshots XLSX.
+
+
+### 5.5.2 Caracterización ampliada de fidelidad — 2026-09-27
+
+Se amplió la fixture de equivalencia para cubrir fórmula/cache, fechas, formatos numéricos, celdas vacías, errores XLSX y hojas `HIDDEN`/`VERY_HIDDEN`.
+
+**Evidencia CI final:**
+- Run: `36351926595`
+- Job: `108712139941`
+- Commit: `f28cd42c93974b923d1ddcbab2247498788f3c24`
+- Build: PASS
+- F10–F19: PASS
+- Reader → pipeline: PASS
+- Snapshot equivalence: PASS
+- Tests totales del workflow: 30/30 PASS en las tres suites
+
+La comparación mantiene un principio fail-closed: los gaps conocidos se registran explícitamente y la prueba falla si aparece una diferencia crítica/significativa que no esté clasificada en el baseline.
+
+Hallazgos nuevos:
+
+1. **ExcelJS ↔ SheetJS:** no se observaron gaps críticos salvo la representación de la celda de error de la fixture; ambos conservan fórmula, fecha y estructura. SheetJS usa `General` como formato por defecto y sus `displayedValue` reflejan el formato aplicado (`10.00`, `27/09/2026`).
+2. **read-excel-file:** no conserva la fórmula como fórmula ni su `formulaResult` en el snapshot común; la celda de fórmula queda como `NUMBER`. Tampoco conserva el formato numérico de la fórmula/fecha en el contrato actual.
+3. **read-excel-file:** la celda XLSX con error no se conserva como `ERROR`; en esta fixture se observa pérdida de contenido/celdas respecto de ExcelJS/SheetJS.
+4. **read-excel-file:** continúa perdiendo `HIDDEN` y `VERY_HIDDEN`, reportándolas como `VISIBLE`.
+5. Las diferencias `General` de SheetJS y las diferencias de representación de `displayedValue` se clasifican como diferencias significativas de representación, no como pérdida de estructura. Las pérdidas anteriores de fórmula/error/visibilidad permanecen como gaps funcionales explícitos.
+
+El baseline de gaps conocidos quedó codificado en `reader-snapshot-equivalence.spec.ts`. Esto no convierte los gaps en PASS: solamente evita que CI confunda una limitación ya documentada con una regresión desconocida.
+
+**Issue de seguimiento:** #249.
+
+
+## 5.6 Gate de límites de recursos + benchmark reproducible — 2026-09-27
+
+Se incorporó el gate común de límites de recursos para los tres adapters y un
+benchmark reproducible ejecutado en procesos Node aislados.
+
+### Límites certificados
+
+El contrato 'WorkbookReaderOptions' exige y prueba:
+
+- 'maxSourceBytes': rechazo antes de parsear cuando el Buffer excede el límite;
+- 'maxSheets': rechazo cuando el workbook supera el número máximo de hojas;
+- 'maxRowsPerSheet': rechazo cuando una hoja supera el máximo de filas;
+- 'maxCellsPerSheet': rechazo cuando una hoja supera el máximo de celdas.
+
+La suite prueba tanto el caso **por encima del límite** como el caso
+**exactamente en el límite**, para ExcelJS 4.4.0, SheetJS CE 0.20.3 y
+read-excel-file 9.3.10.
+
+### Protocolo benchmark
+
+El benchmark se implementa en:
+
+'apps/api/scripts/xlsx-reader-benchmark.mjs'
+
+Protocolo: 'xlsx-reader-resource-benchmark-v1.0.0'.
+
+Fixtures controladas:
+
+| Fixture | Filas de datos/hoja | Columnas | Hojas |
+|---|---:|---:|---:|
+| manifest-180 | 180 | 12 | 1 |
+| manifest-180-3sheets | 180 | 12 | 3 |
+| stress-1000 | 1.000 | 12 | 1 |
+| stress-5000 | 5.000 | 20 | 1 |
+
+Características de reproducibilidad:
+
+1. El mismo binario XLSX se entrega a los tres readers para cada fixture.
+2. Los fixtures son generados determinísticamente por ExcelJS 4.4.0.
+3. Cada medición se ejecuta en un **proceso Node aislado**.
+4. Se ejecuta 1 warm-up + 5 iteraciones por combinación reader/fixture.
+5. Se registra mediana, mínimo y máximo de tiempo.
+6. Se registra 'maxRSS' y delta de RSS.
+7. Se registra SHA-256 de cada fixture.
+8. Se registra Node, npm, plataforma, arquitectura, CPU y memoria del runner.
+9. El artefacto declara explícitamente 'noRanking: true': esta fase produce
+   evidencia comparable, no una selección de parser.
+
+Artefacto CI:
+
+'xlsx-reader-resource-benchmark.json'
+
+La ejecución de CI será la autoridad de los números; no se aceptarán cifras
+copiadas manualmente desde una ejecución local como evidencia certificada.
+
+### Criterio de interpretación
+
+El benchmark no define por sí solo un "ganador". Primero se verificará:
+
+- que los tres readers sobrevivan los tamaños representativos;
+- que no se viole ningún límite configurado;
+- que exista crecimiento observable y reproducible al aumentar volumen;
+- que las diferencias de tiempo/memoria queden registradas;
+- que cualquier fallo de límite o consumo anómalo genere un issue técnico
+  antes de cualquier decisión de selección.
+
+**No se selecciona ningún reader con este gate.**
+
+
+### 5.6.1 Evidencia CI definitiva — 2026-09-27
+
+La ejecución definitiva del gate quedó certificada en:
+
+- Workflow: 'xlsx-f10-f19-pipeline-certification'
+- Run: '36352849471'
+- Job: '108714722542'
+- Commit: '903ff76cfc428b268571062310374d928c06f688'
+- Build: **PASS**
+- Pipeline F10-F19: **PASS**
+- Reader → pipeline: **PASS**
+- Resource limits: **16/16 PASS**
+- Snapshot equivalence: **PASS**
+- Benchmark: **PASS**
+- Artifact: 'xlsx-reader-resource-benchmark'
+- Artifact digest: 'sha256:59d93b4e8c4fbb09c6084bbed2a42f618fff09d38d80348e955d2dda8329f015'
+
+Versiones efectivamente instaladas y observadas por el benchmark:
+
+| Reader | Versión observada |
+|---|---|
+| ExcelJS | 4.4.0 |
+| SheetJS CE | 0.20.3 |
+| read-excel-file | 9.3.10 |
+
+Entorno certificado: Node.js 24.21.0, npm 11.19.0, Linux x64, runner de 4 CPUs y aproximadamente 15.62 GiB de memoria visible.
+
+### 5.6.2 Límites de recursos
+
+Se consolidaron los defaults en 'DEFAULT_WORKBOOK_READER_LIMITS':
+
+- 'maxSourceBytes = 50 MiB'
+- 'maxRowsPerSheet = 100.000'
+- 'maxSheets = 32'
+- 'maxCellsPerSheet = 1.000.000'
+
+Los tres adapters consumen ahora el mismo contrato de defaults. La suite ejecutó 16 controles:
+
+- 3 readers × 4 rechazos por exceso = 12 casos;
+- 3 readers × aceptación exacta de límites = 3 casos;
+- 1 control del contrato compartido = 1 caso.
+
+Resultado: **16/16 PASS**.
+
+Durante la primera implementación se detectó y corrigió un defecto real en SheetJS: sus defaults de filas/celdas estaban en 'Infinity' cuando no se proporcionaban opciones. El problema quedó eliminado al centralizar los límites.
+
+### 5.6.3 Benchmark reproducible definitivo
+
+Protocolo: 'xlsx-reader-resource-benchmark-v1.0.0'.
+
+- 4 fixtures controladas.
+- 1 warm-up + 5 iteraciones por reader/fixture.
+- 12 combinaciones.
+- Cada muestra en proceso Node aislado.
+- Mismo binario XLSX para los tres readers.
+- SHA-256 de cada fixture registrado.
+- Tiempo con 'performance.now()'.
+- Memoria con 'maxRSS' y delta de RSS.
+- 'noRanking = true'.
+
+| Fixture | ExcelJS median | SheetJS median | read-excel-file median |
+|---|---:|---:|---:|
+| manifest-180 | 67.693 ms | 157.084 ms | 69.205 ms |
+| manifest-180-3sheets | 98.084 ms | 204.635 ms | 92.231 ms |
+| stress-1000 | 144.262 ms | 262.358 ms | 121.582 ms |
+| stress-5000 | 518.584 ms | 812.951 ms | 379.788 ms |
+
+Mediana de 'maxRSS':
+
+| Fixture | ExcelJS | SheetJS | read-excel-file |
+|---|---:|---:|---:|
+| manifest-180 | 88.01 MiB | 109.15 MiB | 87.52 MiB |
+| manifest-180-3sheets | 92.99 MiB | 117.38 MiB | 92.34 MiB |
+| stress-1000 | 99.66 MiB | 134.85 MiB | 97.92 MiB |
+| stress-5000 | 207.21 MiB | 219.02 MiB | 145.30 MiB |
+
+Mediana de delta RSS:
+
+| Fixture | ExcelJS | SheetJS | read-excel-file |
+|---|---:|---:|---:|
+| manifest-180 | 10.55 MiB | 31.59 MiB | 8.38 MiB |
+| manifest-180-3sheets | 15.63 MiB | 39.90 MiB | 13.45 MiB |
+| stress-1000 | 22.33 MiB | 57.08 MiB | 17.94 MiB |
+| stress-5000 | 129.39 MiB | 141.00 MiB | 66.66 MiB |
+
+Estos números son **mediciones descriptivas del runner CI**, no un ranking ni una recomendación de selección. No se establece un ganador.
+
+El benchmark demuestra además que el protocolo es reproducible a nivel de:
+- versión exacta de los tres readers;
+- Node/npm;
+- fixtures y hashes;
+- número de iteraciones;
+- aislamiento de proceso;
+- métricas y método de medición.
+
+La reproducibilidad completa del árbol transitorio de dependencias sigue siendo un gate de supply-chain separado mientras el proyecto no incorpore un lockfile para esta rama. Esto no invalida la identificación exacta de las tres versiones de reader usada por esta certificación.
+
+### 5.6.4 Interpretación del gate
+
+El gate de límites y benchmark queda **CERRADO** para la fase comparativa experimental.
+
+Quedan pendientes, fuera de este gate:
+
+1. provenance/persistencia operacional definitiva de F20;
+2. evidencia privacy-preserving de fuente real de SheetJS (#152);
+3. revisión de supply-chain y vulnerabilidades (#198);
+4. cierre del contrato definitivo de fidelidad de snapshot (#249);
+5. lockfile/reproducibilidad completa del árbol de dependencias;
+6. ADR de selección final.
+
+**La ejecución no selecciona ExcelJS, SheetJS ni read-excel-file.**
