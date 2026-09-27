@@ -26,7 +26,9 @@
     "telemetry:test": "node scripts/verify-telemetry.mjs",
     "test:xlsx-pipeline": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config jest.xlsx-pipeline.config.mjs --runInBand",
     "test:xlsx-reader-pipeline": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config jest.xlsx-pipeline.config.mjs --runInBand src/modules/paqueteria/import/reader-to-pipeline-f10-f20.spec.ts",
-    "test:xlsx-reader-equivalence": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config jest.xlsx-pipeline.config.mjs --runInBand src/modules/paqueteria/import/reader-snapshot-equivalence.spec.ts"
+    "test:xlsx-reader-equivalence": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config jest.xlsx-pipeline.config.mjs --runInBand src/modules/paqueteria/import/reader-snapshot-equivalence.spec.ts",
+    "test:xlsx-resource-limits": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config jest.xlsx-pipeline.config.mjs --runInBand src/modules/paqueteria/import/xlsx-reader-resource-limits.spec.ts",
+    "benchmark:xlsx-readers": "node scripts/xlsx-reader-benchmark.mjs"
   },
   "dependencies": {
     "@nestjs/common": "12.1.0",
