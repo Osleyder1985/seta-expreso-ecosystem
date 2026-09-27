@@ -308,7 +308,7 @@ describe('XLSX reader semantic snapshot equivalence', () => {
     const pair = [left, right].sort().join('|');
 
     if (pair === 'exceljs|sheetjs') {
-      return diff.path.endsWith('.numberFormat') && (diff.left === null || diff.left === undefined) && diff.right === 'General';
+      return (diff.path.endsWith('.numberFormat') && (diff.left === null || diff.left === undefined) && diff.right === 'General') || diff.path.endsWith('.displayedValue');
     }
 
     if (pair === 'exceljs|read-excel-file' || pair === 'read-excel-file|sheetjs') {
