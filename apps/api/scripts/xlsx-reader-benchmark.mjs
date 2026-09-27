@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { cpus, totalmem } from 'node:os';
 import { readFile, writeFile, mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import { mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
@@ -18,7 +18,7 @@ const READER_MODULES = {
 const NODE_VERSION = process.version;
 const NPM_VERSION = await commandVersion('npm', ['--version']);
 const READER_PACKAGE_NAMES = { exceljs: 'exceljs', sheetjs: 'xlsx', 'read-excel-file': 'read-excel-file' };
-const READER_VERSIONS = Object.fromEntries(Object.entries(READER_PACKAGE_NAMES).map(([reader, packageName]) => [reader, readInstalledPackageVersion(packageName)]));
+const READER_VERSIONS = Object.fromEntries(await Promise.all(Object.entries(READER_PACKAGE_NAMES).map(async ([reader, packageName]) => [reader, await readInstalledPackageVersion(packageName)])));
 const ITERATIONS = 5;
 const WARMUP = 1;
 const FIXTURES = [
@@ -231,9 +231,11 @@ async function commandVersion(command, args) {
   });
 }
 
-function readInstalledPackageVersion(name) {
+async function readInstalledPackageVersion(name) {
   try {
-    return createRequire(import.meta.url)(name + '/package.json').version;
+    const entry = createRequire(import.meta.url).resolve(name);
+    const packageJson = JSON.parse(await readFile(join(dirname(entry), 'package.json'), 'utf8'));
+    return packageJson.version;
   } catch (error) {
     return 'UNRESOLVED:' + String(error?.message ?? error);
   }
