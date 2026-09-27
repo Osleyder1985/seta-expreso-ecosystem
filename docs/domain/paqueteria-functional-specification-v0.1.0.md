@@ -179,7 +179,7 @@ Debe registrar:
 - duración real;
 - estado.
 
-Varias entregas pueden ejecutarse en una misma parada si D09 se confirma operacionalmente.
+Una misma parada puede ejecutar una única Delivery que agrupa múltiples House cuando corresponden a la misma dirección.
 
 ## 12. Delivery
 
@@ -187,7 +187,7 @@ Una Delivery representa la operación de entrega, no simplemente el cambio de es
 
 Debe registrar House asociado, parada, receptor, resultado, tiempo, ubicación, observaciones y evidencia.
 
-La asociación múltiple con House se mantiene soportada por el modelo hasta cerrar D09.
+Una Delivery puede asociarse a múltiples House cuando comparten la misma dirección/punto de entrega. Esta asociación está confirmada operacionalmente.
 
 ## 13. DeliveryAttempt
 
@@ -249,15 +249,13 @@ La trazabilidad no debe depender únicamente del estado actual.
 
 ## 19. Reglas de modificación
 
-La modificación depende del estado.
+La regla operacional confirmada es: antes del archivado se permiten modificaciones y cancelaciones en todas las etapas operacionales, conservando trazabilidad/auditoría. Después del archivado no se permite modificación directa del histórico; una corrección excepcional debe preservar la historia.
 
-Antes de registro definitivo existe mayor capacidad de corrección, manteniendo origen.
+## 20. Unidad de destino y recepción para distribución
 
-Después de recepción, los cambios sensibles requieren autorización y auditoría.
+La Unidad de destino se almacena mediante el código operacional del aeropuerto internacional de referencia; por ejemplo, Camagüey utiliza `CMW`. Los territorios sin aeropuerto internacional se agrupan en `OTRAS`.
 
-Después de liberación o entrega, no se modifican silenciosamente datos históricos.
-
-Después de cierre, las correcciones deben realizarse mediante mecanismos de ajuste o auditoría.
+Después de la liberación aduanera externa, AeroVaradero entrega la carga y personal autorizado de SETA la recibe utilizando como referencias el Manifiesto recibido de la Agencia y el Manifiesto generado por AeroVaradero. La recepción de SETA constituye el hecho operacional que permite continuar hacia distribución, sujeto a los demás bloqueos del proceso.
 
 ## 20. Reglas de eliminación
 
