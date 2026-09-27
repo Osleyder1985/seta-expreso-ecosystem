@@ -243,3 +243,16 @@ Evidencia reproducible dedicada observada:
 Esta certificación es evidencia estructural ejecutada, no certificación final F01-F20 de producción: F04, F10-F14, F16-F19 y la parte end-to-end de F20 requieren capas superiores. ExcelJS/read-excel-file continúan usando `npm install` en sus ramas experimentales por ausencia de lockfile; por tanto, la reproducibilidad de producción sigue bloqueada hasta incorporar lockfile y los demás gates.
 
 No se selecciona parser con esta ejecución. ADR-XLSX-001 permanece pendiente de los gates restantes, incluido #152 y el análisis de supply chain #198.
+
+### 5.2 Certificación ejecutable F01-F20 — evidencia reproducible
+
+Se incorporó un ledger ejecutable de exactamente 20 controles F01–F20 y un workflow dedicado para ejecutarlo sin convertir un resultado parcial en PASS de producción.
+
+Evidencia observable de CI:
+- ExcelJS — run 36333990786, job 108661211656: build y suite dedicados completados con éxito. Ledger: F01/F02/F03/F05/F06/F07/F08/F09/F15 PASS; F10/F20 PARTIAL; F04/F11/F12/F13/F14/F16/F17/F18/F19 NOT_EXECUTED.
+- SheetJS CE 0.20.3 — run 36335433551, job 108665260317: build y suite completados con éxito. Ledger: F01/F02/F03/F05/F06/F07/F08/F09/F15 PASS; F10/F20 PARTIAL; F04/F11/F12/F13/F14/F16/F17/F18/F19 NOT_EXECUTED.
+- read-excel-file 9.3.10 — run 36334029875, job 108661324840: build y suite completados con éxito. Ledger: F01/F03/F06/F15 PASS; F09/F20 GAP; F10 PARTIAL; F02/F04/F05/F07/F08/F11/F12/F13/F14/F16/F17/F18/F19 NOT_EXECUTED.
+
+La certificación actual es una certificación de ejecución del ledger, no una certificación de cumplimiento F01–F20 completa. F10 sólo demuestra evidencia estructural de TOTAL/SUBTOTAL; F11–F19 requieren capas de mapping/validation/reconciliation/pipeline; F20 exige provenance de extremo a extremo hasta persistencia. Por ello no se selecciona parser ni se habilita producción con esta ejecución.
+
+Limitación de reproducibilidad: los branches experimentales ExcelJS/read-excel-file no disponen actualmente de lockfile y sus workflows dedicados usan npm install; esto queda fuera del gate de adopción productiva, que exige lockfile/dependency tree, límites de recursos, benchmark, security/maintenance review, evidencia real anonimizada y ADR.
