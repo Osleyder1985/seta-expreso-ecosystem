@@ -14,13 +14,13 @@ describe('ExperimentalExcelJsWorkbookReader', () => {
   async function workbookBuffer(): Promise<Buffer> {
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet('Manifiesto');
-    sheet.addRow(['House', 'Peso', 'Dirección']);
-    sheet.addRow(['CACC-00000001', 12.5, 'DIRECCION_TEST_001']);
-    sheet.addRow(['CACC-00000002', 7.5, 'DIRECCION_TEST_001']);
+    sheet.addRow(['House', 'Bultos', 'Dirección', 'Teléfono', 'Latitud', 'Longitud', 'Aduana', 'Consolidado', 'Peso']);
+    sheet.addRow(['CACC-00000001', 3, 'DIRECCION_TEST_001', '+5350000001', 21.38, -77.92, 'Aduana Camagüey', 'CONSOLIDADO-001', 12.5]);
+    sheet.addRow(['CACC-00000002', 1, 'DIRECCION_TEST_001', '+5350000002', null, null, 'Aduana Camagüey', 'CONSOLIDADO-001', 7.5]);
     sheet.addRow([]);
-    sheet.addRow(['SUBTOTAL Habana', 20, null]);
-    sheet.addRow(['TOTAL', 20, null]);
-    const formulaRow = sheet.addRow([null, 3.25, 'DIRECCION_TEST_002']);
+    sheet.addRow(['SUBTOTAL Habana', null, null, null, null, null, null, null, 20]);
+    sheet.addRow(['TOTAL', null, null, null, null, null, null, null, 20]);
+    const formulaRow = sheet.addRow([null, 2, 'DIRECCION_TEST_002', '+5350000003', 23.1, -82.3666, 'Aduana Habana', 'CONSOLIDADO-002', 3.25]);
     formulaRow.getCell(1).value = { formula: 'UPPER("CACC-00000003")', result: 'CACC-00000003' };
 
     const hidden = workbook.addWorksheet('Oculta');
