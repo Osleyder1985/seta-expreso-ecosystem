@@ -1,6 +1,13 @@
 name: xlsx-reader-adapter-conformance
 
 on:
+  push:
+    branches:
+      - 'feat/paqueteria-xlsx-sheetjs-experimental-adapter'
+    paths:
+      - 'apps/api/src/modules/paqueteria/import/**'
+      - 'apps/api/package.json'
+      - '.github/workflows/xlsx-reader-adapter-conformance.yml'
   pull_request:
     paths:
       - 'apps/api/src/modules/paqueteria/import/**'
