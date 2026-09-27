@@ -34,6 +34,7 @@ export class ExperimentalSheetJsWorkbookReader implements WorkbookReaderPort {
       const range = worksheet['!ref'] ? XLSX.utils.decode_range(worksheet['!ref']) : { s: { r: 0, c: 0 }, e: { r: -1, c: -1 } };
       const rows: SourceRow[] = [];
       const maxRows = options.maxRowsPerSheet ?? Number.POSITIVE_INFINITY;
+      const headerByColumn = new Map<number, string>();
       const maxCells = options.maxCellsPerSheet ?? Number.POSITIVE_INFINITY;
       let cellCount = 0;
       for (let rowIndex = range.s.r; rowIndex <= range.e.r; rowIndex += 1) {
@@ -47,8 +48,11 @@ export class ExperimentalSheetJsWorkbookReader implements WorkbookReaderPort {
           const address = columnLetter(columnIndex + 1) + rowNumber;
           const cell = worksheet[address] as XLSX.CellObject | undefined;
           const rawValue = cell?.v ?? null;
+          if (rowIndex === range.s.r && typeof rawValue === 'string') {
+            headerByColumn.set(columnIndex + 1, rawValue);
+          }
           values.push(rawValue);
-          cells.push({ ref: { sheetName, rowNumber, columnIndex: columnIndex + 1, columnHeaderRaw: rowIndex === range.s.r && typeof rawValue === 'string' ? rawValue : undefined, cellAddress: address }, rawValue, displayedValue: cell?.w, detectedType: toDetectedType(cell), formula: cell?.f, formulaResult: cell?.f ? cell.v : undefined, numberFormat: cell?.z === undefined ? undefined : String(cell.z) });
+          cells.push({ ref: { sheetName, rowNumber, columnIndex: columnIndex + 1, columnHeaderRaw: headerByColumn.get(columnIndex + 1), cellAddress: address }, rawValue, displayedValue: cell?.w, detectedType: toDetectedType(cell), formula: cell?.f, formulaResult: cell?.f ? cell.v : undefined, numberFormat: cell?.z === undefined ? undefined : String(cell.z) });
         }
         rows.push({ sheetName, rowNumber, kind: classifyRow(values, rowIndex === range.s.r), cells });
       }
