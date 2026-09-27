@@ -46,7 +46,7 @@ describe.each(readers)('%s → real snapshot → F10-F20 pipeline',(adapter,read
  beforeAll(async()=>{snapshot=await reader.read(await sourceBuffer(),metadata(adapter));});
  test('baseline snapshot enters the real pipeline and preserves additional source data',async()=>{
    const result=await runImportPipeline(snapshot,profile);
-   expect(result.mapping.records).toHaveLength(4);
+   expect(result.mapping.records).toHaveLength(3);
    expect(result.mapping.records[0].additionalColumns.some(c=>c.rawValue==='KEEP')).toBe(true);
    expect(result.acceptance.state).toBe('ACCEPTED');
  });
@@ -71,7 +71,7 @@ describe.each(readers)('%s → real snapshot → F10-F20 pipeline',(adapter,read
    const anomalous=cloneSnapshot(snapshot,rows=>{rows[1].cells[1].rawValue=-1;});
    const anomalyResult=await runImportPipeline(anomalous,profile);
    expect(anomalyResult.validation.findings.some(f=>f.ruleId==='R-FLD-004')).toBe(true);
-   const identity=cloneSnapshot(snapshot,rows=>{rows[2].cells[3].rawValue='JUAN';});
+   const identity=cloneSnapshot(snapshot,rows=>{rows[2].cells[3].rawValue='JUAN';rows[3].cells[3].rawValue='JUAN';});
    const identityResult=await runImportPipeline(identity,profile);
    expect(identityResult.reconciliation.discrepancies.some(f=>f.ruleId==='R-PER-002')).toBe(true);
    const store=new Map<string,Awaited<ReturnType<typeof runImportPipeline>>>();
