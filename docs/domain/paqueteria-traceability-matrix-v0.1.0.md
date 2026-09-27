@@ -182,7 +182,7 @@ La matriz es válida como baseline cuando:
 - los bloqueadores están identificados explícitamente;
 - ningún bloqueador se oculta mediante una decisión técnica.
 
-**Conclusión:** la trazabilidad funcional está establecida. El siguiente paso debe ser cerrar la semántica operacional pendiente y, después, elaborar el modelo lógico PostgreSQL/PostGIS v0.1.0 acompañado de ADRs para las decisiones que afecten persistencia.
+**Conclusión:** la trazabilidad funcional de las reglas cerradas está establecida. Los siguientes bloqueadores son B-01/D01, autorización de objetos/alcance y la evidencia ejecutable end-to-end; el modelo físico definitivo seguirá condicionado por las decisiones aún abiertas.
 
 ## Reglas operacionales cerradas — 2026-09-27
 
