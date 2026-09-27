@@ -1,6 +1,6 @@
 # Cierre de decisiones críticas de Paquetería — v0.2.1
 
-**Estado:** D09, B-04, B-05 y B-06 cerrados con evidencia operacional; B-01 permanece parcial
+**Estado:** D09, B-04, B-05, B-06 y B-01/D01 cerrados con evidencia operacional
 **Fecha:** 2026-09-24
 
 ## 1. Objetivo
@@ -23,7 +23,7 @@ La normativa de control de aeronaves contempla guía master y guía hija, ademá
 
 Esto aporta evidencia para diferenciar Master AWB y House.
 
-La equivalencia exacta entre la guía hija y el campo House del manifiesto real 649-31382945 todavía requiere confirmación operacional específica.
+La guía hija y House se mantienen como conceptos distintos. House no recibe formato, longitud o unicidad propios de una guía hija.
 
 ### 2.3 Depósito temporal
 
@@ -49,11 +49,13 @@ El abandono debe registrarse como acto/resultado aduanero separado.
 
 ## 3. D01 — Master AWB / Guide / House
 
-### Estado: PARCIALMENTE CERRADO
+### Estado: CERRADO
 
-Estructura suficientemente respaldada:
+Estructura de dominio:
 
-Manifest → TransportDocument → MasterAWB → House/ChildAirWaybill → PhysicalUnit[]
+Manifest → TransportDocument → MasterAWB → House → PhysicalUnit[]
+
+ChildAirWaybill es un concepto separado; cuando exista evidencia documental de relación con un House, se modelará como trazabilidad y no como identidad.
 
 El manifiesto real contiene Master AWB 649-31382945 y 127 House.
 
