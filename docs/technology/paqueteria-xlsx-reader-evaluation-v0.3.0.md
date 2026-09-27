@@ -2,7 +2,8 @@
 
 **Estado:** evaluación técnica; parser productivo NO seleccionado  
 **Issue rector:** #228  
-**Fecha:** 2026-09-27
+**Seguimiento:** #243  
+**Fecha de actualización:** 2026-09-27
 
 ## 1. Criterio
 
@@ -14,14 +15,14 @@ SETA no selecciona un parser por popularidad, antigüedad o actividad del paquet
 
 | Candidato | Estado actual | Evidencia funcional | Brecha principal |
 |---|---|---|---|
-| ExcelJS 4.4.0 | 🔴 BLOQUEADO | PoC ejecuta con Node 24; estructura, fórmulas/cache, formatos, filas especiales y visibilidad | Riesgo de consumo de recursos en `Workbook.xlsx.load()`, deuda de dependencias y vulnerabilidades observadas en CI |
-| read-excel-file 9.3.10 | 🟡 CANDIDATO | Adapter aislado ejecuta bajo `WorkbookReaderPort`; valores, filas, direcciones y límites básicos | No preserva de forma suficiente fórmula/cache, visibilidad, formatos, merged cells y errores para el contrato completo |
-| SheetJS 0.20.3 | 🟡 CANDIDATO | Adapter aislado ejecuta bajo `WorkbookReaderPort`; fórmula/cache, formatos y visibilidad fueron ejercitados en fixture | Faltan F01–F20 completos, benchmark, real-source anonimizado y revisión final de supply chain |
+| ExcelJS 4.4.0 | 🔴 BLOQUEADO | Adapter aislado con estructura, fórmulas/cache, formatos, filas especiales, visibilidad, provenance de headers y límites | No existe todavía ejecución CI observable del conformance dedicado; persisten gates de consumo de recursos, seguridad y supply chain |
+| read-excel-file 9.3.10 | 🟡 CANDIDATO / GAP CONOCIDO | Adapter aislado con valores, filas, direcciones, provenance de headers y límites básicos; gate común invocado explícitamente | La API utilizada no preserva suficiente metadata para el contrato completo; no existe todavía ejecución CI observable del conformance dedicado |
+| SheetJS CE 0.20.3 | 🟡 CANDIDATO | Adapter aislado con fórmula/cache, formatos, visibilidad, provenance de headers y límites; conformance dedicado observado PASS | F01–F20 completo, benchmark, real-source anonimizado y revisión final de supply chain siguen pendientes |
 | Forks | ⚪ CONDICIONADOS | No existe todavía una evaluación equivalente | Procedencia, mantenimiento, seguridad y reproducibilidad |
 
 ## 3. Matriz F01–F20
 
-La matriz siguiente registra la evidencia disponible **a la fecha**, no una afirmación de conformidad productiva.
+La matriz registra la evidencia disponible **a la fecha** y no constituye una afirmación de conformidad productiva.
 
 | Fixture | Requisito | ExcelJS | read-excel-file | SheetJS | Estado de decisión |
 |---|---|---:|---:|---:|---|
@@ -38,7 +39,7 @@ La matriz siguiente registra la evidencia disponible **a la fecha**, no una afir
 | F11 | Alias de headers | NOT EXECUTED | NOT EXECUTED | NOT EXECUTED | Mapping pendiente |
 | F12 | Headers ambiguos | NOT EXECUTED | NOT EXECUTED | NOT EXECUTED | Mapping pendiente |
 | F13 | Campo crítico ausente | NOT EXECUTED | NOT EXECUTED | NOT EXECUTED | Validación pendiente |
-| F14 | Columnas adicionales | PASS | PASS | PASS | Preservación de columnas requiere validación de mapping |
+| F14 | Columnas adicionales | PASS | PASS | PASS | Preservación estructural; mapping pendiente |
 | F15 | Filas TOTAL/SUBTOTAL | PASS | PASS | PASS | Evidencia experimental |
 | F16 | Valores numéricos problemáticos | NOT EXECUTED | NOT EXECUTED | NOT EXECUTED | Pendiente |
 | F17 | Identidad ambigua | NOT EXECUTED | NOT EXECUTED | NOT EXECUTED | Reconciliación pendiente |
@@ -46,60 +47,85 @@ La matriz siguiente registra la evidencia disponible **a la fecha**, no una afir
 | F19 | Mismo contenido + mapping versionado diferente | NOT EXECUTED | NOT EXECUTED | NOT EXECUTED | Pipeline/mapping pendiente |
 | F20 | Provenance y trazabilidad completa | PARTIAL | GAP | PARTIAL | Requiere validación end-to-end |
 
-**Nota sobre F10:** que un lector identifique filas TOTAL/SUBTOTAL o conserve valores numéricos no demuestra por sí mismo la regla de discrepancia de negocio. La reconciliación sigue siendo responsabilidad del pipeline.
+**Nota F10:** identificar filas TOTAL/SUBTOTAL o conservar valores numéricos no demuestra por sí mismo la regla de discrepancia de negocio. La reconciliación sigue siendo responsabilidad del pipeline.
 
-**Nota sobre F20:** los tres adapters generan referencias de celda dentro de su alcance experimental, pero todavía no existe evidencia end-to-end que demuestre la provenance completa exigida por el baseline: `sourceDocumentId`, `contentHash`, sheet, fila, columna, header, dirección, valor original, mapping profile/version y transformación.
+**Nota F20:** los adapters generan referencias de celda y, donde aplica, propagan `columnHeaderRaw`, pero todavía no existe evidencia end-to-end de la provenance completa exigida por el baseline: `sourceDocumentId`, `contentHash`, sheet, fila, columna, header, dirección, valor original, mapping profile/version y transformación.
 
-## 4. Evidencia de adapters
+## 4. Estado de implementación de los tres adapters
 
-### ExcelJS
+### ExcelJS 4.4.0
 
-El adapter experimental demostró:
+El adapter experimental implementa:
 
 - lectura desde `Buffer`;
-- límite de bytes;
-- límite de hojas;
-- límites de filas/celdas;
+- límites de bytes, hojas, filas y celdas;
 - clasificación HEADER/DATA/EMPTY/TOTAL/SUBTOTAL;
 - fórmula y resultado cacheado;
 - formato numérico;
 - hojas VISIBLE/HIDDEN/VERY_HIDDEN;
-- referencias de celda.
+- referencias de celda;
+- propagación de `columnHeaderRaw`;
+- prueba explícita del gate provider-neutral F01–F20.
 
-Su estado permanece **BLOCKED FOR PRODUCTION**. La prueba funcional no elimina los hallazgos de seguridad/supply chain.
+**Estado:** adapter experimental técnicamente instrumentado; **BLOCKED FOR PRODUCTION**. La ausencia de una ejecución CI observable en el branch no se interpreta como PASS.
 
-### read-excel-file
+### read-excel-file 9.3.10
 
-El adapter experimental demostró:
+El adapter experimental implementa:
 
-- lectura de múltiples hojas;
-- valores y tipos básicos;
+- lectura mediante `WorkbookReaderPort`;
+- valores/tipos básicos;
 - clasificación de filas;
 - referencias de celda;
-- dirección compartida;
-- límite de bytes.
+- direcciones repetidas;
+- propagación de `columnHeaderRaw`;
+- límite de bytes;
+- prueba explícita que ejecuta el gate común y registra deliberadamente el gap mediante una expectativa de fallo.
 
-El contrato completo requiere información que este adapter no obtiene de forma suficiente de la API usada: fórmula/cache, estado hidden/veryHidden, number format, merged-cell metadata y errores de celda. Por ello queda como **CANDIDATO / NO SELECCIONADO**.
+La implementación no falsea conformidad: la API utilizada no proporciona de forma suficiente fórmula/cache, hidden/veryHidden, number format y otras capacidades requeridas por el contrato.
 
-### SheetJS
+**Estado:** adapter experimental completo para evaluación comparativa; **CANDIDATO / GAP CONOCIDO / NO SELECCIONADO**. La ausencia de una ejecución CI observable no se interpreta como PASS.
 
-El adapter experimental demostró:
+### SheetJS CE 0.20.3
+
+El adapter experimental implementa:
 
 - lectura desde `Buffer`;
-- límite de bytes;
-- límites de hojas/filas/celdas;
+- límites de bytes, hojas, filas y celdas;
 - clasificación HEADER/DATA/EMPTY/TOTAL/SUBTOTAL;
 - fórmula y resultado;
 - formato numérico;
 - visibilidad VISIBLE/HIDDEN/VERY_HIDDEN;
 - referencias de celda;
-- preservación de raw/displayed values dentro del alcance del adapter.
+- `columnHeaderRaw`;
+- direcciones repetidas;
+- ejecución del gate común.
 
-La ejecución funcional de CI del commit `4241dd528b901b6f85061cde9b48d1301301b750` fue PASS en API Foundation, OpenAPI Contract, PostgreSQL/PostGIS, Keycloak OIDC y Observability. Dependency Review continúa afectado por la limitación conocida #198.
+La ejecución dedicada de conformance observada en CI produjo **4/4 pruebas PASS**. Esta evidencia certifica solamente el conjunto estructural cubierto por ese job; no convierte F01–F20 completo en PASS.
 
-Esto **no constituye selección productiva**: F01–F20 completos, benchmark, evidencia real anonimizada, provenance end-to-end y revisión final de supply chain siguen pendientes.
+**Estado:** adapter experimental instrumentado y con evidencia CI observable; **CANDIDATO / NO SELECCIONADO**.
 
-## 5. Arquitectura vigente
+## 5. CI y trazabilidad de la ejecución
+
+Para eliminar la dependencia de workflows que existen únicamente dentro de branches experimentales, se incorporó en `main` el workflow:
+
+`.github/workflows/xlsx-reader-adapters-conformance.yml`
+
+Este workflow se ejecuta sobre Pull Requests que modifican el área XLSX y realiza:
+
+1. checkout del código del PR;
+2. Node.js 24.21.0;
+3. `npm ci`;
+4. `npm run build`;
+5. `npm run test:xlsx-readers`.
+
+Commit de incorporación en `main`: `ad0903f37c426119721acc1673374d9e439253ee`. Posteriormente se corrigió para limitarlo a Pull Requests, evitando ejecutar el job contra `main` cuando `main` todavía no contiene los adapters experimentales; commit de corrección: `eda244b6fb88a11223959113215f1ea79f3ac17b`.
+
+**Importante:** al actualizar esta documentación no se inventa evidencia de ejecución para #234 o #236. Sus workflows dedicados existen en los branches, pero no se ha observado todavía una ejecución CI verificable asociada a sus últimos commits. El workflow central en `main` deja establecida la vía reproducible para que la evidencia se produzca desde los PR.
+
+Para SheetJS existe evidencia CI observable previa: workflow de conformance con **4/4 tests PASS**. Esa evidencia sigue siendo estructural y experimental.
+
+## 6. Arquitectura vigente
 
 El parser concreto permanece aislado:
 
@@ -107,7 +133,7 @@ El parser concreto permanece aislado:
 
 Ningún adapter experimental escribe directamente Manifest, House u otras entidades operacionales.
 
-## 6. Puertas de producción
+## 7. Puertas de producción
 
 Antes de seleccionar un parser deben cerrarse todas estas puertas:
 
@@ -122,9 +148,20 @@ Antes de seleccionar un parser deben cerrarse todas estas puertas:
 9. CI verde en controles funcionales aplicables.
 10. ADR de selección y justificación de mitigaciones.
 11. Integración posterior con mapping/validation/promotion; ningún parser se promociona directamente a Manifest/House.
+12. Para SheetJS, cierre de #152 antes de convertir la evaluación en decisión de adopción.
 
-## 7. Resultado
+## 8. Resultado y siguiente estado
 
-**PARCIAL — la comparación ya tiene evidencia experimental de tres familias de lectores, pero todavía NO existe base suficiente para seleccionar un parser productivo.**
+**PARCIAL — los tres adapters experimentales están implementados detrás del contrato común y la instrumentación comparativa está documentada. La evidencia todavía no permite seleccionar un parser productivo.**
 
-El próximo incremento debe completar la suite F01–F20 en una ejecución común, no crear adapters aislados indefinidamente. La prioridad pasa ahora de “probar otra librería” a **cerrar evidencia comparativa reproducible y los gates de seguridad/supply chain**.
+El trabajo pendiente ya no es “crear otro adapter”. Es producir y conservar evidencia reproducible:
+
+- ejecutar el conformance central en #234 y #236;
+- completar la matriz F01–F20 donde corresponda al adapter y al pipeline;
+- cerrar resource limits/benchmark;
+- cerrar provenance end-to-end;
+- completar #152 para la evidencia real privacy-preserving de SheetJS;
+- separar explícitamente #198 como limitación de Dependency Review;
+- registrar la decisión final mediante ADR.
+
+**No se selecciona ni promociona ningún parser a producción en esta actualización.**
