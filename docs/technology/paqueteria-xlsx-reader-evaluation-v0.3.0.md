@@ -229,3 +229,17 @@ El trabajo pendiente ya no es “crear otro adapter”. Es producir y conservar 
 - registrar la decisión final mediante ADR.
 
 **No se selecciona ni promociona ningún parser a producción en esta actualización.**
+
+
+### 5.2 Certificación F01-F20 — 2026-09-27
+
+Se incorporó un ledger ejecutable de 20 registros (`f01-f20-certification.ts`) que distingue PASS, PARTIAL, GAP y NOT_EXECUTED y evita promover evidencia de reader a capacidades de mapping, validation, reconciliation o pipeline.
+
+Evidencia reproducible dedicada observada:
+- ExcelJS: run `36333990786`, SHA `ac8f8b03e256445481ee36fcb3bd56156739fc6b6`, build y suite `test:xlsx-readers` PASS.
+- read-excel-file: run `36334654986`, SHA `8f4938992ee42c8c5ab4beab35a95a182164c8ed`, build y suite PASS; F09 y F20 permanecen GAP por limitaciones del proveedor.
+- SheetJS: run `36334579842`, SHA `38c7c706e19cc6b5845b56920b2359f34a235f72`, suite PASS.
+
+Esta certificación es evidencia estructural ejecutada, no certificación final F01-F20 de producción: F04, F10-F14, F16-F19 y la parte end-to-end de F20 requieren capas superiores. ExcelJS/read-excel-file continúan usando `npm install` en sus ramas experimentales por ausencia de lockfile; por tanto, la reproducibilidad de producción sigue bloqueada hasta incorporar lockfile y los demás gates.
+
+No se selecciona parser con esta ejecución. ADR-XLSX-001 permanece pendiente de los gates restantes, incluido #152 y el análisis de supply chain #198.
