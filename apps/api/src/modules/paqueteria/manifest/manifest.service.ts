@@ -18,6 +18,22 @@ export class ManifestService {
   ) {}
 
   async list(principal: AuthPrincipal) {
+    const decision = this.authorization.evaluate({
+      principal: { subject: principal.subject, roles: principal.roles, scopes: principal.scopes },
+      action: 'read',
+      resource: { type: 'ManifestCollection', id: 'collection', ownerSubject: principal.subject, state: 'active' },
+    });
+    await this.audit({
+      actorSubject: decision.actorSubject,
+      action: decision.action,
+      resourceType: decision.resourceType,
+      resourceId: decision.resourceId,
+      outcome: decision.decision,
+      reason: decision.reason,
+    });
+    if (decision.decision !== 'allow') {
+      throw new ForbiddenException('Manifest listing is not authorized');
+    }
     const isAdmin = principal.roles.includes('admin');
     return this.prisma.manifest.findMany({
       where: isAdmin ? undefined : { ownerSubject: principal.subject },
@@ -41,6 +57,23 @@ export class ManifestService {
   }
 
   async create(principal: AuthPrincipal, dto: CreateManifestDto) {
+    const decision = this.authorization.evaluate({
+      principal: { subject: principal.subject, roles: principal.roles, scopes: principal.scopes },
+      action: 'create',
+      resource: { type: 'Manifest', id: 'new', ownerSubject: principal.subject, state: 'active' },
+    });
+    await this.audit({
+      actorSubject: decision.actorSubject,
+      action: decision.action,
+      resourceType: decision.resourceType,
+      resourceId: decision.resourceId,
+      outcome: decision.decision,
+      reason: decision.reason,
+    });
+    if (decision.decision !== 'allow') {
+      throw new ForbiddenException('Manifest creation is not authorized');
+    }
+
     const manifest = await this.prisma.manifest.create({
       data: {
         sourceFileName: dto.sourceFileName,
