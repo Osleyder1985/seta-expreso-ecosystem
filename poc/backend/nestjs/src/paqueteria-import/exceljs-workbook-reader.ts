@@ -1,7 +1,7 @@
 import ExcelJS from 'exceljs';
 import { createHash } from 'node:crypto';
 import { ImportSnapshot, SourceRow, SourceSheet } from './intermediate-import.model';
-import { WorkbookReaderOptions, WorkbookReaderPort, classifyRow, toCell } from './workbook-reader.port';
+import { WorkbookReaderOptions, WorkbookReaderPort, classifyRow, detectHeaderRow, toCell } from './workbook-reader.port';
 
 export class ExcelJsWorkbookReader implements WorkbookReaderPort {
   constructor(private readonly options: WorkbookReaderOptions = {}) {}
@@ -26,8 +26,10 @@ export class ExcelJsWorkbookReader implements WorkbookReaderPort {
     const sheets: SourceSheet[] = [];
     workbook.worksheets.forEach((worksheet, ordinal) => {
       const maxRows = this.options.maxRowsPerSheet ?? worksheet.rowCount;
-      const headerValues = worksheet.getRow(1).values as unknown[];
-      const headers = headerValues.slice(1).map((value) => value === null || value === undefined ? undefined : String(value));
+      const rawRows = Array.from({ length: Math.min(worksheet.rowCount, maxRows) }, (_, index) => (worksheet.getRow(index + 1).values as unknown[]).slice(1));
+      const headerRowNumber = detectHeaderRow(rawRows, this.options);
+      const headerValues = rawRows[headerRowNumber - 1] ?? [];
+      const headers = headerValues.map((value) => value === null || value === undefined ? undefined : String(value));
 
       const rows: SourceRow[] = [];
       for (let rowNumber = 1; rowNumber <= Math.min(worksheet.rowCount, maxRows); rowNumber += 1) {
@@ -51,7 +53,7 @@ export class ExcelJsWorkbookReader implements WorkbookReaderPort {
         rows.push({
           sheetName: worksheet.name,
           rowNumber,
-          kind: classifyRow(values.slice(1), rowNumber === 1),
+          kind: classifyRow(values.slice(1), rowNumber === headerRowNumber),
           cells,
         });
       }
