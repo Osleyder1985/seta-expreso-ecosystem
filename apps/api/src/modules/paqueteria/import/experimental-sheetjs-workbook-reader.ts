@@ -23,7 +23,8 @@ const toVisibility = (hidden: number | undefined): SheetVisibility => {
 
 export class ExperimentalSheetJsWorkbookReader implements WorkbookReaderPort {
   async read(source: Buffer, metadata: WorkbookReaderMetadata, options: WorkbookReaderOptions = {}): Promise<ImportSnapshot> {
-    if (source.byteLength > DEFAULT_MAX_SOURCE_BYTES) throw new RangeError('XLSX source exceeds the experimental maximum size.');
+    const maxSourceBytes = options.maxSourceBytes ?? DEFAULT_MAX_SOURCE_BYTES;
+    if (source.byteLength > maxSourceBytes) throw new RangeError('XLSX source exceeds the configured byte limit.');
     const workbook = XLSX.read(source, { type: 'buffer', cellFormula: true, cellNF: true, cellDates: true, cellStyles: true, cellText: true });
     if (options.maxSheets !== undefined && workbook.SheetNames.length > options.maxSheets) throw new RangeError('XLSX workbook exceeds the configured sheet limit.');
     const visibility = new Map<string, number>();
