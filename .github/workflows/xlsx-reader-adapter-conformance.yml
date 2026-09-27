@@ -42,3 +42,5 @@ jobs:
 
       - name: Execute XLSX reader adapter tests
         run: npm run test:xlsx-readers
+
+# Certification suite kept executable on adapter branch.
