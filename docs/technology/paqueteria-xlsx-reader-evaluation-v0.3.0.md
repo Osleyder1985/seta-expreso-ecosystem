@@ -15,8 +15,8 @@ SETA no selecciona un parser por popularidad, antigüedad o actividad del paquet
 
 | Candidato | Estado actual | Evidencia funcional | Brecha principal |
 |---|---|---|---|
-| ExcelJS 4.4.0 | 🔴 BLOQUEADO | Adapter aislado con estructura, fórmulas/cache, formatos, filas especiales, visibilidad, provenance de headers y límites | No existe todavía ejecución CI observable del conformance dedicado; persisten gates de consumo de recursos, seguridad y supply chain |
-| read-excel-file 9.3.10 | 🟡 CANDIDATO / GAP CONOCIDO | Adapter aislado con valores, filas, direcciones, provenance de headers y límites básicos; gate común invocado explícitamente | La API utilizada no preserva suficiente metadata para el contrato completo; no existe todavía ejecución CI observable del conformance dedicado |
+| ExcelJS 4.4.0 | 🔴 BLOQUEADO | Adapter aislado con estructura, fórmulas/cache, formatos, filas especiales, visibilidad, provenance de headers y límites | Conformance dedicado PASS; persisten gates de consumo de recursos, seguridad y supply chain |
+| read-excel-file 9.3.10 | 🟡 CANDIDATO / GAP CONOCIDO | Adapter aislado con valores, filas, direcciones, provenance de headers y límites básicos; gate común invocado explícitamente | La API utilizada no preserva suficiente metadata para el contrato completo; conformance dedicado PASS con GAP explícito |
 | SheetJS CE 0.20.3 | 🟡 CANDIDATO | Adapter aislado con fórmula/cache, formatos, visibilidad, provenance de headers y límites; conformance dedicado observado PASS | F01–F20 completo, benchmark, real-source anonimizado y revisión final de supply chain siguen pendientes |
 | Forks | ⚪ CONDICIONADOS | No existe todavía una evaluación equivalente | Procedencia, mantenimiento, seguridad y reproducibilidad |
 
@@ -121,7 +121,7 @@ Este workflow se ejecuta sobre Pull Requests que modifican el área XLSX y reali
 
 Commit de incorporación en `main`: `ad0903f37c426119721acc1673374d9e439253ee`. Posteriormente se corrigió para limitarlo a Pull Requests, evitando ejecutar el job contra `main` cuando `main` todavía no contiene los adapters experimentales; commit de corrección: `eda244b6fb88a11223959113215f1ea79f3ac17b`.
 
-**Importante:** al actualizar esta documentación no se inventa evidencia de ejecución para #234 o #236. Sus workflows dedicados existen en los branches, pero no se ha observado todavía una ejecución CI verificable asociada a sus últimos commits. El workflow central en `main` deja establecida la vía reproducible para que la evidencia se produzca desde los PR.
+**Importante:** la evidencia dedicada ya es observable para los tres candidatos. La certificación F01–F20 reader-level queda registrada en la sección 5.2; los estados GAP/PARTIAL/NOT_EXECUTED no se convierten en PASS por la mera ejecución del workflow.
 
 Para SheetJS existe evidencia CI observable: run `36329351335`, con **4/4 tests PASS**. Esa evidencia sigue siendo estructural y experimental.
 
