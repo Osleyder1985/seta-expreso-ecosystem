@@ -25,6 +25,12 @@ describe('ExperimentalReadExcelFileWorkbookReader', () => {
     await expect(new ExperimentalReadExcelFileWorkbookReader().read(Buffer.alloc(11), metadata, { maxSourceBytes: 10 })).rejects.toThrow('XLSX source exceeds configured byte limit');
   });
 
+  it('enforces row and cell limits on the parsed sheet', async () => {
+    const reader = new ExperimentalReadExcelFileWorkbookReader();
+    await expect(reader.read(source, metadata, { maxRowsPerSheet: 2 })).rejects.toThrow('row limit');
+    await expect(reader.read(source, metadata, { maxCellsPerSheet: 2 })).rejects.toThrow('cell limit');
+  });
+
   it('executes the common conformance gate and records the known adapter gap', async () => {
     const { assertCommonEvidenceSnapshot } = await import('./workbook-reader-conformance');
     const snapshot = await new ExperimentalReadExcelFileWorkbookReader().read(source, {
