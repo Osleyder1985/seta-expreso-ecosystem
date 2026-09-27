@@ -99,7 +99,7 @@ describe('ExperimentalExcelJsWorkbookReader', () => {
     sheet.addRow(['Fecha', 'Peso', 'Error']);
     const date = new Date('2026-09-27T00:00:00.000Z');
     sheet.addRow([date, 12.5, { error: '#DIV/0!' }]);
-    sheet.getCell('B2').numFmt = '0.00';
+    sheet.getCell('I2').numFmt = '0.00';
     const source = Buffer.from(await workbook.xlsx.writeBuffer());
     const snapshot = await new ExperimentalExcelJsWorkbookReader().read(source, metadata);
     const cells = snapshot.sheets[0].rows[1].cells;
