@@ -1,0 +1,33 @@
+name: xlsx-f10-f19-pipeline-certification
+
+on:
+  pull_request:
+    paths:
+      - 'apps/api/src/modules/paqueteria/import/**'
+      - 'apps/api/package.json'
+      - '.github/workflows/xlsx-f10-f19-pipeline-certification.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24.21.0
+          cache: npm
+          cache-dependency-path: apps/api/package.json
+      - name: Install dependencies
+        run: npm install
+      - name: Build
+        run: npm run build
+      - name: Execute F10-F19 pipeline certification
+        run: npm run test:xlsx-pipeline
