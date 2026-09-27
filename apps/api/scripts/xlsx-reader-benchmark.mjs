@@ -233,9 +233,22 @@ async function commandVersion(command, args) {
 
 async function readInstalledPackageVersion(name) {
   try {
-    const entry = createRequire(import.meta.url).resolve(name);
-    const packageJson = JSON.parse(await readFile(join(dirname(entry), 'package.json'), 'utf8'));
-    return packageJson.version;
+    const require = createRequire(import.meta.url);
+    let entry;
+    try {
+      entry = require.resolve(name);
+    } catch {
+      entry = require.resolve(name + '/node');
+    }
+    let current = dirname(entry);
+    for (let depth = 0; depth < 6; depth += 1) {
+      try {
+        const packageJson = JSON.parse(await readFile(join(current, 'package.json'), 'utf8'));
+        if (packageJson.name === name) return packageJson.version;
+      } catch {}
+      current = dirname(current);
+    }
+    throw new Error('Installed package.json not found for ' + name);
   } catch (error) {
     return 'UNRESOLVED:' + String(error?.message ?? error);
   }
