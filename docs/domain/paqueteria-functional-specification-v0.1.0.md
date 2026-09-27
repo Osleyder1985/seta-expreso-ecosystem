@@ -253,9 +253,9 @@ La regla operacional confirmada es: antes del archivado se permiten modificacion
 
 ## 20. Unidad de destino y recepción para distribución
 
-La Unidad de destino se almacena mediante el código operacional del aeropuerto internacional de referencia; por ejemplo, Camagüey utiliza `CMW`. Los territorios sin aeropuerto internacional se agrupan en `OTRAS`.
+La Unidad de destino se representa mediante el código operacional del aeropuerto internacional de referencia; por ejemplo, Camagüey utiliza `CMW`. Los territorios sin aeropuerto internacional se agrupan en `OTRAS`. Esta regla no convierte el código en un nombre de provincia.
 
-Después de la liberación aduanera externa, AeroVaradero entrega la carga y personal autorizado de SETA la recibe utilizando como referencias el Manifiesto recibido de la Agencia y el Manifiesto generado por AeroVaradero. La recepción de SETA constituye el hecho operacional que permite continuar hacia distribución, sujeto a los demás bloqueos del proceso.
+Después de la liberación aduanera externa, AeroVaradero entrega la carga y personal autorizado de SETA la recibe utilizando como referencias el Manifiesto recibido de la Agencia y el Manifiesto generado por AeroVaradero. La liberación aduanera no se registra como una acción ejecutada por SETA. La recepción de SETA constituye el hecho operacional que permite continuar hacia distribución, sujeto a los demás bloqueos del proceso.
 
 ## 20. Reglas de eliminación
 
@@ -339,14 +339,14 @@ No se establecen metas numéricas todavía.
 7. No sobrescribir historial.
 8. No depender de geocodificación para conservar documentación válida.
 9. No usar un estado global para representar todos los procesos.
-10. No crear migraciones definitivas hasta cerrar las reglas pendientes.
+10. No crear migraciones definitivas hasta cerrar las reglas pendientes de modelo lógico y autorización.
 
 ## 26. Requisitos funcionales derivados
 
 RF-PQ-001: importar manifiestos conservando trazabilidad del archivo fuente.
 RF-PQ-002: validar estructura y contenido.
 RF-PQ-003: registrar discrepancias sin destruir información.
-RF-PQ-004: representar Master AWB, House y unidades físicas separadamente.
+RF-PQ-004: representar Master AWB, Child Air Waybill, House y unidades físicas como conceptos separados. House no hereda formato ni unicidad de Child Air Waybill.
 RF-PQ-005: gestionar personas con roles Sender/Recipient.
 RF-PQ-006: conservar dirección original y normalizada.
 RF-PQ-007: obtener y versionar geolocalizaciones.
@@ -362,7 +362,7 @@ RF-PQ-016: mantener trazabilidad completa.
 RF-PQ-017: aplicar autorización basada en rol y estado.
 RF-PQ-018: mantener historial de transiciones.
 RF-PQ-019: permitir auditoría de operaciones críticas.
-RF-PQ-020: soportar asociación de múltiples House a un mismo Delivery hasta el cierre de D09.
+RF-PQ-020: asociar múltiples House a una misma Delivery cuando comparten la misma dirección/punto de entrega.
 
 ## 27. Criterios de salida
 
@@ -372,12 +372,12 @@ Esta especificación podrá pasar a diseño de aplicación cuando:
 - AT-01…AT-26 puedan mapearse a pruebas;
 - D01…D12 tengan estado explícito;
 - reglas aduaneras que deban convertirse en restricciones tengan evidencia;
-- D09 sea cerrado por procedimiento operativo;
+- D09 esté reflejado como regla operacional cerrada;
 - permisos por rol estén definidos.
 
 ## 28. Estado actual
 
-Modelo de dominio: apto para especificación funcional.
+Modelo de dominio: apto para especificación funcional. Las decisiones D09, D12, B-01/D01, B-04, B-05 y B-06 están cerradas conceptualmente. El esquema físico definitivo sigue condicionado por la definición de ChildAirWaybill, DestinationUnit, archivado, POD y recepción SETA, además del modelo de autorización contextual.
 
 Especificación funcional: v0.1.0.
 
