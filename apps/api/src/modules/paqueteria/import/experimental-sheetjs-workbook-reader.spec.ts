@@ -50,4 +50,11 @@ describe('Experimental SheetJS workbook reader', () => {
 
     assertCommonEvidenceSnapshot(snapshot);
   });
+
+  it('enforces row and cell limits from the shared contract', async () => {
+    const source = await createFixture();
+    const reader = new ExperimentalSheetJsWorkbookReader();
+    await expect(reader.read(source, metadata, { maxRowsPerSheet: 1 })).rejects.toThrow('row limit');
+    await expect(reader.read(source, metadata, { maxCellsPerSheet: 2 })).rejects.toThrow('cell limit');
+  });
 });
