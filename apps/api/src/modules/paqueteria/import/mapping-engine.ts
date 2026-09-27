@@ -14,7 +14,8 @@ export const mapSnapshot = (snapshot: ImportSnapshot, profile: MappingProfile): 
     const mappedAddresses = new Set<string>();
 
     for (const spec of profile.fields) {
-      const candidates = headers.filter(header => spec.headers.some(alias => normalize(alias) === normalize(header.rawValue)));
+      const aliases = [...spec.headers, ...(spec.aliases ?? [])];
+      const candidates = headers.filter(header => aliases.some(alias => normalize(alias) === normalize(header.rawValue)));
       const matching = [...new Map(candidates.filter(header => row.cells.some(cell => cell.ref.columnIndex === header.ref.columnIndex)).map(cell => [cell.ref.cellAddress, cell])).values()];
 
       if (matching.length > 1) {
@@ -32,7 +33,7 @@ export const mapSnapshot = (snapshot: ImportSnapshot, profile: MappingProfile): 
       }
 
       mappedAddresses.add(sourceCell.ref.cellAddress);
-      const exact = normalize(sourceCell.ref.columnHeaderRaw) === normalize(spec.headers[0]);
+      const exact = spec.headers.some(header => normalize(sourceCell.ref.columnHeaderRaw) === normalize(header));
       fields.push({ canonicalField: spec.canonicalField, value: sourceCell.rawValue, decision: exact ? 'EXACT' : 'ALIAS', sourceCells: [sourceCell] });
     }
 
