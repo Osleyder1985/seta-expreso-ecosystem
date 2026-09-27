@@ -1,1 +1,58 @@
-import * as XLSX from 'xlsx';\nimport type { ImportSnapshot, RowKind, SheetVisibility, SourceCell, SourceRow, SourceSheet } from './workbook-reader.types';\nimport { columnLetter, classifyRow, type WorkbookReaderMetadata, type WorkbookReaderOptions, type WorkbookReaderPort } from './workbook-reader.port';\n\nconst DEFAULT_MAX_SOURCE_BYTES = 50 * 1024 * 1024;\n\nconst toDetectedType = (cell: XLSX.CellObject | undefined): SourceCell['detectedType'] => {\n  if (!cell || cell.v === undefined || cell.v === null) return 'BLANK';\n  if (cell.t === 'e') return 'ERROR';\n  if (cell.f) return 'FORMULA';\n  if (cell.t === 'n') return 'NUMBER';\n  if (cell.t === 'b') return 'BOOLEAN';\n  if (cell.t === 'd') return 'DATE';\n  if (cell.t === 's' || cell.t === 'str') return 'STRING';\n  return 'UNKNOWN';\n};\n\nconst toVisibility = (hidden: number | undefined): SheetVisibility => {\n  if (hidden === 2) return 'VERY_HIDDEN';\n  if (hidden === 1) return 'HIDDEN';\n  return 'VISIBLE';\n};\n\nexport class ExperimentalSheetJsWorkbookReader implements WorkbookReaderPort {\n  async read(source: Buffer, metadata: WorkbookReaderMetadata, options: WorkbookReaderOptions = {}): Promise<ImportSnapshot> {\n    if (source.byteLength > DEFAULT_MAX_SOURCE_BYTES) throw new RangeError('XLSX source exceeds the experimental maximum size.');\n    const workbook = XLSX.read(source, { type: 'buffer', cellFormula: true, cellNF: true, cellDates: true, cellStyles: true, cellText: true });\n    if (options.maxSheets !== undefined && workbook.SheetNames.length > options.maxSheets) throw new RangeError('XLSX workbook exceeds the configured sheet limit.');\n    const visibility = new Map<string, number>();\n    for (const sheet of workbook.Workbook?.Sheets ?? []) visibility.set(sheet.name, sheet.Hidden ?? 0);\n\n    const sheets: SourceSheet[] = workbook.SheetNames.map((sheetName, sheetIndex) => {\n      const worksheet = workbook.Sheets[sheetName];\n      const range = worksheet['!ref'] ? XLSX.utils.decode_range(worksheet['!ref']) : { s: { r: 0, c: 0 }, e: { r: -1, c: -1 } };\n      const rows: SourceRow[] = [];\n      const maxRows = options.maxRowsPerSheet ?? Number.POSITIVE_INFINITY;\n      const maxCells = options.maxCellsPerSheet ?? Number.POSITIVE_INFINITY;\n      let cellCount = 0;\n\n      for (let rowIndex = range.s.r; rowIndex <= range.e.r; rowIndex += 1) {\n        if (rows.length >= maxRows) throw new RangeError('XLSX sheet exceeds the configured row limit.');\n        const rowNumber = rowIndex + 1;\n        const cells: SourceCell[] = [];\n        const values: unknown[] = [];\n        for (let columnIndex = range.s.c; columnIndex <= range.e.c; columnIndex += 1) {\n          cellCount += 1;\n          if (cellCount > maxCells) throw new RangeError('XLSX sheet exceeds the configured cell limit.');\n          const address = columnLetter(columnIndex + 1) + rowNumber;\n          const cell = worksheet[address] as XLSX.CellObject | undefined;\n          const rawValue = cell?.v ?? null;\n          values.push(rawValue);\n          cells.push({\n            ref: { sheetName, rowNumber, columnIndex: columnIndex + 1, columnHeaderRaw: rowIndex === range.s.r && typeof rawValue === 'string' ? rawValue : undefined, cellAddress: address },\n            rawValue, displayedValue: cell?.w, detectedType: toDetectedType(cell),\n            formula: cell?.f, formulaResult: cell?.f ? cell.v : undefined, numberFormat: cell?.z,\n          });\n        }\n        rows.push({ sheetName, rowNumber, kind: classifyRow(values, rowIndex === range.s.r), cells });\n      }\n\n      return { name: sheetName, ordinal: sheetIndex + 1, visibility: toVisibility(visibility.get(sheetName)), rows };\n    });\n\n    return { ...metadata, sourceFormat: 'XLSX', sheets };\n  }\n};
+import * as XLSX from 'xlsx';
+import type { ImportSnapshot, RowKind, SheetVisibility, SourceCell, SourceRow, SourceSheet } from './workbook-reader.types';
+import { columnLetter, classifyRow, type WorkbookReaderMetadata, type WorkbookReaderOptions, type WorkbookReaderPort } from './workbook-reader.port';
+
+const DEFAULT_MAX_SOURCE_BYTES = 50 * 1024 * 1024;
+
+const toDetectedType = (cell: XLSX.CellObject | undefined): SourceCell['detectedType'] => {
+  if (!cell || cell.v === undefined || cell.v === null) return 'BLANK';
+  if (cell.t === 'e') return 'ERROR';
+  if (cell.f) return 'FORMULA';
+  if (cell.t === 'n') return 'NUMBER';
+  if (cell.t === 'b') return 'BOOLEAN';
+  if (cell.t === 'd') return 'DATE';
+  if (cell.t === 's' || cell.t === 'str') return 'STRING';
+  return 'UNKNOWN';
+};
+
+const toVisibility = (hidden: number | undefined): SheetVisibility => {
+  if (hidden === 2) return 'VERY_HIDDEN';
+  if (hidden === 1) return 'HIDDEN';
+  return 'VISIBLE';
+};
+
+export class ExperimentalSheetJsWorkbookReader implements WorkbookReaderPort {
+  async read(source: Buffer, metadata: WorkbookReaderMetadata, options: WorkbookReaderOptions = {}): Promise<ImportSnapshot> {
+    if (source.byteLength > DEFAULT_MAX_SOURCE_BYTES) throw new RangeError('XLSX source exceeds the experimental maximum size.');
+    const workbook = XLSX.read(source, { type: 'buffer', cellFormula: true, cellNF: true, cellDates: true, cellStyles: true, cellText: true });
+    if (options.maxSheets !== undefined && workbook.SheetNames.length > options.maxSheets) throw new RangeError('XLSX workbook exceeds the configured sheet limit.');
+    const visibility = new Map<string, number>();
+    for (const sheet of workbook.Workbook?.Sheets ?? []) visibility.set(sheet.name, sheet.Hidden ?? 0);
+    const sheets: SourceSheet[] = workbook.SheetNames.map((sheetName, sheetIndex) => {
+      const worksheet = workbook.Sheets[sheetName];
+      const range = worksheet['!ref'] ? XLSX.utils.decode_range(worksheet['!ref']) : { s: { r: 0, c: 0 }, e: { r: -1, c: -1 } };
+      const rows: SourceRow[] = [];
+      const maxRows = options.maxRowsPerSheet ?? Number.POSITIVE_INFINITY;
+      const maxCells = options.maxCellsPerSheet ?? Number.POSITIVE_INFINITY;
+      let cellCount = 0;
+      for (let rowIndex = range.s.r; rowIndex <= range.e.r; rowIndex += 1) {
+        if (rows.length >= maxRows) throw new RangeError('XLSX sheet exceeds the configured row limit.');
+        const rowNumber = rowIndex + 1;
+        const cells: SourceCell[] = [];
+        const values: unknown[] = [];
+        for (let columnIndex = range.s.c; columnIndex <= range.e.c; columnIndex += 1) {
+          cellCount += 1;
+          if (cellCount > maxCells) throw new RangeError('XLSX sheet exceeds the configured cell limit.');
+          const address = columnLetter(columnIndex + 1) + rowNumber;
+          const cell = worksheet[address] as XLSX.CellObject | undefined;
+          const rawValue = cell?.v ?? null;
+          values.push(rawValue);
+          cells.push({ ref: { sheetName, rowNumber, columnIndex: columnIndex + 1, columnHeaderRaw: rowIndex === range.s.r && typeof rawValue === 'string' ? rawValue : undefined, cellAddress: address }, rawValue, displayedValue: cell?.w, detectedType: toDetectedType(cell), formula: cell?.f, formulaResult: cell?.f ? cell.v : undefined, numberFormat: cell?.z });
+        }
+        rows.push({ sheetName, rowNumber, kind: classifyRow(values, rowIndex === range.s.r), cells });
+      }
+      return { name: sheetName, ordinal: sheetIndex + 1, visibility: toVisibility(visibility.get(sheetName)), rows };
+    });
+    return { ...metadata, sourceFormat: 'XLSX', sheets };
+  }
+};
