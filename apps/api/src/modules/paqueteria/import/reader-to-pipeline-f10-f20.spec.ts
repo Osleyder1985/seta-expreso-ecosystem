@@ -7,8 +7,8 @@ import type { MappingProfile } from './import-pipeline.types';
 import type { ImportSnapshot, SourceCell, SourceRow } from './workbook-reader.types';
 
 const profile:MappingProfile={profileId:'manifest-default',version:'1.0.0',fields:[
- {canonicalField:'house',headers:['House','No. House'],required:true},
- {canonicalField:'bultos',headers:['Bultos','Cantidad'],required:true},
+ {canonicalField:'house',headers:['House'],aliases:['No. House'],required:true},
+ {canonicalField:'bultos',headers:['Bultos'],aliases:['Cantidad'],required:true},
  {canonicalField:'peso',headers:['Peso']},
  {canonicalField:'recipient',headers:['Destinatario']},
  {canonicalField:'address',headers:['Dirección','Direccion'],required:true},
