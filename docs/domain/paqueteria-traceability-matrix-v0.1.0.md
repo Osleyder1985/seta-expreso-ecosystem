@@ -107,6 +107,16 @@ Los contratos de aplicación indicados aquí son **candidatos**. No constituyen 
 | AT-25 | RF-PQ-007, 010 | UC-09, UC-11 | House se conserva aunque no exista geolocalización |
 | AT-26 | RF-PQ-020 | UC-14, UC-15 | varios House con la misma dirección/punto se asocian a una única Delivery |
 
+
+## 6.1 Acceptance tests added by closed decisions and logical model
+
+| Prueba | Requisito | Regla | Resultado verificable |
+|---|---|---|---|
+| AT-27 | RF-PQ-010 | B-04 | DestinationUnit uses airport operational code; territory without international airport maps to OTRAS. |
+| AT-28 | RF-PQ-010, RF-PQ-016 | B-05 | ReceiptHandoff records AeroVaradero as delivering actor, authorized SETA actor as receiver, and both manifests as references. |
+| AT-29 | RF-PQ-017, RF-PQ-018, RF-PQ-019 | B-06 | Pre-archival modification/cancellation is audited; archived object rejects direct mutation. |
+| AT-30 | RF-PQ-004, RF-PQ-016 | B-01/D01 | ChildAirWaybill and House remain distinct; a ChildAWB↔House link cannot be created without explicit source evidence. |
+
 ## 7. Contratos de aplicación candidatos
 
 Estos nombres expresan intención de negocio; no son todavía endpoints definitivos:
