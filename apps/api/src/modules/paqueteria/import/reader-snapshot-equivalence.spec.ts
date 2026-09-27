@@ -38,7 +38,14 @@ async function sourceBuffer(): Promise<Buffer> {
   ws.addRow(['CACC-00000001', 3, 'DIRECCION_TEST_001', 'JUAN', 12.5, 'KEEP']);
   ws.addRow(['CACC-00000002', 1, 'DIRECCION_TEST_001', 'ANA', 7.5, 'KEEP']);
   ws.addRow(['CACC-00000003', 2, 'DIRECCION_TEST_002', 'LUIS', 3.25, 'KEEP']);
-  ws.addRow(['TOTAL', null, null, null, 23.25, 'KEEP']);
+  const formulaRow = ws.addRow(['FORMULA-001', 4, 'DIRECCION_TEST_003', 'FORMULA', 10, 'FORMULA']);
+  formulaRow.getCell(5).value = { formula: 'SUM(1,2,3,4)', result: 10 };
+  formulaRow.getCell(5).numFmt = '0.00';
+  const dateRow = ws.addRow(['DATE-001', 1, 'DIRECCION_TEST_004', 'FECHA', new Date('2026-09-27T12:00:00.000Z'), 'DATE']);
+  dateRow.getCell(5).numFmt = 'dd/mm/yyyy';
+  const errorRow = ws.addRow(['ERROR-001', 1, 'DIRECCION_TEST_005', 'ERROR', { error: '#DIV/0!' }, 'ERROR']);
+  ws.getCell('F7').value = null;
+  ws.addRow(['TOTAL', null, null, null, 45.25, 'KEEP']);
 
   const hidden = wb.addWorksheet('Oculta');
   hidden.state = 'hidden';
@@ -226,6 +233,7 @@ describe('XLSX reader semantic snapshot equivalence', () => {
         sourceCells: 'strict',
         readerSpecificMetadata: 'excluded',
         normalization: 'none-except-Date-and-negative-zero-serialization',
+        characterization: ['formula-and-cache', 'dates', 'number-formats', 'blank-cells', 'error-values', 'hidden-and-very-hidden-sheets'],
       },
       readers: results.map(({ reader, snapshot }) => ({
         reader,
