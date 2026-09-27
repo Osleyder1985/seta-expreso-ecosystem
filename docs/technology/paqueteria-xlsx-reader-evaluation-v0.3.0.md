@@ -565,3 +565,116 @@ El benchmark no define por sí solo un "ganador". Primero se verificará:
   antes de cualquier decisión de selección.
 
 **No se selecciona ningún reader con este gate.**
+
+
+### 5.6.1 Evidencia CI definitiva — 2026-09-27
+
+La ejecución definitiva del gate quedó certificada en:
+
+- Workflow: 'xlsx-f10-f19-pipeline-certification'
+- Run: '36352849471'
+- Job: '108714722542'
+- Commit: '903ff76cfc428b268571062310374d928c06f688'
+- Build: **PASS**
+- Pipeline F10-F19: **PASS**
+- Reader → pipeline: **PASS**
+- Resource limits: **16/16 PASS**
+- Snapshot equivalence: **PASS**
+- Benchmark: **PASS**
+- Artifact: 'xlsx-reader-resource-benchmark'
+- Artifact digest: 'sha256:59d93b4e8c4fbb09c6084bbed2a42f618fff09d38d80348e955d2dda8329f015'
+
+Versiones efectivamente instaladas y observadas por el benchmark:
+
+| Reader | Versión observada |
+|---|---|
+| ExcelJS | 4.4.0 |
+| SheetJS CE | 0.20.3 |
+| read-excel-file | 9.3.10 |
+
+Entorno certificado: Node.js 24.21.0, npm 11.19.0, Linux x64, runner de 4 CPUs y aproximadamente 15.62 GiB de memoria visible.
+
+### 5.6.2 Límites de recursos
+
+Se consolidaron los defaults en 'DEFAULT_WORKBOOK_READER_LIMITS':
+
+- 'maxSourceBytes = 50 MiB'
+- 'maxRowsPerSheet = 100.000'
+- 'maxSheets = 32'
+- 'maxCellsPerSheet = 1.000.000'
+
+Los tres adapters consumen ahora el mismo contrato de defaults. La suite ejecutó 16 controles:
+
+- 3 readers × 4 rechazos por exceso = 12 casos;
+- 3 readers × aceptación exacta de límites = 3 casos;
+- 1 control del contrato compartido = 1 caso.
+
+Resultado: **16/16 PASS**.
+
+Durante la primera implementación se detectó y corrigió un defecto real en SheetJS: sus defaults de filas/celdas estaban en 'Infinity' cuando no se proporcionaban opciones. El problema quedó eliminado al centralizar los límites.
+
+### 5.6.3 Benchmark reproducible definitivo
+
+Protocolo: 'xlsx-reader-resource-benchmark-v1.0.0'.
+
+- 4 fixtures controladas.
+- 1 warm-up + 5 iteraciones por reader/fixture.
+- 12 combinaciones.
+- Cada muestra en proceso Node aislado.
+- Mismo binario XLSX para los tres readers.
+- SHA-256 de cada fixture registrado.
+- Tiempo con 'performance.now()'.
+- Memoria con 'maxRSS' y delta de RSS.
+- 'noRanking = true'.
+
+| Fixture | ExcelJS median | SheetJS median | read-excel-file median |
+|---|---:|---:|---:|
+| manifest-180 | 67.693 ms | 157.084 ms | 69.205 ms |
+| manifest-180-3sheets | 98.084 ms | 204.635 ms | 92.231 ms |
+| stress-1000 | 144.262 ms | 262.358 ms | 121.582 ms |
+| stress-5000 | 518.584 ms | 812.951 ms | 379.788 ms |
+
+Mediana de 'maxRSS':
+
+| Fixture | ExcelJS | SheetJS | read-excel-file |
+|---|---:|---:|---:|
+| manifest-180 | 88.01 MiB | 109.15 MiB | 87.52 MiB |
+| manifest-180-3sheets | 92.99 MiB | 117.38 MiB | 92.34 MiB |
+| stress-1000 | 99.66 MiB | 134.85 MiB | 97.92 MiB |
+| stress-5000 | 207.21 MiB | 219.02 MiB | 145.30 MiB |
+
+Mediana de delta RSS:
+
+| Fixture | ExcelJS | SheetJS | read-excel-file |
+|---|---:|---:|---:|
+| manifest-180 | 10.55 MiB | 31.59 MiB | 8.38 MiB |
+| manifest-180-3sheets | 15.63 MiB | 39.90 MiB | 13.45 MiB |
+| stress-1000 | 22.33 MiB | 57.08 MiB | 17.94 MiB |
+| stress-5000 | 129.39 MiB | 141.00 MiB | 66.66 MiB |
+
+Estos números son **mediciones descriptivas del runner CI**, no un ranking ni una recomendación de selección. No se establece un ganador.
+
+El benchmark demuestra además que el protocolo es reproducible a nivel de:
+- versión exacta de los tres readers;
+- Node/npm;
+- fixtures y hashes;
+- número de iteraciones;
+- aislamiento de proceso;
+- métricas y método de medición.
+
+La reproducibilidad completa del árbol transitorio de dependencias sigue siendo un gate de supply-chain separado mientras el proyecto no incorpore un lockfile para esta rama. Esto no invalida la identificación exacta de las tres versiones de reader usada por esta certificación.
+
+### 5.6.4 Interpretación del gate
+
+El gate de límites y benchmark queda **CERRADO** para la fase comparativa experimental.
+
+Quedan pendientes, fuera de este gate:
+
+1. provenance/persistencia operacional definitiva de F20;
+2. evidencia privacy-preserving de fuente real de SheetJS (#152);
+3. revisión de supply-chain y vulnerabilidades (#198);
+4. cierre del contrato definitivo de fidelidad de snapshot (#249);
+5. lockfile/reproducibilidad completa del árbol de dependencias;
+6. ADR de selección final.
+
+**La ejecución no selecciona ExcelJS, SheetJS ni read-excel-file.**
