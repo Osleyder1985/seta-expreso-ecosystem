@@ -377,3 +377,59 @@ Esto todavía **no cierra F20 como persistencia operacional productiva**. Falta 
 
 **No se selecciona reader.** ExcelJS, SheetJS y read-excel-file permanecen como candidatos técnicamente conformes en este tramo.
 
+
+
+## 5.5 Reader → pipeline certification — 2026-09-27
+
+PR **#248** extends the provider-neutral pipeline evidence to the three experimental readers without selecting one for production.
+
+The same generated XLSX byte stream is parsed independently by:
+
+- ExcelJS
+- SheetJS CE
+- read-excel-file
+
+Each resulting `ImportSnapshot` is then passed through the same pipeline:
+
+`reader → ImportSnapshot → mapping → validation → reconciliation → acceptance`
+
+and F20 is exercised as:
+
+`reader → ImportSnapshot → provenance → persisted audit evidence`.
+
+### CI evidence
+
+- Run: `36350210816`
+- Job: `108707316027`
+- Build: **PASS**
+- Generic pipeline suites: **22/22 PASS**
+- Reader-to-pipeline suite: **12/12 PASS**
+- Three readers × four grouped executable scenarios = **12 reader-level pipeline scenarios**
+
+The reader-level scenarios cover F10, F11, F12, F13, F14, F16, F17, F18, F19 and F20. F15 remains structurally covered by the existing reader conformance/fixture evidence.
+
+### Defect discovered by the executable gate
+
+The reader-to-pipeline comparison exposed a real mapping defect: the mapping layer classified every authorized header as `EXACT`. This incorrectly collapsed canonical-header and alias semantics.
+
+The mapping engine was corrected so that:
+
+- `spec.headers[0]` is the canonical header → `EXACT`;
+- other authorized headers → `ALIAS`.
+
+The defect was therefore detected by the executable pipeline gate and corrected rather than being masked by fixture-level assumptions.
+
+### Security/supply-chain observation
+
+The certification CI installation currently reports **11 dependency vulnerabilities (7 moderate, 4 high)**. This is recorded as a separate security/supply-chain gate and does not constitute a reader selection decision. No parser is promoted on the basis of this run.
+
+### Current interpretation
+
+This is now **reader-to-pipeline evidence**, materially stronger than reader-only evidence:
+
+- reader fidelity is exercised before the business pipeline;
+- mapping/validation/reconciliation execute against reader-produced observations;
+- idempotency and mapping-version behavior execute against those snapshots;
+- provenance/audit persistence executes against those snapshots.
+
+F20 is still not closed as the final production persistence gate until the operational persistence transaction/storage integration is demonstrated.
