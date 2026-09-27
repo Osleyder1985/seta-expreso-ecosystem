@@ -5,6 +5,8 @@ on:
     paths:
       - 'apps/api/src/modules/paqueteria/import/**'
       - 'apps/api/package.json'
+      - 'apps/api/package-lock.json'
+      - 'apps/api/scripts/xlsx-reader-benchmark.mjs'
       - '.github/workflows/xlsx-f10-f19-pipeline-certification.yml'
 
 permissions:
@@ -33,8 +35,19 @@ jobs:
         run: npm run test:xlsx-pipeline
       - name: Execute F10-F20 through each real XLSX reader
         run: npm run test:xlsx-reader-pipeline
+      - name: Enforce resource limits across all three readers
+        run: npm run test:xlsx-resource-limits
       - name: Compare semantic snapshots from all three readers
         run: npm run test:xlsx-reader-equivalence
+      - name: Run reproducible resource benchmark
+        run: npm run benchmark:xlsx-readers
+      - name: Upload reader benchmark evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xlsx-reader-resource-benchmark
+          path: apps/api/certification-artifacts/xlsx-reader-resource-benchmark.json
+          if-no-files-found: error
       - name: Upload reader equivalence evidence
         if: always()
         uses: actions/upload-artifact@v4
