@@ -12,7 +12,7 @@ describe('ExperimentalExcelJsWorkbookReader', () => {
     mappingProfileVersion: '1.0.0',
   };
 
-  export async function workbookBuffer(): Promise<Buffer> {
+  async function workbookBuffer(): Promise<Buffer> {
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet('Manifiesto');
     sheet.addRow(['House', 'Bultos', 'Dirección', 'Teléfono', 'Latitud', 'Longitud', 'Aduana', 'Consolidado', 'Peso']);
