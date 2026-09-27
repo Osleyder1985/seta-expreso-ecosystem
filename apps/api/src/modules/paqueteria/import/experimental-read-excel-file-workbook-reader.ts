@@ -5,28 +5,39 @@ import type { ImportSnapshot, SourceCell, SourceRow, RowKind, SheetVisibility } 
 export class ExperimentalReadExcelFileWorkbookReader implements WorkbookReaderPort {
   async read(source: Buffer, metadata: WorkbookReaderMetadata, options: WorkbookReaderOptions = {}): Promise<ImportSnapshot> {
     const maxSourceBytes = options.maxSourceBytes ?? 50 * 1024 * 1024;
+    const maxSheets = options.maxSheets ?? 32;
+    const maxRowsPerSheet = options.maxRowsPerSheet ?? 100_000;
+    const maxCellsPerSheet = options.maxCellsPerSheet ?? 1_000_000;
     if (source.byteLength > maxSourceBytes) throw new Error('XLSX source exceeds configured byte limit');
 
     const sheets = await readExcelFile(source);
-    const maxSheets = options.maxSheets ?? 32;
     if (sheets.length > maxSheets) throw new Error('XLSX workbook exceeds configured sheet limit');
 
     const normalized = sheets.map((sheet, sheetIndex) => {
+      if (sheet.data.length > maxRowsPerSheet) throw new Error(`XLSX sheet "${sheet.sheet}" exceeds configured row limit`);
+      const headerByColumn = new Map<number, string>();
+      let cellCount = 0;
       const rows = sheet.data.map((values, rowIndex) => {
-        const cells = values.map((value, columnIndex) => this.cell(sheet.sheet, rowIndex + 1, columnIndex + 1, value));
+        const cells = values.map((value, columnIndex) => {
+          cellCount += 1;
+          if (cellCount > maxCellsPerSheet) throw new Error(`XLSX sheet "${sheet.sheet}" exceeds configured cell limit`);
+          return this.cell(sheet.sheet, rowIndex + 1, columnIndex + 1, value);
+        });
+        if (rowIndex === 0) {
+          for (const cell of cells) if (typeof cell.rawValue === 'string') headerByColumn.set(cell.ref.columnIndex, cell.rawValue);
+        }
+        const normalizedCells = cells.map(cell => ({
+          ...cell,
+          ref: { ...cell.ref, columnHeaderRaw: headerByColumn.get(cell.ref.columnIndex) },
+        }));
         return {
           sheetName: sheet.sheet,
           rowNumber: rowIndex + 1,
-          kind: this.classify(cells, rowIndex === 0),
-          cells,
+          kind: this.classify(normalizedCells, rowIndex === 0),
+          cells: normalizedCells,
         } satisfies SourceRow;
       });
-      return {
-        name: sheet.sheet,
-        ordinal: sheetIndex + 1,
-        visibility: 'VISIBLE' as SheetVisibility,
-        rows,
-      };
+      return { name: sheet.sheet, ordinal: sheetIndex + 1, visibility: 'VISIBLE' as SheetVisibility, rows };
     });
 
     return { ...metadata, sourceFormat: 'XLSX', sheets: normalized };
