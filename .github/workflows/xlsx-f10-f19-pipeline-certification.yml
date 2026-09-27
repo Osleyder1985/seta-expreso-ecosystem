@@ -33,3 +33,12 @@ jobs:
         run: npm run test:xlsx-pipeline
       - name: Execute F10-F20 through each real XLSX reader
         run: npm run test:xlsx-reader-pipeline
+      - name: Compare semantic snapshots from all three readers
+        run: npm run test:xlsx-reader-equivalence
+      - name: Upload reader equivalence evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xlsx-reader-snapshot-equivalence
+          path: apps/api/certification-artifacts/xlsx-reader-snapshot-equivalence.json
+          if-no-files-found: error
