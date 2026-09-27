@@ -496,3 +496,72 @@ Hallazgos nuevos:
 El baseline de gaps conocidos quedó codificado en `reader-snapshot-equivalence.spec.ts`. Esto no convierte los gaps en PASS: solamente evita que CI confunda una limitación ya documentada con una regresión desconocida.
 
 **Issue de seguimiento:** #249.
+
+
+## 5.6 Gate de límites de recursos + benchmark reproducible — 2026-09-27
+
+Se incorporó el gate común de límites de recursos para los tres adapters y un
+benchmark reproducible ejecutado en procesos Node aislados.
+
+### Límites certificados
+
+El contrato 'WorkbookReaderOptions' exige y prueba:
+
+- 'maxSourceBytes': rechazo antes de parsear cuando el Buffer excede el límite;
+- 'maxSheets': rechazo cuando el workbook supera el número máximo de hojas;
+- 'maxRowsPerSheet': rechazo cuando una hoja supera el máximo de filas;
+- 'maxCellsPerSheet': rechazo cuando una hoja supera el máximo de celdas.
+
+La suite prueba tanto el caso **por encima del límite** como el caso
+**exactamente en el límite**, para ExcelJS 4.4.0, SheetJS CE 0.20.3 y
+read-excel-file 9.3.10.
+
+### Protocolo benchmark
+
+El benchmark se implementa en:
+
+'apps/api/scripts/xlsx-reader-benchmark.mjs'
+
+Protocolo: 'xlsx-reader-resource-benchmark-v1.0.0'.
+
+Fixtures controladas:
+
+| Fixture | Filas de datos/hoja | Columnas | Hojas |
+|---|---:|---:|---:|
+| manifest-180 | 180 | 12 | 1 |
+| manifest-180-3sheets | 180 | 12 | 3 |
+| stress-1000 | 1.000 | 12 | 1 |
+| stress-5000 | 5.000 | 20 | 1 |
+
+Características de reproducibilidad:
+
+1. El mismo binario XLSX se entrega a los tres readers para cada fixture.
+2. Los fixtures son generados determinísticamente por ExcelJS 4.4.0.
+3. Cada medición se ejecuta en un **proceso Node aislado**.
+4. Se ejecuta 1 warm-up + 5 iteraciones por combinación reader/fixture.
+5. Se registra mediana, mínimo y máximo de tiempo.
+6. Se registra 'maxRSS' y delta de RSS.
+7. Se registra SHA-256 de cada fixture.
+8. Se registra Node, npm, plataforma, arquitectura, CPU y memoria del runner.
+9. El artefacto declara explícitamente 'noRanking: true': esta fase produce
+   evidencia comparable, no una selección de parser.
+
+Artefacto CI:
+
+'xlsx-reader-resource-benchmark.json'
+
+La ejecución de CI será la autoridad de los números; no se aceptarán cifras
+copiadas manualmente desde una ejecución local como evidencia certificada.
+
+### Criterio de interpretación
+
+El benchmark no define por sí solo un "ganador". Primero se verificará:
+
+- que los tres readers sobrevivan los tamaños representativos;
+- que no se viole ningún límite configurado;
+- que exista crecimiento observable y reproducible al aumentar volumen;
+- que las diferencias de tiempo/memoria queden registradas;
+- que cualquier fallo de límite o consumo anómalo genere un issue técnico
+  antes de cualquier decisión de selección.
+
+**No se selecciona ningún reader con este gate.**
