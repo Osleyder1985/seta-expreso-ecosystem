@@ -389,3 +389,14 @@ Siguiente artefacto: matriz completa Requisito → Caso de Uso → Regla → Eve
 
 
 **Fase/nota:** El estado anterior, si existía, se conserva como descripción histórica de fase; el campo `Estado` usa exclusivamente la taxonomía formal de gobernanza.
+
+
+## Regla documental B-01 — House ≠ Child Air Waybill
+
+El sistema debe tratar como conceptos distintos:
+- Master Air Waybill;
+- Child Air Waybill / guía hija;
+- House / número de bulto;
+- PhysicalUnit / bulto físico.
+
+La evidencia de Aduana separa guía master, guía hija y cantidad de bultos. La evidencia operacional publicada de AeroVaradero identifica House como número de paquete/bulto utilizado junto con el AWB para consulta. En consecuencia, no se permite modelar House como alias de ChildAirWaybill ni imponer sobre House reglas de formato o unicidad de HAWB.
