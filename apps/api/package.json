@@ -64,6 +64,7 @@
     "typescript": "6.0.3",
     "dotenv": "17.2.2",
     "prisma": "7.10.0",
-    "@scalar/openapi-validator": "0.1.1"
+    "@scalar/openapi-validator": "0.1.1",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   }
 }
